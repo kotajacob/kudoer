@@ -31,6 +31,7 @@ func kudoCreate(w http.ResponseWriter, r *http.Request) {
 
 // kudoCreatePost presents an kudo.
 func kudoCreatePost(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("create an kudo"))
 }
 
