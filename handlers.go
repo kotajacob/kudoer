@@ -4,12 +4,33 @@ package main
 
 import (
 	"fmt"
+	"html/template"
+	"log"
 	"net/http"
 	"strconv"
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("home"))
+	ts, err := template.ParseFiles("./ui/pages/home.tmpl")
+	if err != nil {
+		log.Println(err)
+		http.Error(
+			w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError,
+		)
+		return
+	}
+
+	err = ts.Execute(w, nil)
+	if err != nil {
+		log.Println(err)
+		http.Error(
+			w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError,
+		)
+	}
 }
 
 // kudoView presents a kudo.
