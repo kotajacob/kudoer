@@ -11,7 +11,12 @@ import (
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("./ui/pages/home.tmpl")
+	files := []string{
+		"./ui/base.tmpl",
+		"./ui/pages/home.tmpl",
+	}
+
+	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		log.Println(err)
 		http.Error(
@@ -22,7 +27,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = ts.Execute(w, nil)
+	err = ts.ExecuteTemplate(w, "base", nil)
 	if err != nil {
 		log.Println(err)
 		http.Error(
