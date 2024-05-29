@@ -3,8 +3,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
@@ -13,7 +15,13 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 // kudoView presents an kudo.
 func kudoView(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("view an kudo"))
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+	msg := fmt.Sprintf("viewing kudo %d", id)
+	w.Write([]byte(msg))
 }
 
 // kudoCreate presents an kudo.
@@ -21,11 +29,17 @@ func kudoCreate(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("create an kudo"))
 }
 
+// kudoCreatePost presents an kudo.
+func kudoCreatePost(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("create an kudo"))
+}
+
 func main() {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/{$}", home)
-	mux.HandleFunc("/kudo/view", kudoView)
-	mux.HandleFunc("/kudo/create", kudoCreate)
+	mux.HandleFunc("GET /{$}", home)
+	mux.HandleFunc("GET /kudo/{id}", kudoView)
+	mux.HandleFunc("GET /kudo/create", kudoCreate)
+	mux.HandleFunc("POST /kudo/create", kudoCreatePost)
 
 	log.Println("listening on :2024")
 
