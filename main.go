@@ -6,20 +6,33 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 )
+
+type application struct {
+	infoLog *log.Logger
+	errLog  *log.Logger
+}
 
 func main() {
 	addr := flag.String("addr", ":2024", "HTTP Network Address")
 	flag.Parse()
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /{$}", home)
-	mux.HandleFunc("GET /kudo/{id}", kudoView)
-	mux.HandleFunc("GET /kudo/create", kudoCreate)
-	mux.HandleFunc("POST /kudo/create", kudoCreatePost)
+	infoLog := log.New(os.Stdout, "INFO ", log.Ldate|log.Ltime)
+	errLog := log.New(os.Stdout, "ERROR ", log.Ldate|log.Ltime|log.Lshortfile)
+
+	app := &application{
+		infoLog: infoLog,
+		errLog:  errLog,
+	}
+
+	srv := &http.Server{
+		Addr:     *addr,
+		ErrorLog: errLog,
+		Handler:  app.routes(),
+	}
 
 	log.Println("listening on", *addr)
-
-	err := http.ListenAndServe(*addr, mux)
-	log.Fatalln(err)
+	err := srv.ListenAndServe()
+	errLog.Fatalln(err)
 }
