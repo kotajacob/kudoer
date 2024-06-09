@@ -3,11 +3,14 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
-	"strconv"
+
+	"git.sr.ht/~kota/kudoer/models"
+	"github.com/oklog/ulid"
 )
 
 func (app *application) routes() *http.ServeMux {
@@ -52,13 +55,23 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 // kudoView presents a kudo.
 func (app *application) kudoView(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil || id < 1 {
-		http.NotFound(w, r)
+	uuid, err := ulid.Parse(r.PathValue("id"))
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
 		return
 	}
-	msg := fmt.Sprintf("viewing kudo %d", id)
-	w.Write([]byte(msg))
+
+	kudo, err := app.kudos.Get(r.Context(), uuid)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	fmt.Fprintf(w, "%+v", kudo)
 }
 
 // kudoCreate presents a web form to add a kudo.
