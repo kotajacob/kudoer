@@ -7,7 +7,7 @@ oldest supported version of [go](https://go.dev/). Then run `make` to compile
 the project.
 
 ## license
-GNU LGPL version 3 or later, see LICENSE.
+GNU AGPL version 3 or later, see LICENSE.
 
 ## schema
 ```go
