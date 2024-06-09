@@ -61,13 +61,18 @@ func (app *application) kudoView(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(msg))
 }
 
-// kudoCreate presents a kudo.
+// kudoCreate presents a web form to add a kudo.
 func (app *application) kudoCreate(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("create a kudo"))
 }
 
-// kudoCreatePost presents a kudo.
+// kudoCreatePost adds a kudo.
 func (app *application) kudoCreatePost(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("create a kudo"))
+	id, err := app.kudos.Insert(r.Context(), 0, "🤣", "Very funny")
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/kudo/%v", id), http.StatusSeeOther)
 }

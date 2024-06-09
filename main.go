@@ -3,10 +3,13 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"net/http"
 	"os"
+
+	"git.sr.ht/~kota/kudoer/models"
 
 	"zombiezen.com/go/sqlite/sqlitex"
 )
@@ -15,26 +18,31 @@ type application struct {
 	infoLog *log.Logger
 	errLog  *log.Logger
 
-	dbpool *sqlitex.Pool
+	kudos *models.KudoModel
 }
 
 func main() {
 	addr := flag.String("addr", ":2024", "HTTP Network Address")
-	dsn := flag.String("dsn", "file:memory:?mode=memory", "SQLite data source name")
+	dsn := flag.String("dsn", "kudoer.db", "SQLite data source name")
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO ", log.Ldate|log.Ltime)
 	errLog := log.New(os.Stdout, "ERROR ", log.Ldate|log.Ltime|log.Lshortfile)
 
-	dbpool, err := openDB(*dsn)
+	db, err := openDB(*dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	app := &application{
 		infoLog: infoLog,
 		errLog:  errLog,
-		dbpool:  dbpool,
+		kudos:   &models.KudoModel{DB: db},
 	}
 
 	srv := &http.Server{
@@ -49,11 +57,32 @@ func main() {
 }
 
 func openDB(dsn string) (*sqlitex.Pool, error) {
-	dbpool, err := sqlitex.NewPool(dsn, sqlitex.PoolOptions{
+	db, err := sqlitex.NewPool(dsn, sqlitex.PoolOptions{
 		PoolSize: 10,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return dbpool, nil
+
+	conn, err := db.Take(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	defer db.Put(conn)
+
+	err = sqlitex.Execute(
+		conn,
+		`CREATE TABLE IF NOT EXISTS kudos (
+			id TEXT NOT NULL PRIMARY KEY,
+			author INTEGER NOT NULL,
+			rating TEXT NOT NULL,
+			body TEXT
+		) WITHOUT ROWID;`,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }

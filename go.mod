@@ -2,7 +2,10 @@ module git.sr.ht/~kota/kudoer
 
 go 1.22.3
 
-require zombiezen.com/go/sqlite v1.3.0
+require (
+	github.com/oklog/ulid v1.3.1
+	zombiezen.com/go/sqlite v1.3.0
+)
 
 require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
