@@ -1,3 +1,5 @@
+// License: AGPL-3.0-only
+// (c) 2024 Dakota Walsh <kota@nilsu.org>
 package main
 
 import (
@@ -8,7 +10,7 @@ import (
 
 // serverError writes a log entry and then sends a generic Internal Server Error
 // response to the client.
-func (app *application) serverError(w http.ResponseWriter, r *http.Request, err error) {
+func (app *application) serverError(w http.ResponseWriter, err error) {
 	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
 	app.errLog.Output(2, trace)
 	http.Error(

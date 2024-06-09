@@ -3,10 +3,9 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
-	"html/template"
-	"log"
 	"net/http"
 
 	"git.sr.ht/~kota/kudoer/models"
@@ -24,33 +23,39 @@ func (app *application) routes() *http.ServeMux {
 	return mux
 }
 
-// home presents a kudo.
-func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	files := []string{
-		"./ui/base.tmpl",
-		"./ui/pages/home.tmpl",
-	}
-
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		log.Println(err)
-		http.Error(
-			w,
-			http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError,
-		)
+func (app *application) render(
+	w http.ResponseWriter,
+	status int,
+	page string,
+	data interface{},
+) {
+	ts, ok := app.templates[page]
+	if !ok {
+		app.serverError(w, fmt.Errorf(
+			"the template %s is missing",
+			page,
+		))
 		return
 	}
 
-	err = ts.ExecuteTemplate(w, "base", nil)
+	buf := new(bytes.Buffer)
+
+	err := ts.ExecuteTemplate(buf, "base", data)
 	if err != nil {
-		log.Println(err)
-		http.Error(
-			w,
-			http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError,
-		)
+		app.serverError(w, err)
 	}
+
+	w.WriteHeader(status)
+	buf.WriteTo(w)
+}
+
+// home presents a kudo.
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
+	app.render(w, http.StatusOK, "home.tmpl", nil)
+}
+
+type kudoPage struct {
+	ID string
 }
 
 // kudoView presents a kudo.
@@ -66,12 +71,14 @@ func (app *application) kudoView(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, models.ErrNoRecord) {
 			http.NotFound(w, r)
 		} else {
-			app.serverError(w, r, err)
+			app.serverError(w, err)
 		}
 		return
 	}
 
-	fmt.Fprintf(w, "%+v", kudo)
+	app.render(w, http.StatusOK, "kudo.tmpl", kudoPage{
+		ID: kudo.ID.String(),
+	})
 }
 
 // kudoCreate presents a web form to add a kudo.
@@ -83,7 +90,7 @@ func (app *application) kudoCreate(w http.ResponseWriter, r *http.Request) {
 func (app *application) kudoCreatePost(w http.ResponseWriter, r *http.Request) {
 	id, err := app.kudos.Insert(r.Context(), 0, "🤣", "Very funny")
 	if err != nil {
-		app.serverError(w, r, err)
+		app.serverError(w, err)
 		return
 	}
 

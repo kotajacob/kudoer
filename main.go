@@ -5,18 +5,21 @@ package main
 import (
 	"context"
 	"flag"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
 
 	"git.sr.ht/~kota/kudoer/models"
+	"git.sr.ht/~kota/kudoer/ui"
 
 	"zombiezen.com/go/sqlite/sqlitex"
 )
 
 type application struct {
-	infoLog *log.Logger
-	errLog  *log.Logger
+	infoLog   *log.Logger
+	errLog    *log.Logger
+	templates map[string]*template.Template
 
 	kudos *models.KudoModel
 }
@@ -39,10 +42,16 @@ func main() {
 		}
 	}()
 
+	templates, err := ui.Templates()
+	if err != nil {
+		errLog.Fatal(err)
+	}
+
 	app := &application{
-		infoLog: infoLog,
-		errLog:  errLog,
-		kudos:   &models.KudoModel{DB: db},
+		infoLog:   infoLog,
+		errLog:    errLog,
+		templates: templates,
+		kudos:     &models.KudoModel{DB: db},
 	}
 
 	srv := &http.Server{
