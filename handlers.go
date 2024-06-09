@@ -12,7 +12,7 @@ import (
 	"github.com/oklog/ulid"
 )
 
-func (app *application) routes() *http.ServeMux {
+func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /{$}", app.home)
@@ -20,7 +20,7 @@ func (app *application) routes() *http.ServeMux {
 	mux.HandleFunc("GET /kudo/create", app.kudoCreate)
 	mux.HandleFunc("POST /kudo/create", app.kudoCreatePost)
 
-	return mux
+	return app.recoverPanic(app.logRequest(app.secureHeaders(mux)))
 }
 
 func (app *application) render(
@@ -49,12 +49,20 @@ func (app *application) render(
 	buf.WriteTo(w)
 }
 
+type homePage struct {
+	CSPNonce string
+}
+
 // home presents a kudo.
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	app.render(w, http.StatusOK, "home.tmpl", nil)
+	app.render(w, http.StatusOK, "home.tmpl", homePage{
+		CSPNonce: nonce(r.Context()),
+	})
 }
 
 type kudoPage struct {
+	CSPNonce string
+
 	ID string
 }
 
@@ -77,7 +85,8 @@ func (app *application) kudoView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.render(w, http.StatusOK, "kudo.tmpl", kudoPage{
-		ID: kudo.ID.String(),
+		CSPNonce: nonce(r.Context()),
+		ID:       kudo.ID.String(),
 	})
 }
 

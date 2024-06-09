@@ -3,7 +3,47 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>kudoers</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Give kudos to your favorite things!">
+	<title>Kudoers</title>
+	<style nonce="{{.CSPNonce}}">
+	:root {
+		--ratio: 1.5;
+		--s-5: calc(var(--s-4) / var(--ratio));
+		--s-4: calc(var(--s-3) / var(--ratio));
+		--s-3: calc(var(--s-2) / var(--ratio));
+		--s-2: calc(var(--s-1) / var(--ratio));
+		--s-1: calc(var(--s0) / var(--ratio));
+		--s0: 1rem;
+		--s1: calc(var(--s0) * var(--ratio));
+		--s2: calc(var(--s1) * var(--ratio));
+		--s3: calc(var(--s2) * var(--ratio));
+		--s4: calc(var(--s3) * var(--ratio));
+		--color-fg: #000;
+		--color-bg: #fff;
+	}
+	*,
+	:after,
+	:before {
+		box-sizing: border-box;
+		font-family: inherit;
+		color: inherit;
+		background-color: inherit;
+		overflow-wrap: break-word;
+		margin: 0;
+		padding: 0;
+		border: 0 solid
+	}
+	body {
+		color: var(--color-fg);
+		background-color: var(--color-bg);
+		box-sizing: content-box;
+		max-inline-size: 70ch;
+		margin-inline: auto;
+		padding: var(--s1);
+		font-family: system-ui, sans-serif;
+	}
+	</style>
 </head>
 <body>
 	{{template "main" .}}
