@@ -21,6 +21,7 @@ type application struct {
 	errLog    *log.Logger
 	templates map[string]*template.Template
 
+	users *models.UserModel
 	kudos *models.KudoModel
 }
 
@@ -51,6 +52,7 @@ func main() {
 		infoLog:   infoLog,
 		errLog:    errLog,
 		templates: templates,
+		users:     &models.UserModel{DB: db},
 		kudos:     &models.KudoModel{DB: db},
 	}
 
@@ -79,6 +81,21 @@ func openDB(dsn string) (*sqlitex.Pool, error) {
 	}
 	defer db.Put(conn)
 
+	// Create users table.
+	err = sqlitex.Execute(
+		conn,
+		`CREATE TABLE IF NOT EXISTS users (
+			id TEXT NOT NULL PRIMARY KEY,
+			name TEXT NOT NULL,
+			email TEXT NOT NULL
+		) WITHOUT ROWID;`,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create kudos table.
 	err = sqlitex.Execute(
 		conn,
 		`CREATE TABLE IF NOT EXISTS kudos (
