@@ -27,7 +27,6 @@ type application struct {
 
 	users *models.UserModel
 	items *models.ItemModel
-	kudos *models.KudoModel
 }
 
 func main() {
@@ -64,7 +63,6 @@ func main() {
 		sessionManager: sessionManager,
 		users:          &models.UserModel{DB: db},
 		items:          &models.ItemModel{DB: db},
-		kudos:          &models.KudoModel{DB: db},
 	}
 
 	app.sessionManager.ErrorFunc = func(w http.ResponseWriter, r *http.Request, err error) {
@@ -142,34 +140,6 @@ func openDB(dsn string) (*sqlitex.Pool, error) {
 	err = sqlitex.Execute(
 		conn,
 		`CREATE UNIQUE INDEX IF NOT EXISTS items_idx ON items (id);`,
-		nil,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	// Create kudos table.
-	err = sqlitex.Execute(
-		conn,
-		`CREATE TABLE IF NOT EXISTS kudos (
-			id TEXT NOT NULL PRIMARY KEY,
-			item_id TEXT NOT NULL,
-			creator_id TEXT NOT NULL,
-			rating TEXT NOT NULL,
-			body TEXT NOT NULL,
-			FOREIGN KEY (creator_id) REFERENCES users (id),
-			FOREIGN KEY (item_id) REFERENCES items (id)
-		) WITHOUT ROWID;`,
-		nil,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	// Create kudos index.
-	err = sqlitex.Execute(
-		conn,
-		`CREATE UNIQUE INDEX IF NOT EXISTS kudos_idx ON kudos (id);`,
 		nil,
 	)
 	if err != nil {

@@ -22,9 +22,6 @@ func (app *application) routes() http.Handler {
 	mux.Handle("GET /item/{id}", dynamic.ThenFunc(app.itemView))
 	mux.Handle("GET /item/create", dynamic.ThenFunc(app.itemCreate))
 	mux.Handle("POST /item/create", dynamic.ThenFunc(app.itemCreatePost))
-	mux.Handle("GET /kudo/{id}", dynamic.ThenFunc(app.kudoView))
-	mux.Handle("GET /kudo/create", dynamic.ThenFunc(app.kudoCreate))
-	mux.Handle("POST /kudo/create", dynamic.ThenFunc(app.kudoCreatePost))
 
 	standard := alice.New(app.recoverPanic, app.logRequest, app.secureHeaders)
 	return standard.Then(mux)
