@@ -6,6 +6,8 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
+
+	"github.com/justinas/alice"
 )
 
 func (app *application) routes() http.Handler {
@@ -19,7 +21,9 @@ func (app *application) routes() http.Handler {
 	mux.HandleFunc("GET /kudo/create", app.kudoCreate)
 	mux.HandleFunc("POST /kudo/create", app.kudoCreatePost)
 
-	return app.recoverPanic(app.logRequest(app.secureHeaders(mux)))
+	standard := alice.New(app.recoverPanic, app.logRequest, app.secureHeaders)
+
+	return standard.Then(mux)
 }
 
 func (app *application) render(
