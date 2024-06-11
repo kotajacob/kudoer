@@ -1,0 +1,18 @@
+{{define "main"}}
+	<h2>Create an Item</h2>
+	<form class="stack" action="create" method="post">
+		<div>
+			<label for="name">Name:</label>
+			<input type="text" name="name" id="name" required />
+		</div>
+		<div>
+			<label for="description">Description:</label>
+			<input type="text" name="description" id="description" required />
+		</div>
+		<div>
+			<label for="image">Image:</label>
+			<input type="text" name="image" id="image" required />
+		</div>
+		<input type="submit" value="Create" />
+	</form>
+{{end}}

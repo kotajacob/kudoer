@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"git.sr.ht/~kota/kudoer/models"
 	"github.com/oklog/ulid"
@@ -62,12 +63,12 @@ func (app *application) userCreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	name := r.PostForm.Get("name")
-	if name == "" {
+	if strings.TrimSpace(name) == "" {
 		app.clientError(w, http.StatusBadRequest)
 	}
 
 	email := r.PostForm.Get("email")
-	if email == "" {
+	if strings.TrimSpace(email) == "" {
 		app.clientError(w, http.StatusBadRequest)
 	}
 

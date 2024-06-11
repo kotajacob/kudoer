@@ -22,6 +22,7 @@ type application struct {
 	templates map[string]*template.Template
 
 	users *models.UserModel
+	items *models.ItemModel
 	kudos *models.KudoModel
 }
 
@@ -53,6 +54,7 @@ func main() {
 		errLog:    errLog,
 		templates: templates,
 		users:     &models.UserModel{DB: db},
+		items:     &models.ItemModel{DB: db},
 		kudos:     &models.KudoModel{DB: db},
 	}
 
@@ -95,14 +97,34 @@ func openDB(dsn string) (*sqlitex.Pool, error) {
 		return nil, err
 	}
 
+	// Create items table.
+	err = sqlitex.Execute(
+		conn,
+		`CREATE TABLE IF NOT EXISTS items (
+			id TEXT NOT NULL PRIMARY KEY,
+			creator_id TEXT NOT NULL,
+			name TEXT NOT NULL,
+			description TEXT NOT NULL,
+			image TEXT NOT NULL,
+			FOREIGN KEY (creator_id) REFERENCES users (id)
+		) WITHOUT ROWID;`,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	// Create kudos table.
 	err = sqlitex.Execute(
 		conn,
 		`CREATE TABLE IF NOT EXISTS kudos (
 			id TEXT NOT NULL PRIMARY KEY,
-			author INTEGER NOT NULL,
+			item_id TEXT NOT NULL,
+			creator_id TEXT NOT NULL,
 			rating TEXT NOT NULL,
-			body TEXT
+			body TEXT NOT NULL,
+			FOREIGN KEY (creator_id) REFERENCES users (id),
+			FOREIGN KEY (item_id) REFERENCES items (id)
 		) WITHOUT ROWID;`,
 		nil,
 	)
