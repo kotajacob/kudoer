@@ -54,6 +54,7 @@ func (app *application) userCreate(w http.ResponseWriter, r *http.Request) {
 
 // userCreatePost adds a user.
 func (app *application) userCreatePost(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 4096)
 	err := r.ParseForm()
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
