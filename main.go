@@ -97,6 +97,16 @@ func openDB(dsn string) (*sqlitex.Pool, error) {
 		return nil, err
 	}
 
+	// Create users index.
+	err = sqlitex.Execute(
+		conn,
+		`CREATE UNIQUE INDEX IF NOT EXISTS users_idx ON users (id);`,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	// Create items table.
 	err = sqlitex.Execute(
 		conn,
@@ -108,6 +118,16 @@ func openDB(dsn string) (*sqlitex.Pool, error) {
 			image TEXT NOT NULL,
 			FOREIGN KEY (creator_id) REFERENCES users (id)
 		) WITHOUT ROWID;`,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create items index.
+	err = sqlitex.Execute(
+		conn,
+		`CREATE UNIQUE INDEX IF NOT EXISTS items_idx ON items (id);`,
 		nil,
 	)
 	if err != nil {
@@ -126,6 +146,16 @@ func openDB(dsn string) (*sqlitex.Pool, error) {
 			FOREIGN KEY (creator_id) REFERENCES users (id),
 			FOREIGN KEY (item_id) REFERENCES items (id)
 		) WITHOUT ROWID;`,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create kudos index.
+	err = sqlitex.Execute(
+		conn,
+		`CREATE UNIQUE INDEX IF NOT EXISTS kudos_idx ON kudos (id);`,
 		nil,
 	)
 	if err != nil {
