@@ -1,10 +1,14 @@
 {{define "main"}}
-	<h1>Create a User</h1>
-	<form action="create" method="post">
-		<label for="name">Name:</label>
-		<input type="text" name="name" id="name" required />
-		<label for="email">Email:</label>
-		<input type="text" name="email" id="email" required />
+	<h2>Create a User</h2>
+	<form class="stack" action="create" method="post">
+		<div>
+			<label for="name">Name:</label>
+			<input type="text" name="name" id="name" required />
+		</div>
+		<div>
+			<label for="email">Email:</label>
+			<input type="text" name="email" id="email" required />
+		</div>
 		<input type="submit" value="Create" />
 	</form>
 {{end}}
