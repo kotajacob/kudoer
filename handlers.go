@@ -13,19 +13,20 @@ import (
 func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /{$}", app.home)
-	mux.HandleFunc("GET /user/{id}", app.userView)
-	mux.HandleFunc("GET /user/create", app.userCreate)
-	mux.HandleFunc("POST /user/create", app.userCreatePost)
-	mux.HandleFunc("GET /item/{id}", app.itemView)
-	mux.HandleFunc("GET /item/create", app.itemCreate)
-	mux.HandleFunc("POST /item/create", app.itemCreatePost)
-	mux.HandleFunc("GET /kudo/{id}", app.kudoView)
-	mux.HandleFunc("GET /kudo/create", app.kudoCreate)
-	mux.HandleFunc("POST /kudo/create", app.kudoCreatePost)
+	dynamic := alice.New(app.sessionManager.LoadAndSave)
+
+	mux.Handle("GET /{$}", dynamic.ThenFunc(app.home))
+	mux.Handle("GET /user/{id}", dynamic.ThenFunc(app.userView))
+	mux.Handle("GET /user/create", dynamic.ThenFunc(app.userCreate))
+	mux.Handle("POST /user/create", dynamic.ThenFunc(app.userCreatePost))
+	mux.Handle("GET /item/{id}", dynamic.ThenFunc(app.itemView))
+	mux.Handle("GET /item/create", dynamic.ThenFunc(app.itemCreate))
+	mux.Handle("POST /item/create", dynamic.ThenFunc(app.itemCreatePost))
+	mux.Handle("GET /kudo/{id}", dynamic.ThenFunc(app.kudoView))
+	mux.Handle("GET /kudo/create", dynamic.ThenFunc(app.kudoCreate))
+	mux.Handle("POST /kudo/create", dynamic.ThenFunc(app.kudoCreatePost))
 
 	standard := alice.New(app.recoverPanic, app.logRequest, app.secureHeaders)
-
 	return standard.Then(mux)
 }
 

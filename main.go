@@ -9,17 +9,21 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
+	"git.sr.ht/~kota/kudoer/litesession"
 	"git.sr.ht/~kota/kudoer/models"
 	"git.sr.ht/~kota/kudoer/ui"
+	"github.com/alexedwards/scs/v2"
 
 	"zombiezen.com/go/sqlite/sqlitex"
 )
 
 type application struct {
-	infoLog   *log.Logger
-	errLog    *log.Logger
-	templates map[string]*template.Template
+	infoLog        *log.Logger
+	errLog         *log.Logger
+	templates      map[string]*template.Template
+	sessionManager *scs.SessionManager
 
 	users *models.UserModel
 	items *models.ItemModel
@@ -49,13 +53,23 @@ func main() {
 		errLog.Fatal(err)
 	}
 
+	sessionManager := scs.New()
+	sessionManager.Store = litesession.New(db)
+	sessionManager.Lifetime = 12 * time.Hour
+
 	app := &application{
-		infoLog:   infoLog,
-		errLog:    errLog,
-		templates: templates,
-		users:     &models.UserModel{DB: db},
-		items:     &models.ItemModel{DB: db},
-		kudos:     &models.KudoModel{DB: db},
+		infoLog:        infoLog,
+		errLog:         errLog,
+		templates:      templates,
+		sessionManager: sessionManager,
+		users:          &models.UserModel{DB: db},
+		items:          &models.ItemModel{DB: db},
+		kudos:          &models.KudoModel{DB: db},
+	}
+
+	app.sessionManager.ErrorFunc = func(w http.ResponseWriter, r *http.Request, err error) {
+		app.serverError(w, err)
+		return
 	}
 
 	srv := &http.Server{
@@ -162,5 +176,28 @@ func openDB(dsn string) (*sqlitex.Pool, error) {
 		return nil, err
 	}
 
+	// Create sessions table.
+	err = sqlitex.Execute(
+		conn,
+		`CREATE TABLE IF NOT EXISTS sessions (
+			token TEXT PRIMARY KEY,
+			data BLOB NOT NULL,
+			expiry REAL NOT NULL
+		);`,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create sessions index.
+	err = sqlitex.Execute(
+		conn,
+		`CREATE INDEX IF NOT EXISTS sessions_expiry_idx ON sessions(expiry);`,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
 	return db, nil
 }

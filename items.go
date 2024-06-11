@@ -16,6 +16,7 @@ import (
 
 type itemViewPage struct {
 	CSPNonce string
+	Flash    string
 
 	Name        string
 	Description string
@@ -40,8 +41,11 @@ func (app *application) itemView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	flash := app.sessionManager.PopString(r.Context(), "flash")
+
 	app.render(w, http.StatusOK, "itemView.tmpl", itemViewPage{
 		CSPNonce:    nonce(r.Context()),
+		Flash:       flash,
 		Name:        item.Name,
 		Description: item.Description,
 		Image:       item.Image,
@@ -95,6 +99,8 @@ func (app *application) itemCreatePost(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 		return
 	}
+
+	app.sessionManager.Put(r.Context(), "flash", "item created")
 
 	http.Redirect(w, r, fmt.Sprintf("/item/%v", id), http.StatusSeeOther)
 }
