@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"git.sr.ht/~kota/kudoer/models"
 	"github.com/oklog/ulid"
@@ -54,13 +55,22 @@ func (app *application) itemView(w http.ResponseWriter, r *http.Request) {
 
 type itemCreatePage struct {
 	CSPNonce string
+	Form     itemCreateForm
 }
 
 // itemCreate presents a web form to add an item.
 func (app *application) itemCreate(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "itemCreate.tmpl", itemCreatePage{
 		CSPNonce: nonce(r.Context()),
+		Form:     itemCreateForm{},
 	})
+}
+
+type itemCreateForm struct {
+	Name        string
+	Description string
+	Image       string
+	FieldErrors map[string]string
 }
 
 // itemCreatePost adds an item.
@@ -79,22 +89,40 @@ func (app *application) itemCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := r.PostForm.Get("name")
-	if strings.TrimSpace(name) == "" {
-		app.clientError(w, http.StatusBadRequest)
+	form := itemCreateForm{
+		Name:        r.PostForm.Get("name"),
+		Description: r.PostForm.Get("description"),
+		Image:       r.PostForm.Get("image"),
+		FieldErrors: map[string]string{},
 	}
 
-	description := r.PostForm.Get("description")
-	if strings.TrimSpace(description) == "" {
-		app.clientError(w, http.StatusBadRequest)
+	if strings.TrimSpace(form.Name) == "" {
+		form.FieldErrors["name"] = "Name cannot be blank"
+	} else if utf8.RuneCountInString(form.Name) > 100 {
+		form.FieldErrors["name"] = "Name cannot be longer than 100 characters"
 	}
 
-	image := r.PostForm.Get("image")
-	if strings.TrimSpace(image) == "" {
-		app.clientError(w, http.StatusBadRequest)
+	if strings.TrimSpace(form.Description) == "" {
+		form.FieldErrors["description"] = "Description cannot be blank"
+	} else if utf8.RuneCountInString(form.Description) > 1000 {
+		form.FieldErrors["description"] = "Description cannot be longer than 1000 characters"
 	}
 
-	id, err := app.items.Insert(r.Context(), creator_id, name, description, image)
+	if len(form.FieldErrors) > 0 {
+		app.render(w, http.StatusUnprocessableEntity, "itemCreate.tmpl", itemCreatePage{
+			CSPNonce: nonce(r.Context()),
+			Form:     form,
+		})
+		return
+	}
+
+	id, err := app.items.Insert(
+		r.Context(),
+		creator_id,
+		form.Name,
+		form.Description,
+		form.Image,
+	)
 	if err != nil {
 		app.serverError(w, err)
 		return

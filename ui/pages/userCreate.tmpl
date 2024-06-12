@@ -1,13 +1,24 @@
 {{define "main"}}
-	<h2>Create a User</h2>
-	<form class="stack" action="create" method="post">
-		<div>
-			<label for="name">Name:</label>
-			<input type="text" name="name" id="name" required />
+	<h3 class="title">Create an account</h3>
+	<form class="stack0" action="create" method="post">
+		<div class="stack2">
+			<label for="username">Username:</label>
+			{{with .Form.FieldErrors.username}}
+				<label class="error" for="username">{{.}}</label>
+				<input class="error" type="text" name="username" id="username"
+				maxlength="30" required />
+			{{else}}
+				<input type="text" name="username" id="username" maxlength="30" required />
+			{{end}}
 		</div>
-		<div>
+		<div class="stack2">
 			<label for="email">Email:</label>
-			<input type="text" name="email" id="email" required />
+			{{with .Form.FieldErrors.email}}
+				<label class="error" for="email">{{.}}</label>
+				<input class="error" type="email" name="email" id="email" required />
+			{{else}}
+				<input type="email" name="email" id="email" required />
+			{{end}}
 		</div>
 		<input type="submit" value="Create" />
 	</form>

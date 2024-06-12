@@ -1,17 +1,35 @@
 {{define "main"}}
-	<h2>Create an Item</h2>
-	<form class="stack" action="create" method="post">
-		<div>
+	<h3 class="title">Create an item</h3>
+	<form class="stack0" action="create" method="post">
+		<div class="stack2">
 			<label for="name">Name:</label>
-			<input type="text" name="name" id="name" required />
+			{{with .Form.FieldErrors.name}}
+				<label class="error" for="name">{{.}}</label>
+				<input class="error" type="text" name="name" id="name"
+				maxlength="100" required />
+			{{else}}
+				<input type="text" name="name" id="name" maxlength="100" required />
+			{{end}}
 		</div>
 		<div>
 			<label for="description">Description:</label>
-			<input type="text" name="description" id="description" required />
+			{{with .Form.FieldErrors.description}}
+				<label class="error" for="description">{{.}}</label>
+				<textarea class="error" type="text" name="description"
+					id="description" rows="5" maxlength="1000" required></textarea>
+			{{else}}
+				<textarea type="text" name="description" id="description"
+					rows="5" maxlength="1000" required></textarea>
+			{{end}}
 		</div>
-		<div>
+		<div class="stack2">
 			<label for="image">Image:</label>
-			<input type="text" name="image" id="image" required />
+			{{with .Form.FieldErrors.image}}
+				<label class="error" for="image">{{.}}</label>
+				<input class="error" type="url" name="image" id="image" />
+			{{else}}
+				<input type="url" name="image" id="image" />
+			{{end}}
 		</div>
 		<input type="submit" value="Create" />
 	</form>

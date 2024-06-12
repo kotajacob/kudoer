@@ -20,7 +20,15 @@
 		--s3: calc(var(--s2) * var(--ratio));
 		--s4: calc(var(--s3) * var(--ratio));
 		--color-fg: #000;
+		--color-fg-light: #666;
 		--color-bg: #fff;
+		--color-1: #f0dab1;
+		--color-2: #e39aac;
+		--color-3: #c45d9f;
+		--color-4: #6461c2;
+		--color-5: #2ba9b4;
+		--color-6: #93d4b5;
+		font-size: calc(.333vw + 1em);
 	}
 	*,
 	:after,
@@ -32,32 +40,96 @@
 		overflow-wrap: break-word;
 		margin: 0;
 		padding: 0;
-		border: 0 solid
+		border: 0 solid;
 	}
 	body {
 		color: var(--color-fg);
 		background-color: var(--color-bg);
 		box-sizing: content-box;
-		max-inline-size: 70ch;
+		max-inline-size: 50ch;
 		margin-inline: auto;
 		padding: var(--s1);
 		font-family: system-ui, sans-serif;
 	}
-	.stack {
+	.color1 {
+		color: var(--color-1);
+	}
+	.color2 {
+		color: var(--color-2);
+	}
+	.color3 {
+		color: var(--color-3);
+	}
+	.color4 {
+		color: var(--color-4);
+	}
+	.color5 {
+		color: var(--color-5);
+	}
+	.color6 {
+		color: var(--color-6);
+	}
+	.title {
+		text-align: center;
+	}
+	h1 {
+		font-size: var(--s3);
+	}
+	h1 > a {
+		text-decoration: none;
+	}
+	h2 {
+		font-size: var(--s2);
+	}
+	h3 {
+		font-size: var(--s1);
+	}
+	.stack0, .stack1 {
 		display: flex;
 		flex-direction: column;
 		justify-content: flex-start;
 	}
-	.stack > * {
+	.stack0, .stack1 > * {
 		margin-block: 0;
 	}
-	.stack > * + * {
+	.stack0 > * + * {
 		margin-block-start: var(--s0);
+	}
+	.stack1 > * + * {
+		margin-block-start: var(--s-1);
+	}
+	.stack2 > * + * {
+		margin-block-start: var(--s-2);
+	}
+	label {
+		display: block;
+	}
+	label.error {
+		font-size: var(--s-1);
+		font-weight: bold;
+		color: var(--color-3);
+	}
+	input, textarea {
+		width: 100%;
+		display: block;
+		border-width: 1px;
+		border-color: var(--color-fg-light);
+		font-size: var(--s0);
+	}
+	input.error, textarea.error {
+		border-color: var(--color-3);
+	}
+	input[type=submit] {
+		font-weight: bold;
+		color: var(--color-bg);
+		background-color: var(--color-fg);
 	}
 	</style>
 </head>
-<body class="stack">
-	<h1><a href="/">Kudoer</a></h1>
+<body class="stack0">
+	<h1 class="title"><a href="/">
+		<span class="color1">K</span><span class="color2">u</span><span class="color3">d</span><span class="color4">o</span><span class="color5">e</span><span class="color6">r</span>
+	</a></h1>
 	{{template "main" .}}
 </body>
 </html>

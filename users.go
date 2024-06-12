@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"unicode/utf8"
 
 	"git.sr.ht/~kota/kudoer/models"
 	"github.com/oklog/ulid"
@@ -15,7 +16,7 @@ import (
 type userViewPage struct {
 	CSPNonce string
 
-	Name string
+	Username string
 }
 
 // userView presents a user.
@@ -38,19 +39,27 @@ func (app *application) userView(w http.ResponseWriter, r *http.Request) {
 
 	app.render(w, http.StatusOK, "userView.tmpl", userViewPage{
 		CSPNonce: nonce(r.Context()),
-		Name:     user.Name,
+		Username: user.Username,
 	})
 }
 
 type userCreatePage struct {
 	CSPNonce string
+	Form     userCreateForm
 }
 
 // userCreate presents a web form to add a user.
 func (app *application) userCreate(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "userCreate.tmpl", userCreatePage{
 		CSPNonce: nonce(r.Context()),
+		Form:     userCreateForm{},
 	})
+}
+
+type userCreateForm struct {
+	Username    string
+	Email       string
+	FieldErrors map[string]string
 }
 
 // userCreatePost adds a user.
@@ -62,17 +71,36 @@ func (app *application) userCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := r.PostForm.Get("name")
-	if strings.TrimSpace(name) == "" {
-		app.clientError(w, http.StatusBadRequest)
+	form := userCreateForm{
+		Username:    r.PostForm.Get("username"),
+		Email:       r.PostForm.Get("email"),
+		FieldErrors: map[string]string{},
 	}
 
-	email := r.PostForm.Get("email")
-	if strings.TrimSpace(email) == "" {
-		app.clientError(w, http.StatusBadRequest)
+	if strings.TrimSpace(form.Username) == "" {
+		form.FieldErrors["username"] = "Username cannot be blank"
+	} else if utf8.RuneCountInString(form.Username) > 30 {
+		form.FieldErrors["username"] = "Username cannot be longer than 30 characters"
 	}
 
-	id, err := app.users.Insert(r.Context(), name, email)
+	if len(form.Email) > 254 || !rxEmail.MatchString(form.Email) {
+		// https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address
+		form.FieldErrors["email"] = "Email appears to be invalid"
+	}
+
+	if len(form.FieldErrors) > 0 {
+		app.render(w, http.StatusUnprocessableEntity, "userCreate.tmpl", userCreatePage{
+			CSPNonce: nonce(r.Context()),
+			Form:     form,
+		})
+		return
+	}
+
+	id, err := app.users.Insert(
+		r.Context(),
+		form.Username,
+		form.Email,
+	)
 	if err != nil {
 		app.serverError(w, err)
 		return

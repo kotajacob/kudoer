@@ -6,9 +6,12 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
+	"regexp"
 
 	"github.com/justinas/alice"
 )
+
+var rxEmail = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()

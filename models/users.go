@@ -13,9 +13,9 @@ import (
 )
 
 type User struct {
-	ID    ulid.ULID
-	Name  string
-	Email string
+	ID       ulid.ULID
+	Username string
+	Email    string
 }
 
 type UserModel struct {
@@ -30,10 +30,10 @@ func (m *UserModel) Get(ctx context.Context, uuid ulid.ULID) (User, error) {
 	defer m.DB.Put(conn)
 
 	var k User
-	err = sqlitex.Execute(conn, `SELECT name, email from users WHERE id = ?`, &sqlitex.ExecOptions{
+	err = sqlitex.Execute(conn, `SELECT username, email from users WHERE id = ?`, &sqlitex.ExecOptions{
 		ResultFunc: func(stmt *sqlite.Stmt) error {
 			k.ID = uuid
-			k.Name = stmt.ColumnText(0)
+			k.Username = stmt.ColumnText(0)
 			k.Email = stmt.ColumnText(1)
 			return nil
 		},
@@ -48,7 +48,7 @@ func (m *UserModel) Get(ctx context.Context, uuid ulid.ULID) (User, error) {
 
 func (m *UserModel) Insert(
 	ctx context.Context,
-	name string,
+	username string,
 	email string,
 ) (ulid.ULID, error) {
 	ms := ulid.Timestamp(time.Now())
@@ -65,8 +65,8 @@ func (m *UserModel) Insert(
 
 	err = sqlitex.Execute(
 		conn,
-		`INSERT INTO users (id, name, email) VALUES (?, ?, ?)`,
-		&sqlitex.ExecOptions{Args: []any{uuid, name, email}},
+		`INSERT INTO users (id, username, email) VALUES (?, ?, ?)`,
+		&sqlitex.ExecOptions{Args: []any{uuid, username, email}},
 	)
 	return uuid, err
 }
