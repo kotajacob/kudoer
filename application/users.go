@@ -1,6 +1,6 @@
 // License: AGPL-3.0-only
 // (c) 2024 Dakota Walsh <kota@nilsu.org>
-package main
+package application
 
 import (
 	"errors"

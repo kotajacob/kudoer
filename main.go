@@ -4,27 +4,19 @@ package main
 
 import (
 	"flag"
-	"html/template"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"runtime/debug"
 	"time"
 
+	"git.sr.ht/~kota/kudoer/application"
 	"git.sr.ht/~kota/kudoer/litesession"
 	"git.sr.ht/~kota/kudoer/models"
 	"git.sr.ht/~kota/kudoer/ui"
 	"github.com/alexedwards/scs/v2"
 )
-
-type application struct {
-	infoLog        *log.Logger
-	errLog         *log.Logger
-	templates      map[string]*template.Template
-	sessionManager *scs.SessionManager
-
-	users *models.UserModel
-	items *models.ItemModel
-}
 
 func main() {
 	addr := flag.String("addr", ":2024", "HTTP Network Address")
@@ -52,29 +44,34 @@ func main() {
 	sessionManager := scs.New()
 	sessionManager.Store = litesession.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
-
-	app := &application{
-		infoLog:        infoLog,
-		errLog:         errLog,
-		templates:      templates,
-		sessionManager: sessionManager,
-		users:          &models.UserModel{DB: db},
-		items:          &models.ItemModel{DB: db},
-	}
-
-	app.sessionManager.ErrorFunc = func(
+	sessionManager.ErrorFunc = func(
 		w http.ResponseWriter,
 		r *http.Request,
 		err error,
 	) {
-		app.serverError(w, err)
+		trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
+		errLog.Output(2, trace)
+		http.Error(
+			w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError,
+		)
 		return
 	}
+
+	app := application.New(
+		infoLog,
+		errLog,
+		templates,
+		sessionManager,
+		&models.UserModel{DB: db},
+		&models.ItemModel{DB: db},
+	)
 
 	srv := &http.Server{
 		Addr:         *addr,
 		ErrorLog:     errLog,
-		Handler:      app.routes(),
+		Handler:      app.Routes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,

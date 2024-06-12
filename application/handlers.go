@@ -1,6 +1,6 @@
 // License: AGPL-3.0-only
 // (c) 2024 Dakota Walsh <kota@nilsu.org>
-package main
+package application
 
 import (
 	"bytes"
@@ -14,7 +14,7 @@ import (
 var rxUsername = regexp.MustCompile("^[a-z0-9_-]+$")
 var rxEmail = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
-func (app *application) routes() http.Handler {
+func (app *application) Routes() http.Handler {
 	mux := http.NewServeMux()
 
 	dynamic := alice.New(app.sessionManager.LoadAndSave)
