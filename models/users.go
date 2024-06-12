@@ -4,25 +4,23 @@ package models
 
 import (
 	"context"
-	"crypto/rand"
-	"time"
+	"strings"
 
-	"github.com/oklog/ulid"
 	"zombiezen.com/go/sqlite"
 	"zombiezen.com/go/sqlite/sqlitex"
 )
 
 type User struct {
-	ID       ulid.ULID
-	Username string
-	Email    string
+	Username       string
+	Email          string
+	HashedPassword string
 }
 
 type UserModel struct {
 	DB *sqlitex.Pool
 }
 
-func (m *UserModel) Get(ctx context.Context, uuid ulid.ULID) (User, error) {
+func (m *UserModel) Get(ctx context.Context, username string) (User, error) {
 	conn, err := m.DB.Take(ctx)
 	if err != nil {
 		return User{}, err
@@ -30,17 +28,18 @@ func (m *UserModel) Get(ctx context.Context, uuid ulid.ULID) (User, error) {
 	defer m.DB.Put(conn)
 
 	var k User
-	err = sqlitex.Execute(conn, `SELECT username, email from users WHERE id = ?`, &sqlitex.ExecOptions{
-		ResultFunc: func(stmt *sqlite.Stmt) error {
-			k.ID = uuid
-			k.Username = stmt.ColumnText(0)
-			k.Email = stmt.ColumnText(1)
-			return nil
-		},
-		Args: []any{uuid},
-	})
+	err = sqlitex.Execute(conn, `SELECT email from users WHERE username = ?`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				k.Username = username
 
-	if k.ID.Compare(uuid) != 0 {
+				k.Email = stmt.ColumnText(0)
+				return nil
+			},
+			Args: []any{username},
+		})
+
+	if k.Username == "" {
 		return k, ErrNoRecord
 	}
 	return k, err
@@ -50,23 +49,27 @@ func (m *UserModel) Insert(
 	ctx context.Context,
 	username string,
 	email string,
-) (ulid.ULID, error) {
-	ms := ulid.Timestamp(time.Now())
-	uuid, err := ulid.New(ms, rand.Reader)
-	if err != nil {
-		return uuid, err
-	}
-
+	hashedPassword string,
+) error {
 	conn, err := m.DB.Take(ctx)
 	if err != nil {
-		return uuid, err
+		return err
 	}
 	defer m.DB.Put(conn)
 
 	err = sqlitex.Execute(
 		conn,
-		`INSERT INTO users (id, username, email) VALUES (?, ?, ?)`,
-		&sqlitex.ExecOptions{Args: []any{uuid, username, email}},
+		`INSERT INTO users (username, email, password) VALUES (?, ?, ?)`,
+		&sqlitex.ExecOptions{Args: []any{username, email, hashedPassword}},
 	)
-	return uuid, err
+	if sqlite.ErrCode(err) == sqlite.ResultConstraintUnique {
+		if strings.HasSuffix(err.Error(), "users.username") {
+			return ErrUsernameExists
+		}
+		if strings.HasSuffix(err.Error(), "users.email") {
+			return ErrEmailExists
+		}
+		return err
+	}
+	return err
 }

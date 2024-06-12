@@ -130,5 +130,5 @@ func (app *application) itemCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	app.sessionManager.Put(r.Context(), "flash", "item created")
 
-	http.Redirect(w, r, fmt.Sprintf("/item/%v", id), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/item/view/%v", id), http.StatusSeeOther)
 }

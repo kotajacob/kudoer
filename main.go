@@ -65,15 +65,22 @@ func main() {
 		items:          &models.ItemModel{DB: db},
 	}
 
-	app.sessionManager.ErrorFunc = func(w http.ResponseWriter, r *http.Request, err error) {
+	app.sessionManager.ErrorFunc = func(
+		w http.ResponseWriter,
+		r *http.Request,
+		err error,
+	) {
 		app.serverError(w, err)
 		return
 	}
 
 	srv := &http.Server{
-		Addr:     *addr,
-		ErrorLog: errLog,
-		Handler:  app.routes(),
+		Addr:         *addr,
+		ErrorLog:     errLog,
+		Handler:      app.routes(),
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	log.Println("listening on", *addr)
@@ -99,9 +106,9 @@ func openDB(dsn string) (*sqlitex.Pool, error) {
 	err = sqlitex.Execute(
 		conn,
 		`CREATE TABLE IF NOT EXISTS users (
-			id TEXT NOT NULL PRIMARY KEY,
-			username TEXT NOT NULL,
-			email TEXT NOT NULL
+			username TEXT NOT NULL PRIMARY KEY,
+			email TEXT NOT NULL UNIQUE,
+			password TEXT NOT NULL
 		) WITHOUT ROWID;`,
 		nil,
 	)
@@ -112,7 +119,7 @@ func openDB(dsn string) (*sqlitex.Pool, error) {
 	// Create users index.
 	err = sqlitex.Execute(
 		conn,
-		`CREATE UNIQUE INDEX IF NOT EXISTS users_idx ON users (id);`,
+		`CREATE UNIQUE INDEX IF NOT EXISTS users_idx ON users (username);`,
 		nil,
 	)
 	if err != nil {

@@ -5,3 +5,5 @@ package models
 import "errors"
 
 var ErrNoRecord = errors.New("model: no matching record found")
+var ErrUsernameExists = errors.New("model: that username already exists")
+var ErrEmailExists = errors.New("model: that email already exists")

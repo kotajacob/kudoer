@@ -1,25 +1,54 @@
-{{define "main"}}
+{{ define "main" }}
 	<h3 class="title">Create an account</h3>
 	<form class="stack0" action="create" method="post">
 		<div class="stack2">
 			<label for="username">Username:</label>
-			{{with .Form.FieldErrors.username}}
-				<label class="error" for="username">{{.}}</label>
-				<input class="error" type="text" name="username" id="username"
-				maxlength="30" required />
-			{{else}}
-				<input type="text" name="username" id="username" maxlength="30" required />
-			{{end}}
+			{{ with .Form.FieldErrors.username }}
+				<label class="error" for="username">{{ . }}</label>
+			{{ end }}
+			<input
+				{{ if .Form.FieldErrors.username }}
+					class="error"
+				{{ end }}
+				{{ if .Form.Username }}value="{{ .Form.Username }}"{{ end }}
+				type="text"
+				name="username"
+				id="username"
+				maxlength="30"
+				required
+			/>
 		</div>
 		<div class="stack2">
 			<label for="email">Email:</label>
-			{{with .Form.FieldErrors.email}}
-				<label class="error" for="email">{{.}}</label>
-				<input class="error" type="email" name="email" id="email" required />
-			{{else}}
-				<input type="email" name="email" id="email" required />
-			{{end}}
+			{{ with .Form.FieldErrors.email }}
+				<label class="error" for="email">{{ . }}</label>
+			{{ end }}
+			<input
+				{{ if .Form.FieldErrors.email }}
+					class="error"
+				{{ end }}
+				{{ if .Form.Email }}value="{{ .Form.Email }}"{{ end }}
+				type="email"
+				name="email"
+				id="email"
+				required
+			/>
+		</div>
+		<div>
+			<label for="password">Password:</label>
+			{{ with .Form.FieldErrors.password }}
+				<label class="error" for="password">{{ . }}</label>
+			{{ end }}
+			<input
+				{{ if .Form.FieldErrors.password }}
+					class="error"
+				{{ end }}
+				name="password"
+				id="password"
+				type="password"
+				required
+			/>
 		</div>
 		<input type="submit" value="Create" />
 	</form>
-{{end}}
+{{ end }}

@@ -11,6 +11,7 @@ import (
 	"github.com/justinas/alice"
 )
 
+var rxUsername = regexp.MustCompile("^[a-z0-9_-]+$")
 var rxEmail = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 func (app *application) routes() http.Handler {
@@ -19,10 +20,15 @@ func (app *application) routes() http.Handler {
 	dynamic := alice.New(app.sessionManager.LoadAndSave)
 
 	mux.Handle("GET /{$}", dynamic.ThenFunc(app.home))
-	mux.Handle("GET /user/{id}", dynamic.ThenFunc(app.userView))
+
+	mux.Handle("GET /user/view/{username}", dynamic.ThenFunc(app.userView))
 	mux.Handle("GET /user/create", dynamic.ThenFunc(app.userCreate))
 	mux.Handle("POST /user/create", dynamic.ThenFunc(app.userCreatePost))
-	mux.Handle("GET /item/{id}", dynamic.ThenFunc(app.itemView))
+	mux.Handle("GET /user/login", dynamic.ThenFunc(app.userLogin))
+	mux.Handle("POST /user/login", dynamic.ThenFunc(app.userLoginPost))
+	mux.Handle("POST /user/logout", dynamic.ThenFunc(app.userLogoutPost))
+
+	mux.Handle("GET /item/view/{id}", dynamic.ThenFunc(app.itemView))
 	mux.Handle("GET /item/create", dynamic.ThenFunc(app.itemCreate))
 	mux.Handle("POST /item/create", dynamic.ThenFunc(app.itemCreatePost))
 
