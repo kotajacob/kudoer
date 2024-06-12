@@ -4,8 +4,10 @@ package models
 
 import (
 	"context"
+	"errors"
 	"strings"
 
+	"golang.org/x/crypto/bcrypt"
 	"zombiezen.com/go/sqlite"
 	"zombiezen.com/go/sqlite/sqlitex"
 )
@@ -70,6 +72,42 @@ func (m *UserModel) Insert(
 			return ErrEmailExists
 		}
 		return err
+	}
+	return err
+}
+
+func (m *UserModel) Authenticate(
+	ctx context.Context,
+	username string,
+	password string,
+) error {
+	conn, err := m.DB.Take(ctx)
+	if err != nil {
+		return err
+	}
+	defer m.DB.Put(conn)
+
+	var k User
+	err = sqlitex.Execute(conn, `SELECT password from users WHERE username = ?`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				k.Username = username
+
+				k.HashedPassword = stmt.ColumnText(0)
+				return nil
+			},
+			Args: []any{username},
+		})
+
+	if k.Username == "" {
+		return ErrInvalidCredentials
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(k.HashedPassword), []byte(password))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return ErrInvalidCredentials
+		}
 	}
 	return err
 }

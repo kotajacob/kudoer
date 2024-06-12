@@ -43,7 +43,6 @@ func (app *application) itemView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	flash := app.sessionManager.PopString(r.Context(), "flash")
-
 	app.render(w, http.StatusOK, "itemView.tmpl", itemViewPage{
 		CSPNonce:    nonce(r.Context()),
 		Flash:       flash,
@@ -70,6 +69,8 @@ type itemCreateForm struct {
 	Name        string
 	Description string
 	Image       string
+
+	// FieldErrors stores errors relating to specific form fields.
 	FieldErrors map[string]string
 }
 

@@ -1,0 +1,41 @@
+{{ define "main" }}
+	<h3 class="title">Login</h3>
+	<form class="stack0" action="login" method="post">
+		<div class="stack2">
+			{{ range .Form.NonFieldErrors }}
+				<div class="error">{{ . }}</div>
+			{{ end }}
+			<label for="username">Username:</label>
+			{{ with .Form.FieldErrors.username }}
+				<label class="error" for="username">{{ . }}</label>
+			{{ end }}
+			<input
+				{{ if .Form.FieldErrors.username }}
+					class="error"
+				{{ end }}
+				{{ if .Form.Username }}value="{{ .Form.Username }}"{{ end }}
+				type="text"
+				name="username"
+				id="username"
+				maxlength="30"
+				required
+			/>
+		</div>
+		<div>
+			<label for="password">Password:</label>
+			{{ with .Form.FieldErrors.password }}
+				<label class="error" for="password">{{ . }}</label>
+			{{ end }}
+			<input
+				{{ if .Form.FieldErrors.password }}
+					class="error"
+				{{ end }}
+				name="password"
+				id="password"
+				type="password"
+				required
+			/>
+		</div>
+		<input type="submit" value="Login" />
+	</form>
+{{ end }}
