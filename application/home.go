@@ -11,6 +11,6 @@ type homePage struct {
 // home presents the home page.
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "home.tmpl", homePage{
-		Page: app.newPage(r.Context()),
+		Page: app.newPage(r),
 	})
 }

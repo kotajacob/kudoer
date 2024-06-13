@@ -3,9 +3,9 @@
 package application
 
 import (
-	"context"
 	"html/template"
 	"log"
+	"net/http"
 
 	"git.sr.ht/~kota/kudoer/models"
 	"github.com/alexedwards/scs/v2"
@@ -33,15 +33,18 @@ func New(infoLog *log.Logger, errLog *log.Logger, templates map[string]*template
 }
 
 type Page struct {
-	CSPNonce string
-	Flash    string
+	CSPNonce        string
+	Flash           string
+	IsAuthenticated bool
 }
 
-func (app *application) newPage(ctx context.Context) Page {
-	cspNonce := nonce(ctx)
-	flash := app.sessionManager.PopString(ctx, "flash")
+func (app *application) newPage(r *http.Request) Page {
+	cspNonce := nonce(r.Context())
+	flash := app.sessionManager.PopString(r.Context(), "flash")
+	isAuthenticated := app.isAuthenticated(r)
 	return Page{
-		CSPNonce: cspNonce,
-		Flash:    flash,
+		CSPNonce:        cspNonce,
+		Flash:           flash,
+		IsAuthenticated: isAuthenticated,
 	}
 }

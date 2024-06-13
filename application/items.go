@@ -42,7 +42,7 @@ func (app *application) itemView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.render(w, http.StatusOK, "itemView.tmpl", itemViewPage{
-		Page:        app.newPage(r.Context()),
+		Page:        app.newPage(r),
 		Name:        item.Name,
 		Description: item.Description,
 		Image:       item.Image,
@@ -57,7 +57,7 @@ type itemCreatePage struct {
 // itemCreate presents a web form to add an item.
 func (app *application) itemCreate(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "itemCreate.tmpl", itemCreatePage{
-		Page: app.newPage(r.Context()),
+		Page: app.newPage(r),
 		Form: itemCreateForm{},
 	})
 }
@@ -108,7 +108,7 @@ func (app *application) itemCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	if len(form.FieldErrors) > 0 {
 		app.render(w, http.StatusUnprocessableEntity, "itemCreate.tmpl", itemCreatePage{
-			Page: app.newPage(r.Context()),
+			Page: app.newPage(r),
 			Form: form,
 		})
 		return

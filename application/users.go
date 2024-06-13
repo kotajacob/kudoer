@@ -34,7 +34,7 @@ func (app *application) userView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.render(w, http.StatusOK, "userView.tmpl", userViewPage{
-		Page:     app.newPage(r.Context()),
+		Page:     app.newPage(r),
 		Username: user.Username,
 		Email:    user.Email,
 	})
@@ -48,7 +48,7 @@ type userCreatePage struct {
 // userCreate presents a web form to add a user.
 func (app *application) userCreate(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "userCreate.tmpl", userCreatePage{
-		Page: app.newPage(r.Context()),
+		Page: app.newPage(r),
 		Form: userCreateForm{},
 	})
 }
@@ -124,7 +124,7 @@ func (app *application) userCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	if len(form.FieldErrors) > 0 {
 		app.render(w, http.StatusUnprocessableEntity, "userCreate.tmpl", userCreatePage{
-			Page: app.newPage(r.Context()),
+			Page: app.newPage(r),
 			Form: form,
 		})
 		return
@@ -140,7 +140,7 @@ type userLoginPage struct {
 
 func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "login.tmpl", userLoginPage{
-		Page: app.newPage(r.Context()),
+		Page: app.newPage(r),
 		Form: userLoginForm{},
 	})
 }
@@ -185,7 +185,7 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 
 	if len(form.FieldErrors) > 0 {
 		app.render(w, http.StatusUnprocessableEntity, "login.tmpl", userLoginPage{
-			Page: app.newPage(r.Context()),
+			Page: app.newPage(r),
 			Form: form,
 		})
 		return
@@ -199,7 +199,7 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 				"Email or password is incorrect",
 			)
 			app.render(w, http.StatusUnprocessableEntity, "login.tmpl", userLoginPage{
-				Page: app.newPage(r.Context()),
+				Page: app.newPage(r),
 				Form: form,
 			})
 		} else {

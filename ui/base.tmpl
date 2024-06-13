@@ -163,6 +163,11 @@
 					font-weight: bold;
 					color: var(--color-3);
 				}
+				div.flash {
+					text-align: center;
+					font-weight: bold;
+					color: var(--color-5);
+				}
 				input,
 				textarea {
 					width: 100%;
@@ -191,14 +196,17 @@
 				</a>
 			</h1>
 			{{ with .Flash }}
-				<span>{{ . }}</span>
+				<div class="flash">{{ . }}</div>
 			{{ end }}
 			<nav>
-				<h3><a href="/user/create">Register</a></h3>
-				<h3><a href="/user/login">Login</a></h3>
-				<form action="/user/logout" method="POST">
-					<button>Logout</button>
-				</form>
+				{{ if .IsAuthenticated }}
+					<form action="/user/logout" method="POST">
+						<button>Logout</button>
+					</form>
+				{{ else }}
+					<h3><a href="/user/create">Register</a></h3>
+					<h3><a href="/user/login">Login</a></h3>
+				{{ end }}
 			</nav>
 			{{ template "main" . }}
 		</body>
