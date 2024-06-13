@@ -188,6 +188,17 @@
 			</style>
 		</head>
 		<body class="stack0">
+			<nav>
+				{{ if .IsAuthenticated }}
+					<h3><a href="/item/create">Create Item</a></h3>
+					<form action="/user/logout" method="POST">
+						<button>Logout</button>
+					</form>
+				{{ else }}
+					<h3><a href="/user/register">Register</a></h3>
+					<h3><a href="/user/login">Login</a></h3>
+				{{ end }}
+			</nav>
 			<h1 class="title">
 				<a href="/">
 					<span class="color1">K</span><span class="color2">u</span
@@ -198,16 +209,6 @@
 			{{ with .Flash }}
 				<div class="flash">{{ . }}</div>
 			{{ end }}
-			<nav>
-				{{ if .IsAuthenticated }}
-					<form action="/user/logout" method="POST">
-						<button>Logout</button>
-					</form>
-				{{ else }}
-					<h3><a href="/user/create">Register</a></h3>
-					<h3><a href="/user/login">Login</a></h3>
-				{{ end }}
-			</nav>
 			{{ template "main" . }}
 		</body>
 	</html>

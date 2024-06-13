@@ -40,20 +40,20 @@ func (app *application) userView(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-type userCreatePage struct {
+type userRegisterPage struct {
 	Page
-	Form userCreateForm
+	Form userRegisterForm
 }
 
-// userCreate presents a web form to add a user.
-func (app *application) userCreate(w http.ResponseWriter, r *http.Request) {
-	app.render(w, http.StatusOK, "userCreate.tmpl", userCreatePage{
+// userRegister presents a web form to add a user.
+func (app *application) userRegister(w http.ResponseWriter, r *http.Request) {
+	app.render(w, http.StatusOK, "userRegister.tmpl", userRegisterPage{
 		Page: app.newPage(r),
-		Form: userCreateForm{},
+		Form: userRegisterForm{},
 	})
 }
 
-type userCreateForm struct {
+type userRegisterForm struct {
 	Username string
 	Email    string
 
@@ -63,8 +63,8 @@ type userCreateForm struct {
 	FieldErrors map[string]string
 }
 
-// userCreatePost adds a user.
-func (app *application) userCreatePost(w http.ResponseWriter, r *http.Request) {
+// userRegisterPost adds a user.
+func (app *application) userRegisterPost(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 4096)
 	err := r.ParseForm()
 	if err != nil {
@@ -72,7 +72,7 @@ func (app *application) userCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	form := userCreateForm{
+	form := userRegisterForm{
 		Username:    r.PostForm.Get("username"),
 		Email:       r.PostForm.Get("email"),
 		FieldErrors: map[string]string{},
@@ -123,7 +123,7 @@ func (app *application) userCreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(form.FieldErrors) > 0 {
-		app.render(w, http.StatusUnprocessableEntity, "userCreate.tmpl", userCreatePage{
+		app.render(w, http.StatusUnprocessableEntity, "userRegister.tmpl", userRegisterPage{
 			Page: app.newPage(r),
 			Form: form,
 		})

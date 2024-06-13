@@ -20,17 +20,18 @@ func (app *application) Routes() http.Handler {
 	dynamic := alice.New(app.sessionManager.LoadAndSave)
 
 	mux.Handle("GET /{$}", dynamic.ThenFunc(app.home))
-
 	mux.Handle("GET /user/view/{username}", dynamic.ThenFunc(app.userView))
-	mux.Handle("GET /user/create", dynamic.ThenFunc(app.userCreate))
-	mux.Handle("POST /user/create", dynamic.ThenFunc(app.userCreatePost))
+	mux.Handle("GET /user/register", dynamic.ThenFunc(app.userRegister))
+	mux.Handle("POST /user/register", dynamic.ThenFunc(app.userRegisterPost))
 	mux.Handle("GET /user/login", dynamic.ThenFunc(app.userLogin))
 	mux.Handle("POST /user/login", dynamic.ThenFunc(app.userLoginPost))
-	mux.Handle("POST /user/logout", dynamic.ThenFunc(app.userLogoutPost))
-
 	mux.Handle("GET /item/view/{id}", dynamic.ThenFunc(app.itemView))
-	mux.Handle("GET /item/create", dynamic.ThenFunc(app.itemCreate))
-	mux.Handle("POST /item/create", dynamic.ThenFunc(app.itemCreatePost))
+
+	protected := dynamic.Append(app.requireAuthentication)
+
+	mux.Handle("POST /user/logout", protected.ThenFunc(app.userLogoutPost))
+	mux.Handle("GET /item/create", protected.ThenFunc(app.itemCreate))
+	mux.Handle("POST /item/create", protected.ThenFunc(app.itemCreatePost))
 
 	standard := alice.New(app.recoverPanic, app.logRequest, app.secureHeaders)
 	return standard.Then(mux)

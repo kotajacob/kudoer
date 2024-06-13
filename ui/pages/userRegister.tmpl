@@ -1,6 +1,6 @@
 {{ define "main" }}
-	<h3 class="title">Create an account</h3>
-	<form class="stack0" action="create" method="post">
+	<h3 class="title">Register an account</h3>
+	<form class="stack0" action="register" method="post">
 		<div class="stack2">
 			<label for="username">Username:</label>
 			{{ with .Form.FieldErrors.username }}
@@ -49,6 +49,6 @@
 				required
 			/>
 		</div>
-		<input type="submit" value="Create" />
+		<input type="submit" value="Register" />
 	</form>
 {{ end }}
