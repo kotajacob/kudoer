@@ -13,11 +13,11 @@ import (
 )
 
 type Item struct {
-	ID          ulid.ULID
-	CreatorID   ulid.ULID
-	Name        string
-	Description string
-	Image       string
+	ID              ulid.ULID
+	CreatorUsername string
+	Name            string
+	Description     string
+	Image           string
 }
 
 type ItemModel struct {
@@ -32,15 +32,11 @@ func (m *ItemModel) Get(ctx context.Context, uuid ulid.ULID) (Item, error) {
 	defer m.DB.Put(conn)
 
 	var k Item
-	err = sqlitex.Execute(conn, `SELECT creator_id, name, description, image from items WHERE id = ?`, &sqlitex.ExecOptions{
+	err = sqlitex.Execute(conn, `SELECT creator_username, name, description, image from items WHERE id = ?`, &sqlitex.ExecOptions{
 		ResultFunc: func(stmt *sqlite.Stmt) error {
 			k.ID = uuid
 
-			creator_id, err := ulid.Parse(stmt.ColumnText(0))
-			if err != nil {
-				return err
-			}
-			k.CreatorID = creator_id
+			k.CreatorUsername = stmt.ColumnText(0)
 			k.Name = stmt.ColumnText(1)
 			k.Description = stmt.ColumnText(2)
 			k.Image = stmt.ColumnText(3)
@@ -57,7 +53,7 @@ func (m *ItemModel) Get(ctx context.Context, uuid ulid.ULID) (Item, error) {
 
 func (m *ItemModel) Insert(
 	ctx context.Context,
-	creator_id ulid.ULID,
+	creator_username string,
 	name string,
 	description string,
 	image string,
@@ -76,8 +72,8 @@ func (m *ItemModel) Insert(
 
 	err = sqlitex.Execute(
 		conn,
-		`INSERT INTO items (id, creator_id, name, description, image) VALUES (?, ?, ?, ?, ?)`,
-		&sqlitex.ExecOptions{Args: []any{uuid, creator_id, name, description, image}},
+		`INSERT INTO items (id, creator_username, name, description, image) VALUES (?, ?, ?, ?, ?)`,
+		&sqlitex.ExecOptions{Args: []any{uuid, creator_username, name, description, image}},
 	)
 	return uuid, err
 }

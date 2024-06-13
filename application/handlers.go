@@ -19,19 +19,20 @@ func (app *application) Routes() http.Handler {
 
 	dynamic := alice.New(app.sessionManager.LoadAndSave)
 
-	mux.Handle("GET /{$}", dynamic.ThenFunc(app.home))
-	mux.Handle("GET /user/view/{username}", dynamic.ThenFunc(app.userView))
-	mux.Handle("GET /user/register", dynamic.ThenFunc(app.userRegister))
-	mux.Handle("POST /user/register", dynamic.ThenFunc(app.userRegisterPost))
-	mux.Handle("GET /user/login", dynamic.ThenFunc(app.userLogin))
-	mux.Handle("POST /user/login", dynamic.ThenFunc(app.userLoginPost))
-	mux.Handle("GET /item/view/{id}", dynamic.ThenFunc(app.itemView))
+	mux.Handle("GET /{$}", dynamic.ThenFunc(app.homeHandler))
+	mux.Handle("GET /search", dynamic.ThenFunc(app.searchHandler))
+	mux.Handle("GET /user/view/{username}", dynamic.ThenFunc(app.userViewHandler))
+	mux.Handle("GET /user/register", dynamic.ThenFunc(app.userRegisterHandler))
+	mux.Handle("POST /user/register", dynamic.ThenFunc(app.userRegisterPostHandler))
+	mux.Handle("GET /user/login", dynamic.ThenFunc(app.userLoginHandler))
+	mux.Handle("POST /user/login", dynamic.ThenFunc(app.userLoginPostHandler))
+	mux.Handle("GET /item/view/{id}", dynamic.ThenFunc(app.itemViewHandler))
 
 	protected := dynamic.Append(app.requireAuthentication)
 
-	mux.Handle("POST /user/logout", protected.ThenFunc(app.userLogoutPost))
-	mux.Handle("GET /item/create", protected.ThenFunc(app.itemCreate))
-	mux.Handle("POST /item/create", protected.ThenFunc(app.itemCreatePost))
+	mux.Handle("POST /user/logout", protected.ThenFunc(app.userLogoutPostHandler))
+	mux.Handle("GET /item/create", protected.ThenFunc(app.itemCreateHandler))
+	mux.Handle("POST /item/create", protected.ThenFunc(app.itemCreatePostHandler))
 
 	standard := alice.New(app.recoverPanic, app.logRequest, app.secureHeaders)
 	return standard.Then(mux)

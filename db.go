@@ -51,11 +51,11 @@ func openDB(dsn string) (*sqlitex.Pool, error) {
 		conn,
 		`CREATE TABLE IF NOT EXISTS items (
 			id TEXT NOT NULL PRIMARY KEY,
-			creator_id TEXT NOT NULL,
+			creator_username TEXT NOT NULL,
 			name TEXT NOT NULL,
 			description TEXT NOT NULL,
 			image TEXT NOT NULL,
-			FOREIGN KEY (creator_id) REFERENCES users (id)
+			FOREIGN KEY (creator_username) REFERENCES users (username)
 		) WITHOUT ROWID;`,
 		nil,
 	)
@@ -67,6 +67,39 @@ func openDB(dsn string) (*sqlitex.Pool, error) {
 	err = sqlitex.Execute(
 		conn,
 		`CREATE UNIQUE INDEX IF NOT EXISTS items_idx ON items (id);`,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create items full text search.
+	err = sqlitex.Execute(
+		conn,
+		`CREATE VIRTUAL TABLE IF NOT EXISTS items_search USING fts5(
+			id,
+			name,
+			description
+		);`,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+	err = sqlitex.Execute(
+		conn,
+		`CREATE TRIGGER IF NOT EXISTS after_items_insert AFTER INSERT ON items
+			BEGIN INSERT INTO items_search(
+				id,
+				name,
+				description
+			)
+			VALUES (
+				new.id,
+				new.name,
+				new.description
+			);
+		END;`,
 		nil,
 	)
 	if err != nil {

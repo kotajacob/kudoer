@@ -17,11 +17,20 @@ type application struct {
 	templates      map[string]*template.Template
 	sessionManager *scs.SessionManager
 
-	users *models.UserModel
-	items *models.ItemModel
+	users  *models.UserModel
+	items  *models.ItemModel
+	search *models.SearchModel
 }
 
-func New(infoLog *log.Logger, errLog *log.Logger, templates map[string]*template.Template, sessionManager *scs.SessionManager, users *models.UserModel, items *models.ItemModel) *application {
+func New(
+	infoLog *log.Logger,
+	errLog *log.Logger,
+	templates map[string]*template.Template,
+	sessionManager *scs.SessionManager,
+	users *models.UserModel,
+	items *models.ItemModel,
+	search *models.SearchModel,
+) *application {
 	return &application{
 		infoLog:        infoLog,
 		errLog:         errLog,
@@ -29,6 +38,7 @@ func New(infoLog *log.Logger, errLog *log.Logger, templates map[string]*template
 		sessionManager: sessionManager,
 		users:          users,
 		items:          items,
+		search:         search,
 	}
 }
 

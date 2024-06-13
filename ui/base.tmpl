@@ -22,6 +22,7 @@
 					--color-fg: #000;
 					--color-fg-light: #666;
 					--color-bg: #fff;
+					--color-bg-light: #ccc;
 					--color-1: #e0ba91;
 					--color-2: #e39aac;
 					--color-3: #c45d9f;
@@ -55,23 +56,10 @@
 					color: var(--color-bg);
 					background-color: var(--color-fg);
 				}
-				.color1 {
-					color: var(--color-1);
-				}
-				.color2 {
-					color: var(--color-2);
-				}
-				.color3 {
-					color: var(--color-3);
-				}
-				.color4 {
-					color: var(--color-4);
-				}
-				.color5 {
-					color: var(--color-5);
-				}
-				.color6 {
-					color: var(--color-6);
+				h1,
+				h2,
+				h3 {
+					text-align: center;
 				}
 				h1 {
 					font-size: var(--s3);
@@ -94,16 +82,78 @@
 					text-decoration: underline;
 					cursor: pointer;
 				}
+				nav button {
+					font-size: var(--s1);
+					width: auto;
+					display: inline-block;
+					border: none;
+					color: var(--color-fg);
+					background-color: var(--color-bg);
+				}
 				nav button:active {
 					color: var(--color-bg);
 					background-color: var(--color-fg);
 				}
-				.title {
-					text-align: center;
+				label {
+					display: block;
 				}
-				.title a {
-					text-decoration: none;
+				label.error {
+					font-size: var(--s-1);
+					font-weight: bold;
+					color: var(--color-3);
+				}
+				div.error {
+					text-align: center;
+					font-weight: bold;
+					color: var(--color-3);
+				}
+				div.flash {
+					text-align: center;
+					font-weight: bold;
+					color: var(--color-5);
+				}
+				input,
+				button,
+				textarea {
+					width: 100%;
+					display: block;
+					border-width: 1px;
+					border-color: var(--color-fg-light);
+					font-size: var(--s0);
+				}
+				input.error,
+				textarea.error {
+					border-color: var(--color-3);
+				}
+				button,
+				input[type="submit"] {
+					font-weight: bold;
+					color: var(--color-bg);
+					background-color: var(--color-fg);
+				}
+				.color1 {
+					color: var(--color-1);
+				}
+				.color2 {
+					color: var(--color-2);
+				}
+				.color3 {
+					color: var(--color-3);
+				}
+				.color4 {
+					color: var(--color-4);
+				}
+				.color5 {
+					color: var(--color-5);
+				}
+				.color6 {
+					color: var(--color-6);
+				}
+				.title {
 					font-family: "Nimbus Mono PS", "FreeMono", "Courier New", monospace;
+				}
+				.title > a {
+					text-decoration: none;
 				}
 				.title > a > .color1 {
 					color: var(--color-bg);
@@ -131,14 +181,13 @@
 					background-color: var(--color-6);
 					padding-inline-end: var(--s-1);
 				}
-				.stack0,
-				.stack1 {
-					display: flex;
-					flex-direction: column;
-					justify-content: flex-start;
+				.box {
+					border: var(--s-4) solid var(--color-bg-light);
+					padding: var(--s-1);
 				}
 				.stack0,
-				.stack1 > * {
+				.stack1,
+				.stack2 > * {
 					margin-block: 0;
 				}
 				.stack0 > * + * {
@@ -150,46 +199,33 @@
 				.stack2 > * + * {
 					margin-block-start: var(--s-2);
 				}
-				label {
-					display: block;
+				.row0,
+				.row1,
+				.row2 {
+					display: flex;
+					flex-direction: row;
+					justify-content: flex-start;
 				}
-				label.error {
-					font-size: var(--s-1);
-					font-weight: bold;
-					color: var(--color-3);
+				.row0,
+				.row1,
+				.row2 > * {
+					margin-block: 0;
 				}
-				div.error {
-					text-align: center;
-					font-weight: bold;
-					color: var(--color-3);
+				.row0 > * + * {
+					margin-inline-start: var(--s0);
 				}
-				div.flash {
-					text-align: center;
-					font-weight: bold;
-					color: var(--color-5);
+				.row2 > * + * {
+					margin-inline-start: var(--s-1);
 				}
-				input,
-				textarea {
-					width: 100%;
-					display: block;
-					border-width: 1px;
-					border-color: var(--color-fg-light);
-					font-size: var(--s0);
-				}
-				input.error,
-				textarea.error {
-					border-color: var(--color-3);
-				}
-				input[type="submit"] {
-					font-weight: bold;
-					color: var(--color-bg);
-					background-color: var(--color-fg);
+				.row2 > * + * {
+					margin-inline-start: var(--s-2);
 				}
 			</style>
 		</head>
 		<body class="stack0">
 			<nav>
 				{{ if .IsAuthenticated }}
+					<h3><a href="/search">Search</a></h3>
 					<h3><a href="/item/create">Create Item</a></h3>
 					<form action="/user/logout" method="POST">
 						<button>Logout</button>

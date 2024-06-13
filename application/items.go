@@ -3,12 +3,10 @@
 package application
 
 import (
-	"crypto/rand"
 	"errors"
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 	"unicode/utf8"
 
 	"git.sr.ht/~kota/kudoer/models"
@@ -23,8 +21,8 @@ type itemViewPage struct {
 	Image       string
 }
 
-// itemView presents a item.
-func (app *application) itemView(w http.ResponseWriter, r *http.Request) {
+// itemViewHandler presents a item.
+func (app *application) itemViewHandler(w http.ResponseWriter, r *http.Request) {
 	uuid, err := ulid.Parse(r.PathValue("id"))
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
@@ -54,8 +52,8 @@ type itemCreatePage struct {
 	Form itemCreateForm
 }
 
-// itemCreate presents a web form to add an item.
-func (app *application) itemCreate(w http.ResponseWriter, r *http.Request) {
+// itemCreateHandler presents a web form to add an item.
+func (app *application) itemCreateHandler(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "itemCreate.tmpl", itemCreatePage{
 		Page: app.newPage(r),
 		Form: itemCreateForm{},
@@ -71,19 +69,12 @@ type itemCreateForm struct {
 	FieldErrors map[string]string
 }
 
-// itemCreatePost adds an item.
-func (app *application) itemCreatePost(w http.ResponseWriter, r *http.Request) {
+// itemCreatePostHandler adds an item.
+func (app *application) itemCreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 4096)
 	err := r.ParseForm()
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
-		return
-	}
-
-	ms := ulid.Timestamp(time.Now())
-	creator_id, err := ulid.New(ms, rand.Reader)
-	if err != nil {
-		app.serverError(w, err)
 		return
 	}
 
@@ -116,7 +107,7 @@ func (app *application) itemCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	id, err := app.items.Insert(
 		r.Context(),
-		creator_id,
+		"kota", // TODO: Pass in an actual value!
 		form.Name,
 		form.Description,
 		form.Image,
@@ -126,7 +117,7 @@ func (app *application) itemCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.sessionManager.Put(r.Context(), "flash", "item created")
+	app.sessionManager.Put(r.Context(), "flash", "Item created")
 
 	http.Redirect(w, r, fmt.Sprintf("/item/view/%v", id), http.StatusSeeOther)
 }

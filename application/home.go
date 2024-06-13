@@ -8,8 +8,8 @@ type homePage struct {
 	Page
 }
 
-// home presents the home page.
-func (app *application) home(w http.ResponseWriter, r *http.Request) {
+// homeHandler presents the homeHandler page.
+func (app *application) homeHandler(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "home.tmpl", homePage{
 		Page: app.newPage(r),
 	})

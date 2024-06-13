@@ -20,8 +20,8 @@ type userViewPage struct {
 	Email    string
 }
 
-// userView presents a user.
-func (app *application) userView(w http.ResponseWriter, r *http.Request) {
+// userViewHandler presents a user.
+func (app *application) userViewHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.PathValue("username")
 	user, err := app.users.Get(r.Context(), username)
 	if err != nil {
@@ -45,8 +45,8 @@ type userRegisterPage struct {
 	Form userRegisterForm
 }
 
-// userRegister presents a web form to add a user.
-func (app *application) userRegister(w http.ResponseWriter, r *http.Request) {
+// userRegisterHandler presents a web form to add a user.
+func (app *application) userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "userRegister.tmpl", userRegisterPage{
 		Page: app.newPage(r),
 		Form: userRegisterForm{},
@@ -63,8 +63,8 @@ type userRegisterForm struct {
 	FieldErrors map[string]string
 }
 
-// userRegisterPost adds a user.
-func (app *application) userRegisterPost(w http.ResponseWriter, r *http.Request) {
+// userRegisterPostHandler adds a user.
+func (app *application) userRegisterPostHandler(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 4096)
 	err := r.ParseForm()
 	if err != nil {
@@ -138,7 +138,7 @@ type userLoginPage struct {
 	Form userLoginForm
 }
 
-func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
+func (app *application) userLoginHandler(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "login.tmpl", userLoginPage{
 		Page: app.newPage(r),
 		Form: userLoginForm{},
@@ -154,7 +154,7 @@ type userLoginForm struct {
 	FieldErrors map[string]string
 }
 
-func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
+func (app *application) userLoginPostHandler(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 4096)
 	err := r.ParseForm()
 	if err != nil {
@@ -218,7 +218,7 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
+func (app *application) userLogoutPostHandler(w http.ResponseWriter, r *http.Request) {
 	err := app.sessionManager.RenewToken(r.Context())
 	if err != nil {
 		app.serverError(w, err)

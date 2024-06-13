@@ -1,0 +1,22 @@
+{{ define "main" }}
+	<form class="stack2" method="GET" action="search">
+		<input
+			type="search"
+			placeholder="Search..."
+			value="{{ .Query }}"
+			name="q"
+		/>
+		<div class="row2">
+			<button type="submit" name="type" value="items">Items</button>
+			<button type="submit" name="type" value="users">Users</button>
+		</div>
+	</form>
+	<div class="stack0">
+		{{ range .Items }}
+			<div class="box stack2">
+				<h3>{{ .Name }}</h3>
+				<p>{{ .Description }}</p>
+			</div>
+		{{ end }}
+	</div>
+{{ end }}
