@@ -22,7 +22,7 @@
 					--color-fg: #000;
 					--color-fg-light: #666;
 					--color-bg: #fff;
-					--color-1: #f0dab1;
+					--color-1: #e0ba91;
 					--color-2: #e39aac;
 					--color-3: #c45d9f;
 					--color-4: #6461c2;
@@ -51,6 +51,10 @@
 					padding: var(--s1);
 					font-family: system-ui, sans-serif;
 				}
+				a:active {
+					color: var(--color-bg);
+					background-color: var(--color-fg);
+				}
 				.color1 {
 					color: var(--color-1);
 				}
@@ -69,20 +73,63 @@
 				.color6 {
 					color: var(--color-6);
 				}
-				.title {
-					text-align: center;
-				}
 				h1 {
 					font-size: var(--s3);
-				}
-				h1 > a {
-					text-decoration: none;
 				}
 				h2 {
 					font-size: var(--s2);
 				}
 				h3 {
 					font-size: var(--s1);
+				}
+				nav {
+					display: flex;
+					column-gap: var(--s0);
+					flex-direction: row;
+					justify-content: center;
+				}
+				nav * {
+					font-size: var(--s1);
+					font-weight: bold;
+					text-decoration: underline;
+					cursor: pointer;
+				}
+				nav button:active {
+					color: var(--color-bg);
+					background-color: var(--color-fg);
+				}
+				.title {
+					text-align: center;
+				}
+				.title a {
+					text-decoration: none;
+					font-family: "Nimbus Mono PS", "Courier New", monospace;
+				}
+				.title > a > .color1 {
+					color: var(--color-bg);
+					background-color: var(--color-1);
+					padding-inline-start: var(--s-1);
+				}
+				.title > a > .color2 {
+					color: var(--color-bg);
+					background-color: var(--color-2);
+				}
+				.title > a > .color3 {
+					color: var(--color-bg);
+					background-color: var(--color-3);
+				}
+				.title > a > .color4 {
+					color: var(--color-bg);
+					background-color: var(--color-4);
+				}
+				.title > a > .color5 {
+					color: var(--color-bg);
+					background-color: var(--color-5);
+				}
+				.title > a > .color6 {
+					color: var(--color-bg);
+					background-color: var(--color-6);
+					padding-inline-end: var(--s-1);
 				}
 				.stack0,
 				.stack1 {
@@ -146,6 +193,13 @@
 			{{ with .Flash }}
 				<span>{{ . }}</span>
 			{{ end }}
+			<nav>
+				<h3><a href="/user/create">Register</a></h3>
+				<h3><a href="/user/login">Login</a></h3>
+				<form action="/user/logout" method="POST">
+					<button>Logout</button>
+				</form>
+			</nav>
 			{{ template "main" . }}
 		</body>
 	</html>
