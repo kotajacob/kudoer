@@ -16,8 +16,7 @@ import (
 )
 
 type itemViewPage struct {
-	CSPNonce string
-	Flash    string
+	Page
 
 	Name        string
 	Description string
@@ -42,10 +41,8 @@ func (app *application) itemView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	flash := app.sessionManager.PopString(r.Context(), "flash")
 	app.render(w, http.StatusOK, "itemView.tmpl", itemViewPage{
-		CSPNonce:    nonce(r.Context()),
-		Flash:       flash,
+		Page:        app.newPage(r.Context()),
 		Name:        item.Name,
 		Description: item.Description,
 		Image:       item.Image,
@@ -53,15 +50,15 @@ func (app *application) itemView(w http.ResponseWriter, r *http.Request) {
 }
 
 type itemCreatePage struct {
-	CSPNonce string
-	Form     itemCreateForm
+	Page
+	Form itemCreateForm
 }
 
 // itemCreate presents a web form to add an item.
 func (app *application) itemCreate(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "itemCreate.tmpl", itemCreatePage{
-		CSPNonce: nonce(r.Context()),
-		Form:     itemCreateForm{},
+		Page: app.newPage(r.Context()),
+		Form: itemCreateForm{},
 	})
 }
 
@@ -111,8 +108,8 @@ func (app *application) itemCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	if len(form.FieldErrors) > 0 {
 		app.render(w, http.StatusUnprocessableEntity, "itemCreate.tmpl", itemCreatePage{
-			CSPNonce: nonce(r.Context()),
-			Form:     form,
+			Page: app.newPage(r.Context()),
+			Form: form,
 		})
 		return
 	}

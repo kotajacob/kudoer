@@ -3,6 +3,7 @@
 package application
 
 import (
+	"context"
 	"html/template"
 	"log"
 
@@ -28,5 +29,19 @@ func New(infoLog *log.Logger, errLog *log.Logger, templates map[string]*template
 		sessionManager: sessionManager,
 		users:          users,
 		items:          items,
+	}
+}
+
+type Page struct {
+	CSPNonce string
+	Flash    string
+}
+
+func (app *application) newPage(ctx context.Context) Page {
+	cspNonce := nonce(ctx)
+	flash := app.sessionManager.PopString(ctx, "flash")
+	return Page{
+		CSPNonce: cspNonce,
+		Flash:    flash,
 	}
 }

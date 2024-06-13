@@ -14,7 +14,7 @@ import (
 )
 
 type userViewPage struct {
-	CSPNonce string
+	Page
 
 	Username string
 	Email    string
@@ -34,22 +34,22 @@ func (app *application) userView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.render(w, http.StatusOK, "userView.tmpl", userViewPage{
-		CSPNonce: nonce(r.Context()),
+		Page:     app.newPage(r.Context()),
 		Username: user.Username,
 		Email:    user.Email,
 	})
 }
 
 type userCreatePage struct {
-	CSPNonce string
-	Form     userCreateForm
+	Page
+	Form userCreateForm
 }
 
 // userCreate presents a web form to add a user.
 func (app *application) userCreate(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "userCreate.tmpl", userCreatePage{
-		CSPNonce: nonce(r.Context()),
-		Form:     userCreateForm{},
+		Page: app.newPage(r.Context()),
+		Form: userCreateForm{},
 	})
 }
 
@@ -124,8 +124,8 @@ func (app *application) userCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	if len(form.FieldErrors) > 0 {
 		app.render(w, http.StatusUnprocessableEntity, "userCreate.tmpl", userCreatePage{
-			CSPNonce: nonce(r.Context()),
-			Form:     form,
+			Page: app.newPage(r.Context()),
+			Form: form,
 		})
 		return
 	}
@@ -134,14 +134,14 @@ func (app *application) userCreatePost(w http.ResponseWriter, r *http.Request) {
 }
 
 type userLoginPage struct {
-	CSPNonce string
-	Form     userLoginForm
+	Page
+	Form userLoginForm
 }
 
 func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "login.tmpl", userLoginPage{
-		CSPNonce: nonce(r.Context()),
-		Form:     userLoginForm{},
+		Page: app.newPage(r.Context()),
+		Form: userLoginForm{},
 	})
 }
 
@@ -185,8 +185,8 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 
 	if len(form.FieldErrors) > 0 {
 		app.render(w, http.StatusUnprocessableEntity, "login.tmpl", userLoginPage{
-			CSPNonce: nonce(r.Context()),
-			Form:     form,
+			Page: app.newPage(r.Context()),
+			Form: form,
 		})
 		return
 	}
@@ -199,8 +199,8 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 				"Email or password is incorrect",
 			)
 			app.render(w, http.StatusUnprocessableEntity, "login.tmpl", userLoginPage{
-				CSPNonce: nonce(r.Context()),
-				Form:     form,
+				Page: app.newPage(r.Context()),
+				Form: form,
 			})
 		} else {
 			app.serverError(w, err)

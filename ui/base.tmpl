@@ -143,6 +143,9 @@
 					><span class="color5">e</span><span class="color6">r</span>
 				</a>
 			</h1>
+			{{ with .Flash }}
+				<span>{{ . }}</span>
+			{{ end }}
 			{{ template "main" . }}
 		</body>
 	</html>
