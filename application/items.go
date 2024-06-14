@@ -105,9 +105,10 @@ func (app *application) itemCreatePostHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	username := app.sessionManager.GetString(r.Context(), "authenticatedUsername")
 	id, err := app.items.Insert(
 		r.Context(),
-		"kota", // TODO: Pass in an actual value!
+		username,
 		form.Name,
 		form.Description,
 		form.Image,
