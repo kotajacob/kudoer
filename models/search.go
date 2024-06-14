@@ -4,7 +4,6 @@ package models
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/oklog/ulid"
 	"zombiezen.com/go/sqlite"
@@ -44,6 +43,5 @@ func (m *SearchModel) Items(ctx context.Context, query string) ([]SearchItem, er
 		},
 		Args: []any{query},
 	})
-	fmt.Println(err)
 	return items, err
 }
