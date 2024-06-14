@@ -5,12 +5,22 @@ package main
 import (
 	"context"
 
+	"zombiezen.com/go/sqlite"
 	"zombiezen.com/go/sqlite/sqlitex"
 )
 
 func openDB(dsn string) (*sqlitex.Pool, error) {
 	db, err := sqlitex.NewPool(dsn, sqlitex.PoolOptions{
 		PoolSize: 10,
+		PrepareConn: func(conn *sqlite.Conn) error {
+			// Create users table.
+			err := sqlitex.Execute(
+				conn,
+				`PRAGMA foreign_keys = on`,
+				nil,
+			)
+			return err
+		},
 	})
 	if err != nil {
 		return nil, err
