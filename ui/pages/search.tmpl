@@ -1,10 +1,15 @@
 {{ define "main" }}
 	<form class="stack2" method="GET" action="search">
+		{{ with .Form.FieldErrors.query }}
+			<label class="error" for="q">{{ . }}</label>
+		{{ end }}
 		<input
 			type="search"
 			placeholder="Search..."
-			value="{{ .Query }}"
+			value="{{ .Form.Query }}"
 			name="q"
+			id="q"
+			required
 		/>
 		<div class="row2">
 			<button type="submit" name="type" value="items">Items</button>
