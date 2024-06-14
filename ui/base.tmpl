@@ -184,7 +184,7 @@
 				}
 				.box {
 					border: var(--s-4) solid var(--color-bg-light);
-					padding: var(--s-1);
+					padding: var(--s0);
 				}
 				.stack0,
 				.stack1,
@@ -227,7 +227,7 @@
 			<nav>
 				<h3><a href="/search">Search</a></h3>
 				{{ if .IsAuthenticated }}
-					<h3><a href="/item/create">Create Item</a></h3>
+					<h3><a href="/item/create">Create</a></h3>
 					<form action="/user/logout" method="POST">
 						<button>Logout</button>
 					</form>
