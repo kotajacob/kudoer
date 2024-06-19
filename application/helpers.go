@@ -20,10 +20,13 @@ func (app *application) serverError(w http.ResponseWriter, err error) {
 	)
 }
 
+// clientError sends a basic error response to the client.
 func (app *application) clientError(w http.ResponseWriter, status int) {
 	http.Error(w, http.StatusText(status), status)
 }
 
+// authenticated returns the session's authenticated username or a blank string
+// if the user is not authenticated.
 func (app *application) authenticated(r *http.Request) string {
 	return app.sessionManager.GetString(r.Context(), "authenticatedUsername")
 }
