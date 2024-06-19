@@ -19,6 +19,7 @@ type application struct {
 
 	users  *models.UserModel
 	items  *models.ItemModel
+	kudos  *models.KudoModel
 	search *models.SearchModel
 }
 
@@ -29,6 +30,7 @@ func New(
 	sessionManager *scs.SessionManager,
 	users *models.UserModel,
 	items *models.ItemModel,
+	kudos *models.KudoModel,
 	search *models.SearchModel,
 ) *application {
 	return &application{
@@ -38,23 +40,24 @@ func New(
 		sessionManager: sessionManager,
 		users:          users,
 		items:          items,
+		kudos:          kudos,
 		search:         search,
 	}
 }
 
 type Page struct {
-	CSPNonce        string
-	Flash           string
-	IsAuthenticated bool
+	CSPNonce      string
+	Flash         string
+	Authenticated string
 }
 
 func (app *application) newPage(r *http.Request) Page {
 	cspNonce := nonce(r.Context())
 	flash := app.sessionManager.PopString(r.Context(), "flash")
-	isAuthenticated := app.isAuthenticated(r)
+	authenticated := app.authenticated(r)
 	return Page{
-		CSPNonce:        cspNonce,
-		Flash:           flash,
-		IsAuthenticated: isAuthenticated,
+		CSPNonce:      cspNonce,
+		Flash:         flash,
+		Authenticated: authenticated,
 	}
 }

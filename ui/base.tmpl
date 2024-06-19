@@ -186,8 +186,29 @@
 					border: var(--s-4) solid var(--color-bg-light);
 					padding: var(--s0);
 				}
+				.kudo {
+					display: flex;
+					flex-direction: row;
+					justify-content: space-evenly;
+					font-size: var(--s2);
+				}
+				.kudo > input {
+					appearance: none;
+					display: none;
+				}
+				.kudo input[type="radio"]:checked + label {
+					text-decoration: underline;
+					text-underline-position: under;
+				}
 				.stack0,
 				.stack1,
+				.stack2 {
+					display: flex;
+					flex-direction: column;
+					justify-content: flex-start;
+				}
+				.stack0 > *,
+				.stack1 > *,
 				.stack2 > * {
 					margin-block: 0;
 				}
@@ -207,15 +228,15 @@
 					flex-direction: row;
 					justify-content: flex-start;
 				}
-				.row0,
-				.row1,
+				.row0 > *,
+				.row1 > *,
 				.row2 > * {
 					margin-block: 0;
 				}
 				.row0 > * + * {
 					margin-inline-start: var(--s0);
 				}
-				.row2 > * + * {
+				.row1 > * + * {
 					margin-inline-start: var(--s-1);
 				}
 				.row2 > * + * {
@@ -226,7 +247,7 @@
 		<body class="stack0">
 			<nav>
 				<h3><a href="/search">Search</a></h3>
-				{{ if .IsAuthenticated }}
+				{{ if .Authenticated }}
 					<h3><a href="/item/create">Create</a></h3>
 					<form action="/user/logout" method="POST">
 						<button>Logout</button>

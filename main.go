@@ -66,6 +66,7 @@ func main() {
 		sessionManager,
 		&models.UserModel{DB: db},
 		&models.ItemModel{DB: db},
+		&models.KudoModel{DB: db},
 		&models.SearchModel{DB: db},
 	)
 

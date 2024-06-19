@@ -1,5 +1,5 @@
 {{ define "main" }}
-	<form class="stack2" method="GET" action="search">
+	<form class="stack1" method="GET" action="search">
 		{{ with .Form.FieldErrors.query }}
 			<label class="error" for="q">{{ . }}</label>
 		{{ end }}
@@ -11,7 +11,7 @@
 			id="q"
 			required
 		/>
-		<div class="row2">
+		<div class="row1">
 			<button type="submit" name="type" value="items">Items</button>
 			<button type="submit" name="type" value="users">Users</button>
 		</div>
@@ -19,7 +19,7 @@
 	<div class="stack0">
 		{{ range .Items }}
 			<div class="box stack2">
-				<h3>{{ .Name }}</h3>
+				<h3><a href="/item/view/{{ .ID }}">{{ .Name }}</a></h3>
 				<p>{{ .Description }}</p>
 			</div>
 		{{ end }}

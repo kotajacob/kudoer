@@ -1,4 +1,46 @@
 {{ define "main" }}
 	<h2>{{ .Name }}</h2>
 	<p>{{ .Description }}</p>
+	<form class="stack0" action="/kudo/{{ .ID }}" method="post">
+		{{ if .Authenticated }}
+			<div class="kudo">
+				<input name="emoji" type="radio" id="1" value="1" /><label for="1"
+					>🤮</label
+				>
+				<input name="emoji" type="radio" id="2" value="2" /><label for="2"
+					>🫠</label
+				>
+				<input name="emoji" type="radio" id="3" value="3" /><label for="3"
+					>🤔</label
+				>
+				<input name="emoji" type="radio" id="4" value="4" /><label for="4"
+					>😐</label
+				>
+				<input name="emoji" type="radio" id="5" value="5" /><label for="5"
+					>🥰</label
+				>
+				<input name="emoji" type="radio" id="6" value="6" /><label for="6"
+					>🤩</label
+				>
+			</div>
+			<textarea
+				type="text"
+				name="body"
+				id="body"
+				rows="5"
+				maxlength="1000"
+				required
+			></textarea>
+			<input type="submit" value="Give Kudos" />
+		{{ end }}
+		{{ range .Kudos }}
+			<div class="box stack2">
+				<h3>
+					<a href="/user/view/{{ .CreatorUsername }}">{{ .CreatorUsername }}</a>
+				</h3>
+				<h2>{{ .Emoji }}</h2>
+				<p>{{ .Body }}</p>
+			</div>
+		{{ end }}
+	</form>
 {{ end }}

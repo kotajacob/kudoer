@@ -16,9 +16,20 @@ import (
 type itemViewPage struct {
 	Page
 
+	ID          string
 	Name        string
 	Description string
 	Image       string
+
+	Kudos []Kudo
+}
+
+type Kudo struct {
+	ID              string
+	ItemID          string
+	CreatorUsername string
+	Emoji           string
+	Body            string
 }
 
 // itemViewHandler presents a item.
@@ -39,11 +50,19 @@ func (app *application) itemViewHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	kudos, err := app.kudos.Item(r.Context(), uuid)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
 	app.render(w, http.StatusOK, "itemView.tmpl", itemViewPage{
 		Page:        app.newPage(r),
+		ID:          item.ID.String(),
 		Name:        item.Name,
 		Description: item.Description,
 		Image:       item.Image,
+		Kudos:       app.renderKudos(kudos),
 	})
 }
 

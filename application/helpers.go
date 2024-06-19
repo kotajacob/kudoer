@@ -24,6 +24,6 @@ func (app *application) clientError(w http.ResponseWriter, status int) {
 	http.Error(w, http.StatusText(status), status)
 }
 
-func (app *application) isAuthenticated(r *http.Request) bool {
-	return app.sessionManager.Exists(r.Context(), "authenticatedUsername")
+func (app *application) authenticated(r *http.Request) string {
+	return app.sessionManager.GetString(r.Context(), "authenticatedUsername")
 }

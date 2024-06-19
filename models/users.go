@@ -29,22 +29,22 @@ func (m *UserModel) Get(ctx context.Context, username string) (User, error) {
 	}
 	defer m.DB.Put(conn)
 
-	var k User
+	var u User
 	err = sqlitex.Execute(conn, `SELECT email from users WHERE username = ?`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
-				k.Username = username
+				u.Username = username
 
-				k.Email = stmt.ColumnText(0)
+				u.Email = stmt.ColumnText(0)
 				return nil
 			},
 			Args: []any{username},
 		})
 
-	if k.Username == "" {
-		return k, ErrNoRecord
+	if u.Username == "" {
+		return u, ErrNoRecord
 	}
-	return k, err
+	return u, err
 }
 
 func (m *UserModel) Insert(
@@ -87,23 +87,23 @@ func (m *UserModel) Authenticate(
 	}
 	defer m.DB.Put(conn)
 
-	var k User
+	var u User
 	err = sqlitex.Execute(conn, `SELECT password from users WHERE username = ?`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
-				k.Username = username
+				u.Username = username
 
-				k.HashedPassword = stmt.ColumnText(0)
+				u.HashedPassword = stmt.ColumnText(0)
 				return nil
 			},
 			Args: []any{username},
 		})
 
-	if k.Username == "" {
+	if u.Username == "" {
 		return ErrInvalidCredentials
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(k.HashedPassword), []byte(password))
+	err = bcrypt.CompareHashAndPassword([]byte(u.HashedPassword), []byte(password))
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
 			return ErrInvalidCredentials

@@ -116,6 +116,41 @@ func openDB(dsn string) (*sqlitex.Pool, error) {
 		return nil, err
 	}
 
+	// Create kudos table.
+	err = sqlitex.Execute(
+		conn,
+		`CREATE TABLE IF NOT EXISTS kudos (
+			id TEXT NOT NULL PRIMARY KEY,
+			item_id TEXT NOT NULL,
+			creator_username TEXT NOT NULL,
+			emoji INTEGER NOT NULL,
+			body TEXT NOT NULL,
+			FOREIGN KEY (creator_username) REFERENCES users (username)
+		) WITHOUT ROWID;`,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create kudos index.
+	err = sqlitex.Execute(
+		conn,
+		`CREATE UNIQUE INDEX IF NOT EXISTS kudos_idx ON kudos (id);`,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+	err = sqlitex.Execute(
+		conn,
+		`CREATE UNIQUE INDEX IF NOT EXISTS kudos_item_idx ON kudos (item_id);`,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	// Create sessions table.
 	err = sqlitex.Execute(
 		conn,

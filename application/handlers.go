@@ -33,6 +33,7 @@ func (app *application) Routes() http.Handler {
 	mux.Handle("POST /user/logout", protected.ThenFunc(app.userLogoutPostHandler))
 	mux.Handle("GET /item/create", protected.ThenFunc(app.itemCreateHandler))
 	mux.Handle("POST /item/create", protected.ThenFunc(app.itemCreatePostHandler))
+	mux.Handle("POST /kudo/{id}", protected.ThenFunc(app.kudoPostHandler))
 
 	standard := alice.New(app.recoverPanic, app.logRequest, app.secureHeaders)
 	return standard.Then(mux)

@@ -31,24 +31,24 @@ func (m *ItemModel) Get(ctx context.Context, uuid ulid.ULID) (Item, error) {
 	}
 	defer m.DB.Put(conn)
 
-	var k Item
+	var i Item
 	err = sqlitex.Execute(conn, `SELECT creator_username, name, description, image from items WHERE id = ?`, &sqlitex.ExecOptions{
 		ResultFunc: func(stmt *sqlite.Stmt) error {
-			k.ID = uuid
+			i.ID = uuid
 
-			k.CreatorUsername = stmt.ColumnText(0)
-			k.Name = stmt.ColumnText(1)
-			k.Description = stmt.ColumnText(2)
-			k.Image = stmt.ColumnText(3)
+			i.CreatorUsername = stmt.ColumnText(0)
+			i.Name = stmt.ColumnText(1)
+			i.Description = stmt.ColumnText(2)
+			i.Image = stmt.ColumnText(3)
 			return nil
 		},
 		Args: []any{uuid},
 	})
 
-	if k.ID.Compare(uuid) != 0 {
-		return k, ErrNoRecord
+	if i.ID.Compare(uuid) != 0 {
+		return i, ErrNoRecord
 	}
-	return k, err
+	return i, err
 }
 
 func (m *ItemModel) Insert(
