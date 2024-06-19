@@ -9,6 +9,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"git.sr.ht/~kota/kudoer/application/emoji"
 	"git.sr.ht/~kota/kudoer/models"
 	"github.com/oklog/ulid"
 )
@@ -20,6 +21,8 @@ type itemViewPage struct {
 	Name        string
 	Description string
 	Image       string
+
+	Emojis []emoji.Emoji
 
 	Kudos []Kudo
 }
@@ -62,6 +65,7 @@ func (app *application) itemViewHandler(w http.ResponseWriter, r *http.Request) 
 		Name:        item.Name,
 		Description: item.Description,
 		Image:       item.Image,
+		Emojis:      emoji.List(),
 		Kudos:       app.renderKudos(kudos),
 	})
 }

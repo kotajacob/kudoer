@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"git.sr.ht/~kota/kudoer/application/emoji"
 	"git.sr.ht/~kota/kudoer/models"
 	"github.com/oklog/ulid"
 )
@@ -73,20 +74,9 @@ func (app *application) renderKudos(kudos []models.Kudo) []Kudo {
 		r.ItemID = k.ItemID.String()
 		r.CreatorUsername = k.CreatorUsername
 
-		switch k.Emoji {
-		case 1:
-			r.Emoji = "🤮"
-		case 2:
-			r.Emoji = "🫠"
-		case 3:
-			r.Emoji = "🤔"
-		case 4:
-			r.Emoji = "😐"
-		case 5:
-			r.Emoji = "🥰"
-		case 6:
-			r.Emoji = "🤩"
-		default:
+		var err error
+		r.Emoji, err = emoji.Value(k.Emoji)
+		if err != nil {
 			app.errLog.Printf("kudo with invalid emoji %v: %v\n", k.Emoji, k.ID)
 			continue
 		}
