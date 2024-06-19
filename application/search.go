@@ -67,20 +67,6 @@ func (app *application) searchHandler(w http.ResponseWriter, r *http.Request) {
 		})
 }
 
-func strip(s string) string {
-	var result strings.Builder
-	for i := 0; i < len(s); i++ {
-		b := s[i]
-		if ('a' <= b && b <= 'z') ||
-			('A' <= b && b <= 'Z') ||
-			('0' <= b && b <= '9') ||
-			b == ' ' {
-			result.WriteByte(b)
-		}
-	}
-	return result.String()
-}
-
 // renderSearchItems converts the SearchItem database model into the application
 // type for display.
 func (app *application) renderSearchItems(items []models.SearchItem) []SearchItem {
