@@ -81,6 +81,8 @@ func strip(s string) string {
 	return result.String()
 }
 
+// renderSearchItems converts the SearchItem database model into the application
+// type for display.
 func (app *application) renderSearchItems(items []models.SearchItem) []SearchItem {
 	var rendered []SearchItem
 

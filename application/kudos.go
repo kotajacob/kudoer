@@ -62,6 +62,8 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 	http.Redirect(w, r, fmt.Sprintf("/item/view/%v", itemID), http.StatusSeeOther)
 }
 
+// renderKudos converts the Kudo database model into the application type for
+// display.
 func (app *application) renderKudos(kudos []models.Kudo) []Kudo {
 	var rendered []Kudo
 

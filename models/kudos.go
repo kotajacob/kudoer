@@ -5,7 +5,6 @@ package models
 import (
 	"context"
 	"crypto/rand"
-	"fmt"
 	"time"
 
 	"github.com/oklog/ulid"
@@ -55,7 +54,6 @@ func (m *KudoModel) Item(ctx context.Context, itemID ulid.ULID) ([]Kudo, error) 
 		},
 		Args: []any{itemID},
 	})
-	fmt.Println(kudos)
 	return kudos, err
 }
 
