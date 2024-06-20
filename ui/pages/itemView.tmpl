@@ -31,15 +31,7 @@
 			/>
 		{{ end }}
 		{{ range .Kudos }}
-			<div class="box stack2">
-				<h3>
-					<a href="/user/view/{{ .CreatorUsername }}"
-						>{{ .CreatorUsername }}</a
-					>
-				</h3>
-				<h2>{{ .Emoji }}</h2>
-				<p>{{ .Body }}</p>
-			</div>
+			{{ template "kudo" . }}
 		{{ end }}
 	</form>
 {{ end }}

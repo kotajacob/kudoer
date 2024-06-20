@@ -32,23 +32,51 @@ func (m *ItemModel) Get(ctx context.Context, uuid ulid.ULID) (Item, error) {
 	defer m.DB.Put(conn)
 
 	var i Item
-	err = sqlitex.Execute(conn, `SELECT creator_username, name, description, image from items WHERE id = ?`, &sqlitex.ExecOptions{
-		ResultFunc: func(stmt *sqlite.Stmt) error {
-			i.ID = uuid
+	err = sqlitex.Execute(conn,
+		`SELECT creator_username, name, description, image from items WHERE id = ?`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				i.ID = uuid
 
-			i.CreatorUsername = stmt.ColumnText(0)
-			i.Name = stmt.ColumnText(1)
-			i.Description = stmt.ColumnText(2)
-			i.Image = stmt.ColumnText(3)
-			return nil
-		},
-		Args: []any{uuid},
-	})
+				i.CreatorUsername = stmt.ColumnText(0)
+				i.Name = stmt.ColumnText(1)
+				i.Description = stmt.ColumnText(2)
+				i.Image = stmt.ColumnText(3)
+				return nil
+			},
+			Args: []any{uuid},
+		})
 
 	if i.ID.Compare(uuid) != 0 {
 		return i, ErrNoRecord
 	}
 	return i, err
+}
+
+func (m *ItemModel) Name(ctx context.Context, uuid ulid.ULID) (string, error) {
+	conn, err := m.DB.Take(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer m.DB.Put(conn)
+
+	var name string
+	var found bool
+	err = sqlitex.Execute(conn,
+		`SELECT name from items WHERE id = ?`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				found = true
+				name = stmt.ColumnText(0)
+				return nil
+			},
+			Args: []any{uuid},
+		})
+
+	if !found {
+		return "", ErrNoRecord
+	}
+	return name, err
 }
 
 func (m *ItemModel) Insert(

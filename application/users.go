@@ -16,8 +16,10 @@ import (
 type userViewPage struct {
 	Page
 
-	Username string
-	Email    string
+	Username    string
+	DisplayName string
+
+	Kudos []Kudo
 }
 
 // userViewHandler presents a user.
@@ -33,10 +35,17 @@ func (app *application) userViewHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	kudos, err := app.kudos.User(r.Context(), username)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
 	app.render(w, http.StatusOK, "userView.tmpl", userViewPage{
-		Page:     app.newPage(r),
-		Username: user.Username,
-		Email:    user.Email,
+		Page:        app.newPage(r),
+		Username:    user.Username,
+		DisplayName: user.DisplayName,
+		Kudos:       app.renderKudos(r.Context(), kudos),
 	})
 }
 
@@ -54,8 +63,9 @@ func (app *application) userRegisterHandler(w http.ResponseWriter, r *http.Reque
 }
 
 type userRegisterForm struct {
-	Username string
-	Email    string
+	Username    string
+	DisplayName string
+	Email       string
 
 	// NonFieldErrors stores errors which do not relate to a form field.
 	NonFieldErrors []string
@@ -75,6 +85,7 @@ func (app *application) userRegisterPostHandler(w http.ResponseWriter, r *http.R
 	form := userRegisterForm{
 		Username:    r.PostForm.Get("username"),
 		Email:       r.PostForm.Get("email"),
+		DisplayName: r.PostForm.Get("displayname"),
 		FieldErrors: map[string]string{},
 	}
 
@@ -84,6 +95,10 @@ func (app *application) userRegisterPostHandler(w http.ResponseWriter, r *http.R
 		form.FieldErrors["username"] = "Username cannot be longer than 30 characters"
 	} else if !rxUsername.MatchString(form.Username) {
 		form.FieldErrors["username"] = "Username may only contain lowercase letters, numbers, hyphen, and underscore"
+	}
+
+	if strings.TrimSpace(form.DisplayName) == "" {
+		form.DisplayName = form.Username
 	}
 
 	if len(form.Email) > 254 || !rxEmail.MatchString(form.Email) {
@@ -110,6 +125,7 @@ func (app *application) userRegisterPostHandler(w http.ResponseWriter, r *http.R
 	err = app.users.Insert(
 		r.Context(),
 		form.Username,
+		form.DisplayName,
 		form.Email,
 		string(hashedPassword),
 	)

@@ -31,14 +31,6 @@ type itemViewPage struct {
 	Kudos []Kudo
 }
 
-type Kudo struct {
-	ID              string
-	ItemID          string
-	CreatorUsername string
-	Emoji           string
-	Body            string
-}
-
 // itemViewHandler presents a item.
 func (app *application) itemViewHandler(w http.ResponseWriter, r *http.Request) {
 	uuid, err := ulid.Parse(r.PathValue("id"))
@@ -78,7 +70,7 @@ func (app *application) itemViewHandler(w http.ResponseWriter, r *http.Request) 
 		Image:       item.Image,
 		Emojis:      emoji.List(),
 		Kudoed:      kudoed,
-		Kudos:       app.renderKudos(kudos),
+		Kudos:       app.renderKudos(r.Context(), kudos),
 	})
 }
 

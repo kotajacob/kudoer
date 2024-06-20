@@ -14,6 +14,7 @@ import (
 
 type User struct {
 	Username       string
+	DisplayName    string
 	Email          string
 	HashedPassword string
 }
@@ -30,12 +31,12 @@ func (m *UserModel) Get(ctx context.Context, username string) (User, error) {
 	defer m.DB.Put(conn)
 
 	var u User
-	err = sqlitex.Execute(conn, `SELECT email from users WHERE username = ?`,
+	err = sqlitex.Execute(conn, `SELECT displayname from users WHERE username = ?`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				u.Username = username
 
-				u.Email = stmt.ColumnText(0)
+				u.DisplayName = stmt.ColumnText(0)
 				return nil
 			},
 			Args: []any{username},
@@ -47,9 +48,38 @@ func (m *UserModel) Get(ctx context.Context, username string) (User, error) {
 	return u, err
 }
 
+func (m *UserModel) DisplayName(
+	ctx context.Context,
+	username string,
+) (string, error) {
+	conn, err := m.DB.Take(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer m.DB.Put(conn)
+
+	var displayName string
+	var found bool
+	err = sqlitex.Execute(conn, `SELECT displayname from users WHERE username = ?`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				found = true
+				displayName = stmt.ColumnText(0)
+				return nil
+			},
+			Args: []any{username},
+		})
+
+	if !found {
+		return displayName, ErrNoRecord
+	}
+	return displayName, err
+}
+
 func (m *UserModel) Insert(
 	ctx context.Context,
 	username string,
+	displayname string,
 	email string,
 	hashedPassword string,
 ) error {
@@ -61,8 +91,8 @@ func (m *UserModel) Insert(
 
 	err = sqlitex.Execute(
 		conn,
-		`INSERT INTO users (username, email, password) VALUES (?, ?, ?)`,
-		&sqlitex.ExecOptions{Args: []any{username, email, hashedPassword}},
+		`INSERT INTO users (username, displayname, email, password) VALUES (?, ?, ?, ?)`,
+		&sqlitex.ExecOptions{Args: []any{username, displayname, email, hashedPassword}},
 	)
 	if sqlite.ErrCode(err) == sqlite.ResultConstraintUnique {
 		if strings.HasSuffix(err.Error(), "users.username") {

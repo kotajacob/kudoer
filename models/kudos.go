@@ -96,6 +96,48 @@ func (m *KudoModel) ItemUser(
 	return k, err
 }
 
+func (m *KudoModel) User(
+	ctx context.Context,
+	creator_username string,
+) ([]Kudo, error) {
+	conn, err := m.DB.Take(ctx)
+	if err != nil {
+		return []Kudo{}, err
+	}
+	defer m.DB.Put(conn)
+
+	var kudos []Kudo
+	err = sqlitex.Execute(conn,
+		`SELECT id, item_id, emoji, body from kudos WHERE creator_username = ?`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				var k Kudo
+
+				id := stmt.ColumnText(0)
+				k.ID, err = ulid.Parse(id)
+				if err != nil {
+					return err
+				}
+
+				k.CreatorUsername = creator_username
+
+				itemID := stmt.ColumnText(1)
+				k.ItemID, err = ulid.Parse(itemID)
+				if err != nil {
+					return err
+				}
+
+				k.Emoji = stmt.ColumnInt(2)
+				k.Body = stmt.ColumnText(3)
+
+				kudos = append(kudos, k)
+				return nil
+			},
+			Args: []any{creator_username},
+		})
+	return kudos, err
+}
+
 func (m *KudoModel) Insert(
 	ctx context.Context,
 	item_id ulid.ULID,

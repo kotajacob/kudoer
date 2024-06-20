@@ -45,6 +45,7 @@ func New(
 	}
 }
 
+// Page represents basic information needed on every page.
 type Page struct {
 	CSPNonce      string
 	Flash         string

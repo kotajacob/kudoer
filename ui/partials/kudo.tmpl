@@ -1,0 +1,15 @@
+{{ define "kudo" }}
+	<div class="box stack2">
+		<div class="row1">
+			<h4>
+				<a href="/user/view/{{ .CreatorUsername }}"
+					>{{ .CreatorDisplayName }}</a
+				>
+				on <a href="/item/view/{{ .ItemID }}">{{ .ItemName }}</a>
+			</h4>
+			<h4><aside>{{ Date .CreatedAt }}</aside></h4>
+		</div>
+		<h2>{{ .Emoji }}</h2>
+		<p>{{ .Body }}</p>
+	</div>
+{{ end }}

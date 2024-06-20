@@ -19,6 +19,24 @@
 			/>
 		</div>
 		<div class="stack2">
+			<label for="displayname">Display Name:</label>
+			{{ with .Form.FieldErrors.displayname }}
+				<label class="error" for="displayname">{{ . }}</label>
+			{{ end }}
+			<input
+				{{ if .Form.FieldErrors.displayname }}
+					class="error"
+				{{ end }}
+				{{ if .Form.DisplayName }}
+					value="{{ .Form.DisplayName }}"
+				{{ end }}
+				type="text"
+				name="displayname"
+				id="displayname"
+				maxlength="30"
+			/>
+		</div>
+		<div class="stack2">
 			<label for="email">Email:</label>
 			{{ with .Form.FieldErrors.email }}
 				<label class="error" for="email">{{ . }}</label>

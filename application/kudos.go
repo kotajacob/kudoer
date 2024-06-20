@@ -3,10 +3,12 @@
 package application
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"git.sr.ht/~kota/kudoer/application/emoji"
 	"git.sr.ht/~kota/kudoer/models"
@@ -82,25 +84,56 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 	http.Redirect(w, r, fmt.Sprintf("/item/view/%v", itemID), http.StatusSeeOther)
 }
 
+type Kudo struct {
+	ID                 string
+	CreatedAt          time.Time
+	ItemID             string
+	ItemName           string
+	CreatorUsername    string
+	CreatorDisplayName string
+	Emoji              string
+	Body               string
+}
+
 // renderKudos converts the Kudo database model into the application type for
 // display.
-func (app *application) renderKudos(kudos []models.Kudo) []Kudo {
+func (app *application) renderKudos(ctx context.Context, kudos []models.Kudo) []Kudo {
 	var rendered []Kudo
 
 	for _, k := range kudos {
 		var r Kudo
 		r.ID = k.ID.String()
+		r.CreatedAt = ulid.Time(k.ID.Time())
 		r.ItemID = k.ItemID.String()
 		r.CreatorUsername = k.CreatorUsername
+		r.Body = k.Body
 
 		var err error
+		r.ItemName, err = app.items.Name(ctx, k.ItemID)
+		if err != nil {
+			app.errLog.Printf(
+				"failed getting item name for %v: %v\n",
+				r.ItemID,
+				err,
+			)
+			continue
+		}
+
+		r.CreatorDisplayName, err = app.users.DisplayName(ctx, k.CreatorUsername)
+		if err != nil {
+			app.errLog.Printf(
+				"failed getting display name for %v: %v\n",
+				k.CreatorUsername,
+				err,
+			)
+			continue
+		}
+
 		r.Emoji, err = emoji.Value(k.Emoji)
 		if err != nil {
 			app.errLog.Printf("kudo with invalid emoji %v: %v\n", k.Emoji, k.ID)
 			continue
 		}
-
-		r.Body = k.Body
 
 		rendered = append(rendered, r)
 	}

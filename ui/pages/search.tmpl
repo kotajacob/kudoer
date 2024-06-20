@@ -18,10 +18,7 @@
 	</form>
 	<div class="stack0">
 		{{ range .Items }}
-			<div class="box stack2">
-				<h3><a href="/item/view/{{ .ID }}">{{ .Name }}</a></h3>
-				<p>{{ .Description }}</p>
-			</div>
+			{{ template "item" . }}
 		{{ end }}
 	</div>
 {{ end }}
