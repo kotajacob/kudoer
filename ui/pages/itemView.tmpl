@@ -21,7 +21,14 @@
 				maxlength="1000"
 				required
 			></textarea>
-			<input type="submit" value="Give Kudos" />
+			<input
+				type="submit"
+				{{ if .Kudoed }}
+					value="Give Kudos"
+				{{ else }}
+					value="Update Kudos"
+				{{ end }}
+			/>
 		{{ end }}
 		{{ range .Kudos }}
 			<div class="box stack2">

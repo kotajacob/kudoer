@@ -3,6 +3,7 @@
 package application
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -48,18 +49,36 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 	}
 	body := r.PostForm.Get("body") // TODO: Max length 1000 characters.
 
-	// if len(form.FieldErrors) > 0 { // TODO: form response
-	// }
-
-	_, err = app.kudos.Insert(
+	k, err := app.kudos.ItemUser(
 		r.Context(),
+		itemID,
+		username,
+	)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			_, err = app.kudos.Insert(
+				r.Context(),
+				itemID,
+				username,
+				emoji,
+				body,
+			)
+			app.sessionManager.Put(r.Context(), "flash", "Kudos given")
+		} else {
+			app.serverError(w, err)
+			return
+		}
+	}
+
+	_, err = app.kudos.Update(
+		r.Context(),
+		k.ID,
 		itemID,
 		username,
 		emoji,
 		body,
 	)
-
-	app.sessionManager.Put(r.Context(), "flash", "Kudos given")
+	app.sessionManager.Put(r.Context(), "flash", "Kudos updated")
 	http.Redirect(w, r, fmt.Sprintf("/item/view/%v", itemID), http.StatusSeeOther)
 }
 

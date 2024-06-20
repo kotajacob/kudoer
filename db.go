@@ -144,7 +144,15 @@ func openDB(dsn string) (*sqlitex.Pool, error) {
 	}
 	err = sqlitex.Execute(
 		conn,
-		`CREATE UNIQUE INDEX IF NOT EXISTS kudos_item_idx ON kudos (item_id);`,
+		`CREATE INDEX IF NOT EXISTS kudos_item_idx ON kudos (item_id);`,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+	err = sqlitex.Execute(
+		conn,
+		`CREATE INDEX IF NOT EXISTS kudos_creator_usernamex ON kudos (creator_username);`,
 		nil,
 	)
 	if err != nil {

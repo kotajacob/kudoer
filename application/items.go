@@ -24,6 +24,10 @@ type itemViewPage struct {
 
 	Emojis []emoji.Emoji
 
+	// Has the user already given kudos for this item?
+	Kudoed bool
+
+	// All kudos given to this item.
 	Kudos []Kudo
 }
 
@@ -53,10 +57,17 @@ func (app *application) itemViewHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	kudos, err := app.kudos.Item(r.Context(), uuid)
+	kudos, err := app.kudos.ItemAll(r.Context(), uuid)
 	if err != nil {
 		app.serverError(w, err)
 		return
+	}
+
+	var kudoed bool
+	if username := app.sessionManager.GetString(r.Context(), "authenticatedUsername"); username != "" {
+		if _, err := app.kudos.ItemUser(r.Context(), uuid, username); errors.Is(err, models.ErrNoRecord) {
+			kudoed = true
+		}
 	}
 
 	app.render(w, http.StatusOK, "itemView.tmpl", itemViewPage{
@@ -66,6 +77,7 @@ func (app *application) itemViewHandler(w http.ResponseWriter, r *http.Request) 
 		Description: item.Description,
 		Image:       item.Image,
 		Emojis:      emoji.List(),
+		Kudoed:      kudoed,
 		Kudos:       app.renderKudos(kudos),
 	})
 }
