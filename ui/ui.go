@@ -11,7 +11,7 @@ import (
 
 const baseTMPL = "base.tmpl"
 
-//go:embed "base.tmpl" "pages"
+//go:embed "base.tmpl" "pages" "static"
 var EFS embed.FS
 
 func Templates() (map[string]*template.Template, error) {

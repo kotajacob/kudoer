@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"regexp"
 
+	"git.sr.ht/~kota/kudoer/ui"
 	"github.com/justinas/alice"
 )
 
@@ -16,6 +17,8 @@ var rxEmail = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9
 
 func (app *application) Routes() http.Handler {
 	mux := http.NewServeMux()
+
+	mux.Handle("GET /static/", http.FileServerFS(ui.EFS))
 
 	dynamic := alice.New(app.sessionManager.LoadAndSave)
 
