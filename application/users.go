@@ -147,6 +147,13 @@ func (app *application) userRegisterPostHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	err = app.sessionManager.RenewToken(r.Context())
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.sessionManager.Put(r.Context(), "authenticatedUsername", form.Username)
 	http.Redirect(w, r, fmt.Sprintf("/user/view/%v", form.Username), http.StatusSeeOther)
 }
 
