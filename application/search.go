@@ -7,11 +7,12 @@ import (
 	"strings"
 
 	"git.sr.ht/~kota/kudoer/models"
+	"github.com/blevesearch/bleve"
 )
 
 type searchPage struct {
 	Page
-	Items []models.SearchItem
+	Items []models.Item
 
 	Form searchForm
 }
@@ -48,15 +49,15 @@ func (app *application) searchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var items []models.SearchItem
+	var items []models.Item
 	switch params.Get("type") {
 	case "items":
-		i, err := app.search.Items(r.Context(), form.Query)
+		var err error
+		items, err = app.searchItems(form.Query, r)
 		if err != nil {
 			app.serverError(w, err)
 			return
 		}
-		items = i
 	}
 	app.render(w, http.StatusOK, "search.tmpl",
 		searchPage{
@@ -64,4 +65,22 @@ func (app *application) searchHandler(w http.ResponseWriter, r *http.Request) {
 			Items: items,
 			Form:  form,
 		})
+}
+
+func (app *application) searchItems(q string, r *http.Request) ([]models.Item, error) {
+	query := bleve.NewQueryStringQuery(q)
+	searchRequest := bleve.NewSearchRequest(query)
+	searchResult, err := app.itemSearch.Search(searchRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	// We take the list of IDs and their rankings and look up their names and
+	// descriptions in the database for rendering the search result.
+	var ids []models.SortedID
+	for i, hit := range searchResult.Hits {
+		ids = append(ids, models.SortedID{Index: i, ID: hit.ID})
+	}
+
+	return app.items.GetList(r.Context(), ids)
 }

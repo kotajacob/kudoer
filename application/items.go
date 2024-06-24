@@ -11,6 +11,7 @@ import (
 
 	"git.sr.ht/~kota/kudoer/application/emoji"
 	"git.sr.ht/~kota/kudoer/models"
+	"git.sr.ht/~kota/kudoer/search"
 	"github.com/oklog/ulid"
 )
 
@@ -139,7 +140,16 @@ func (app *application) itemCreatePostHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	app.sessionManager.Put(r.Context(), "flash", "Item created")
+	err = app.itemSearch.Index(id.String(), search.Item{
+		ID:          id.String(),
+		Name:        form.Name,
+		Description: form.Description,
+	})
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
 
+	app.sessionManager.Put(r.Context(), "flash", "Item created")
 	http.Redirect(w, r, fmt.Sprintf("/item/view/%v", id), http.StatusSeeOther)
 }
