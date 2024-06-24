@@ -3,7 +3,7 @@
 	<p>{{ .Description }}</p>
 	{{ if .Authenticated }}
 		<form class="stack0" action="/kudo/{{ .ID }}" method="post">
-			<div class="kudo">
+			<div class="emoji-options row2">
 				{{ range .Emojis }}
 					<input
 						name="emoji"

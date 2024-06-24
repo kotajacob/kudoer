@@ -17,8 +17,8 @@
 			<link
 				rel="icon"
 				sizes="any"
-				href="/static/favicon.png"
-				type="image/png"
+				href="/static/favicon.ico"
+				type="image/x-icon"
 			/>
 			<title>{{ .Title }}</title>
 			<style nonce="{{ .CSPNonce }}">
@@ -35,15 +35,9 @@
 					--s3: calc(var(--s2) * var(--ratio));
 					--s4: calc(var(--s3) * var(--ratio));
 					--color-fg: #000;
-					--color-fg-light: #666;
-					--color-bg: #fff;
+					--color-fg-light: #505050;
+					--color-bg: #f8f5f2;
 					--color-bg-light: #ccc;
-					--color-1: #e0ba91;
-					--color-2: #e39aac;
-					--color-3: #c45d9f;
-					--color-4: #6461c2;
-					--color-5: #2ba9b4;
-					--color-6: #93d4b5;
 					font-size: calc(0.333vw + 1em);
 				}
 				*,
@@ -158,71 +152,6 @@
 					background-color: var(--color-fg);
 					cursor: pointer;
 				}
-				.color1 {
-					color: var(--color-1);
-				}
-				.color2 {
-					color: var(--color-2);
-				}
-				.color3 {
-					color: var(--color-3);
-				}
-				.color4 {
-					color: var(--color-4);
-				}
-				.color5 {
-					color: var(--color-5);
-				}
-				.color6 {
-					color: var(--color-6);
-				}
-				.title {
-					font-family: "Nimbus Mono PS", "FreeMono", "Courier New",
-						monospace;
-				}
-				.title > a {
-					text-decoration: none;
-				}
-				.title > a > .color1 {
-					color: var(--color-bg);
-					background-color: var(--color-1);
-					padding-inline-start: var(--s-1);
-				}
-				.title > a > .color2 {
-					color: var(--color-bg);
-					background-color: var(--color-2);
-				}
-				.title > a > .color3 {
-					color: var(--color-bg);
-					background-color: var(--color-3);
-				}
-				.title > a > .color4 {
-					color: var(--color-bg);
-					background-color: var(--color-4);
-				}
-				.title > a > .color5 {
-					color: var(--color-bg);
-					background-color: var(--color-5);
-				}
-				.title > a > .color6 {
-					color: var(--color-bg);
-					background-color: var(--color-6);
-					padding-inline-end: var(--s-1);
-				}
-				.kudo {
-					display: flex;
-					flex-direction: row;
-					justify-content: space-evenly;
-					font-size: var(--s2);
-				}
-				.kudo > input {
-					appearance: none;
-					display: none;
-				}
-				.kudo input[type="radio"]:checked + label {
-					text-decoration: underline;
-					text-underline-position: under;
-				}
 				.username {
 					text-align: center;
 					color: var(--color-fg-light);
@@ -246,14 +175,14 @@
 				.stack2 > * {
 					margin-block: 0;
 				}
-				.stack0 > * + * {
-					margin-block-start: var(--s0);
+				.stack0 {
+					row-gap: var(--s0);
 				}
-				.stack1 > * + * {
-					margin-block-start: var(--s-1);
+				.stack1 {
+					row-gap: var(--s-1);
 				}
-				.stack2 > * + * {
-					margin-block-start: var(--s-2);
+				.stack2 {
+					row-gap: var(--s-2);
 				}
 				.row0,
 				.row1,
@@ -267,14 +196,44 @@
 				.row2 > * {
 					margin-block: 0;
 				}
-				.row0 > * + * {
-					margin-inline-start: var(--s0);
+				.row0 {
+					column-gap: var(--s0);
 				}
-				.row1 > * + * {
-					margin-inline-start: var(--s-1);
+				.row1 {
+					column-gap: var(--s-1);
 				}
-				.row2 > * + * {
-					margin-inline-start: var(--s-2);
+				.row2 {
+					column-gap: var(--s-2);
+				}
+				.emoji-options {
+					justify-content: space-evenly;
+					font-size: var(--s2);
+				}
+				.emoji-options > input {
+					appearance: none;
+					display: none;
+				}
+				.emoji-options > label {
+					cursor: pointer;
+				}
+				.emoji-options input[type="radio"]:checked + label {
+					text-decoration: underline;
+					text-underline-position: under;
+				}
+				.kudo > h2 {
+					justify-content: center;
+				}
+				.kudo > h2 > :first-child {
+					flex-grow: 1;
+					flex-basis: 0px;
+					text-align: end;
+					align-content: center;
+				}
+				.kudo > h2 > :last-child {
+					flex-grow: 1;
+					flex-basis: 0px;
+					text-align: start;
+					align-content: center;
 				}
 			</style>
 		</head>
@@ -300,9 +259,7 @@
 			</nav>
 			<h1 class="title">
 				<a href="/">
-					<span class="color1">K</span><span class="color2">u</span
-					><span class="color3">d</span><span class="color4">o</span
-					><span class="color5">e</span><span class="color6">r</span>
+					<img src="/static/title.svg" alt="Kudoer site title" />
 				</a>
 			</h1>
 			{{ with .Flash }}

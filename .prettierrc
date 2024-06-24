@@ -1,6 +1,6 @@
 {
-  "useTabs": true,
-  "tabWidth": 4,
-  "printWidth": 80,
-  "plugins": ["/usr/lib/node_modules/prettier-plugin-go-template/lib/index.js"]
+	"useTabs": true,
+	"tabWidth": 4,
+	"printWidth": 80,
+	"plugins": ["prettier-plugin-go-template"]
 }

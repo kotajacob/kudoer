@@ -1,8 +1,30 @@
-<svg width="16px" height="16px" xmlns="http://www.w3.org/2000/svg">
-	<rect x="2px" y="2px" width="2px" height="12px" fill="#e0ba91" />
-	<rect x="4px" y="2px" width="2px" height="12px" fill="#e39aac" />
-	<rect x="6px" y="2px" width="2px" height="12px" fill="#c45d9f" />
-	<rect x="8px" y="2px" width="2px" height="12px" fill="#6461c2" />
-	<rect x="10px" y="2px" width="2px" height="12px" fill="#2ba9b4" />
-	<rect x="12px" y="2px" width="2px" height="12px" fill="#93d4b5" />
+<svg width="16px" height="16px" viewbox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+<style>
+	path {
+		fill: #000;
+	}
+	@media (prefers-color-scheme: dark) {
+		path {
+			fill: #f8f5f2;
+		}
+	}
+</style>
+<path d="
+	M 2 15
+	l 6 -2
+	l 5 -7
+	l -3 -3
+	l -7 5
+	l -2 6
+	l 0 0.5
+	l 5 -5
+	a 1 1 0 1 1 0.5 0.5
+	l -5 5
+	z
+	M 13.75 5.25
+	l 1.25 -1
+	l -3.25 -3.25
+	l -1 1.25
+	z
+" />
 </svg>
