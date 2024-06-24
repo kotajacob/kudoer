@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"git.sr.ht/~kota/kudoer/application"
+	"git.sr.ht/~kota/kudoer/db"
 	"git.sr.ht/~kota/kudoer/litesession"
 	"git.sr.ht/~kota/kudoer/models"
 	"git.sr.ht/~kota/kudoer/ui"
@@ -26,7 +27,7 @@ func main() {
 	infoLog := log.New(os.Stdout, "INFO ", log.Ldate|log.Ltime)
 	errLog := log.New(os.Stdout, "ERROR ", log.Ldate|log.Ltime|log.Lshortfile)
 
-	db, err := openDB(*dsn)
+	db, err := db.Open(*dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
