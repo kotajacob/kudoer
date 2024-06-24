@@ -16,36 +16,11 @@ type User struct {
 	Username    string
 	DisplayName string
 	Email       string
+	Bio         string
 }
 
 type UserModel struct {
 	DB *sqlitex.Pool
-}
-
-// DisplayName returns a user's display name.
-func (m *UserModel) DisplayName(ctx context.Context, username string) (string, error) {
-	conn, err := m.DB.Take(ctx)
-	if err != nil {
-		return "", err
-	}
-	defer m.DB.Put(conn)
-
-	var found bool
-	var displayname string
-	err = sqlitex.Execute(conn, `SELECT displayname from users WHERE username = ?`,
-		&sqlitex.ExecOptions{
-			ResultFunc: func(stmt *sqlite.Stmt) error {
-				found = true
-				displayname = stmt.ColumnText(0)
-				return nil
-			},
-			Args: []any{username},
-		})
-
-	if !found {
-		return "", ErrNoRecord
-	}
-	return displayname, err
 }
 
 // Get returns information about a given user.
@@ -57,13 +32,14 @@ func (m *UserModel) Get(ctx context.Context, username string) (User, error) {
 	defer m.DB.Put(conn)
 
 	var u User
-	err = sqlitex.Execute(conn, `SELECT displayname, email from users WHERE username = ?`,
+	err = sqlitex.Execute(conn, `SELECT displayname, email, bio from users WHERE username = ?`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				u.Username = username
 
 				u.DisplayName = stmt.ColumnText(0)
 				u.Email = stmt.ColumnText(1)
+				u.Bio = stmt.ColumnText(2)
 				return nil
 			},
 			Args: []any{username},
@@ -113,6 +89,7 @@ func (m *UserModel) Update(
 	username string,
 	displayname string,
 	email string,
+	bio string,
 ) error {
 	conn, err := m.DB.Take(ctx)
 	if err != nil {
@@ -122,8 +99,8 @@ func (m *UserModel) Update(
 
 	err = sqlitex.Execute(
 		conn,
-		`UPDATE users SET displayname = ?, email = ? WHERE username = ?`,
-		&sqlitex.ExecOptions{Args: []any{displayname, email, username}},
+		`UPDATE users SET displayname = ?, email = ?, bio = ? WHERE username = ?`,
+		&sqlitex.ExecOptions{Args: []any{displayname, email, bio, username}},
 	)
 	return err
 }

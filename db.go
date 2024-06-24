@@ -72,6 +72,8 @@ func openDB(dsn string) (*sqlitex.Pool, error) {
 			expiry REAL NOT NULL
 		);`,
 			`CREATE INDEX IF NOT EXISTS sessions_expiry_idx ON sessions(expiry);`,
+
+			`ALTER TABLE users ADD bio TEXT NOT NULL DEFAULT ""`,
 		},
 	}
 

@@ -35,6 +35,22 @@
 			/>
 		</div>
 		<div class="stack2">
+			<label for="bio">Bio:</label>
+			{{ with .Form.FieldErrors.bio }}
+				<label class="error" for="bio">{{ . }}</label>
+			{{ end }}
+			<textarea
+				{{ if .Form.FieldErrors.bio }}class="error"{{ end }}
+				type="text"
+				name="bio"
+				id="bio"
+				rows="5"
+				maxlength="1000"
+			>
+{{ .Form.Bio }}</textarea
+			>
+		</div>
+		<div class="stack2">
 			<label for="password">Password:</label>
 			{{ with .Form.FieldErrors.password }}
 				<label class="error" for="password">{{ . }}</label>

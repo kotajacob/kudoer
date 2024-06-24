@@ -15,9 +15,7 @@ import (
 
 type userViewPage struct {
 	Page
-
-	Username    string
-	DisplayName string
+	models.User
 
 	// All kudos this user has given.
 	Kudos []models.Kudo
@@ -26,7 +24,7 @@ type userViewPage struct {
 // userViewHandler presents a user.
 func (app *application) userViewHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.PathValue("username")
-	displayname, err := app.users.DisplayName(r.Context(), username)
+	user, err := app.users.Get(r.Context(), username)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
 			http.NotFound(w, r)
@@ -43,10 +41,9 @@ func (app *application) userViewHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	app.render(w, http.StatusOK, "userView.tmpl", userViewPage{
-		Page:        app.newPage(r),
-		Username:    username,
-		DisplayName: displayname,
-		Kudos:       kudos,
+		Page:  app.newPage(r),
+		User:  user,
+		Kudos: kudos,
 	})
 }
 
@@ -271,6 +268,7 @@ func (app *application) userSettingsHandler(w http.ResponseWriter, r *http.Reque
 	form := userSettingsForm{
 		DisplayName: user.DisplayName,
 		Email:       user.Email,
+		Bio:         user.Bio,
 	}
 
 	app.render(w, http.StatusOK, "userSettings.tmpl", userSettingsPage{
@@ -283,6 +281,7 @@ func (app *application) userSettingsHandler(w http.ResponseWriter, r *http.Reque
 type userSettingsForm struct {
 	DisplayName string
 	Email       string
+	Bio         string
 
 	// NonFieldErrors stores errors which do not relate to a form field.
 	NonFieldErrors []string
@@ -291,7 +290,6 @@ type userSettingsForm struct {
 }
 
 func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.Request) {
-	r.Body = http.MaxBytesReader(w, r.Body, 4096)
 	err := r.ParseForm()
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
@@ -301,6 +299,7 @@ func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.R
 	form := userSettingsForm{
 		DisplayName: r.PostForm.Get("displayname"),
 		Email:       r.PostForm.Get("email"),
+		Bio:         r.PostForm.Get("bio"),
 		FieldErrors: map[string]string{},
 	}
 
@@ -309,6 +308,10 @@ func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.R
 			// https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address
 			form.FieldErrors["email"] = "Email appears to be invalid"
 		}
+	}
+
+	if utf8.RuneCountInString(form.Bio) > 1000 {
+		form.FieldErrors["bio"] = "Bio cannot be longer than 1000 characters"
 	}
 
 	password := r.PostForm.Get("password")
@@ -328,7 +331,13 @@ func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.R
 
 	// Update non-password fields.
 	username := app.sessionManager.GetString(r.Context(), "authenticatedUsername")
-	err = app.users.Update(r.Context(), username, form.DisplayName, form.Email)
+	err = app.users.Update(
+		r.Context(),
+		username,
+		form.DisplayName,
+		form.Email,
+		form.Bio,
+	)
 	if err != nil {
 		app.serverError(w, err)
 		return
