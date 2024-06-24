@@ -2,6 +2,7 @@
 	<h2>{{ .Name }}</h2>
 	<p>{{ .Description }}</p>
 	<form class="stack0" action="/kudo/{{ .ID }}" method="post">
+		<input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
 		{{ if .Authenticated }}
 			<div class="kudo">
 				{{ range .Emojis }}
@@ -30,8 +31,8 @@
 				{{ end }}
 			/>
 		{{ end }}
-		{{ range .Kudos }}
-			{{ template "kudo" . }}
-		{{ end }}
 	</form>
+	{{ range .Kudos }}
+		{{ template "kudo" . }}
+	{{ end }}
 {{ end }}

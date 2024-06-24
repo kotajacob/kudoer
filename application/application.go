@@ -9,6 +9,7 @@ import (
 
 	"git.sr.ht/~kota/kudoer/models"
 	"github.com/alexedwards/scs/v2"
+	"github.com/justinas/nosurf"
 )
 
 type application struct {
@@ -48,16 +49,19 @@ func New(
 // Page represents basic information needed on every page.
 type Page struct {
 	CSPNonce      string
+	CSRFToken     string
 	Flash         string
 	Authenticated string
 }
 
 func (app *application) newPage(r *http.Request) Page {
 	cspNonce := nonce(r.Context())
+	csrfToken := nosurf.Token(r)
 	flash := app.sessionManager.PopString(r.Context(), "flash")
 	authenticated := app.authenticated(r)
 	return Page{
 		CSPNonce:      cspNonce,
+		CSRFToken:     csrfToken,
 		Flash:         flash,
 		Authenticated: authenticated,
 	}

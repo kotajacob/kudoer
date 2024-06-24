@@ -1,6 +1,7 @@
 {{ define "main" }}
 	<h3>Register an account</h3>
 	<form class="stack0" action="register" method="post">
+		<input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
 		<div class="stack2">
 			<label for="username">Username:</label>
 			{{ with .Form.FieldErrors.username }}

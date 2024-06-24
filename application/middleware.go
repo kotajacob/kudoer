@@ -8,7 +8,22 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+
+	"github.com/justinas/nosurf"
 )
+
+// noSurf sets a random CSRF token as a cookie.
+// This is then checked in potentially vulnerable forms against a random embeded
+// field value to prevent cross-site request forgery attacks.
+func noSurf(next http.Handler) http.Handler {
+	csrfHandler := nosurf.New(next)
+	csrfHandler.SetBaseCookie(http.Cookie{
+		HttpOnly: true,
+		Path:     "/",
+		Secure:   true,
+	})
+	return csrfHandler
+}
 
 // cspNonce securely generates a 128bit base64 encoded number.
 func cspNonce() (string, error) {

@@ -1,6 +1,7 @@
 {{ define "main" }}
 	<h3>Create an item</h3>
 	<form class="stack0" action="create" method="post">
+		<input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
 		<div class="stack2">
 			<label for="name">Name:</label>
 			{{ with .Form.FieldErrors.name }}
@@ -14,7 +15,13 @@
 					required
 				/>
 			{{ else }}
-				<input type="text" name="name" id="name" maxlength="100" required />
+				<input
+					type="text"
+					name="name"
+					id="name"
+					maxlength="100"
+					required
+				/>
 			{{ end }}
 		</div>
 		<div class="stack2">

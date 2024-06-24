@@ -20,7 +20,7 @@ func (app *application) Routes() http.Handler {
 
 	mux.Handle("GET /static/", http.FileServerFS(ui.EFS))
 
-	dynamic := alice.New(app.sessionManager.LoadAndSave)
+	dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf)
 
 	mux.Handle("GET /{$}", dynamic.ThenFunc(app.homeHandler))
 	mux.Handle("GET /search", dynamic.ThenFunc(app.searchHandler))

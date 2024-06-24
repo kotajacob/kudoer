@@ -280,6 +280,11 @@
 				{{ if .Authenticated }}
 					<h3><a href="/item/create">Create</a></h3>
 					<form action="/user/logout" method="POST">
+						<input
+							type="hidden"
+							name="csrf_token"
+							value="{{ .CSRFToken }}"
+						/>
 						<button>Logout</button>
 					</form>
 				{{ else }}
