@@ -40,8 +40,10 @@ func (app *application) userViewHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	title := user.DisplayName + " - " + "Kudoer"
+	desc := "Viewing " + user.DisplayName + " on Kudoer"
 	app.render(w, http.StatusOK, "userView.tmpl", userViewPage{
-		Page:  app.newPage(r),
+		Page:  app.newPage(r, title, desc),
 		User:  user,
 		Kudos: kudos,
 	})
@@ -55,7 +57,11 @@ type userRegisterPage struct {
 // userRegisterHandler presents a web form to add a user.
 func (app *application) userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "userRegister.tmpl", userRegisterPage{
-		Page: app.newPage(r),
+		Page: app.newPage(
+			r,
+			"Register an account on Kudoer",
+			"Register a new account on Kudoer where you can give kudos to your favorite things!",
+		),
 		Form: userRegisterForm{},
 	})
 }
@@ -117,7 +123,11 @@ func (app *application) userRegisterPostHandler(w http.ResponseWriter, r *http.R
 
 	if len(form.FieldErrors) > 0 {
 		app.render(w, http.StatusUnprocessableEntity, "userRegister.tmpl", userRegisterPage{
-			Page: app.newPage(r),
+			Page: app.newPage(
+				r,
+				"Register an account on Kudoer",
+				"Register a new account on Kudoer where you can give kudos to your favorite things!",
+			),
 			Form: form,
 		})
 		return
@@ -163,7 +173,11 @@ type userLoginPage struct {
 
 func (app *application) userLoginHandler(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "login.tmpl", userLoginPage{
-		Page: app.newPage(r),
+		Page: app.newPage(
+			r,
+			"Login on Kudoer",
+			"Provide your login details to access Kudoer",
+		),
 		Form: userLoginForm{},
 	})
 }
@@ -208,7 +222,11 @@ func (app *application) userLoginPostHandler(w http.ResponseWriter, r *http.Requ
 
 	if len(form.FieldErrors) > 0 {
 		app.render(w, http.StatusUnprocessableEntity, "login.tmpl", userLoginPage{
-			Page: app.newPage(r),
+			Page: app.newPage(
+				r,
+				"Login on Kudoer",
+				"Provide your login details to access Kudoer",
+			),
 			Form: form,
 		})
 		return
@@ -222,7 +240,11 @@ func (app *application) userLoginPostHandler(w http.ResponseWriter, r *http.Requ
 				"Email or password is incorrect",
 			)
 			app.render(w, http.StatusUnprocessableEntity, "login.tmpl", userLoginPage{
-				Page: app.newPage(r),
+				Page: app.newPage(
+					r,
+					"Login on Kudoer",
+					"Provide your login details to access Kudoer",
+				),
 				Form: form,
 			})
 		} else {
@@ -274,7 +296,11 @@ func (app *application) userSettingsHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	app.render(w, http.StatusOK, "userSettings.tmpl", userSettingsPage{
-		Page:     app.newPage(r),
+		Page: app.newPage(
+			r,
+			"Editing your profile",
+			"Change your profile settings",
+		),
 		Username: user.Username,
 		Form:     form,
 	})
@@ -329,7 +355,11 @@ func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.R
 
 	if len(form.FieldErrors) > 0 {
 		app.render(w, http.StatusUnprocessableEntity, "userSettings.tmpl", userSettingsPage{
-			Page: app.newPage(r),
+			Page: app.newPage(
+				r,
+				"Editing your profile",
+				"Change your profile settings",
+			),
 			Form: form,
 		})
 		return

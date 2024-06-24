@@ -11,6 +11,6 @@ type homePage struct {
 // homeHandler presents the homeHandler page.
 func (app *application) homeHandler(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "home.tmpl", homePage{
-		Page: app.newPage(r),
+		Page: app.newPage(r, "Kudoer", "Give kudos to your favorite things!"),
 	})
 }

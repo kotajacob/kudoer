@@ -58,8 +58,9 @@ func (app *application) itemViewHandler(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
+	title := item.Name + " - " + "Kudoer"
 	app.render(w, http.StatusOK, "itemView.tmpl", itemViewPage{
-		Page:   app.newPage(r),
+		Page:   app.newPage(r, title, item.Description),
 		Item:   item,
 		Emojis: emoji.List(),
 		Kudoed: kudoed,
@@ -75,7 +76,7 @@ type itemCreatePage struct {
 // itemCreateHandler presents a web form to add an item.
 func (app *application) itemCreateHandler(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "itemCreate.tmpl", itemCreatePage{
-		Page: app.newPage(r),
+		Page: app.newPage(r, "Create an item", "Create a new item on Kudoer"),
 		Form: itemCreateForm{},
 	})
 }
@@ -119,7 +120,7 @@ func (app *application) itemCreatePostHandler(w http.ResponseWriter, r *http.Req
 
 	if len(form.FieldErrors) > 0 {
 		app.render(w, http.StatusUnprocessableEntity, "itemCreate.tmpl", itemCreatePage{
-			Page: app.newPage(r),
+			Page: app.newPage(r, "Create an item", "Create a new item on Kudoer"),
 			Form: form,
 		})
 		return

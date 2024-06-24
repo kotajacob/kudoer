@@ -7,10 +7,7 @@
 				name="viewport"
 				content="width=device-width, initial-scale=1"
 			/>
-			<meta
-				name="description"
-				content="Give kudos to your favorite things!"
-			/>
+			<meta name="description" content="{{ .Description }}" />
 			<link
 				rel="icon"
 				sizes="any"
@@ -23,7 +20,7 @@
 				href="/static/favicon.png"
 				type="image/png"
 			/>
-			<title>Kudoer</title>
+			<title>{{ .Title }}</title>
 			<style nonce="{{ .CSPNonce }}">
 				:root {
 					--ratio: 1.5;
