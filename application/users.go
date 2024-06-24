@@ -97,6 +97,8 @@ func (app *application) userRegisterPostHandler(w http.ResponseWriter, r *http.R
 
 	if strings.TrimSpace(form.DisplayName) == "" {
 		form.DisplayName = form.Username
+	} else if utf8.RuneCountInString(form.DisplayName) > 30 {
+		form.FieldErrors["displayname"] = "Display Name cannot be longer than 30 characters"
 	}
 
 	if form.Email != "" {
@@ -301,6 +303,10 @@ func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.R
 		Email:       r.PostForm.Get("email"),
 		Bio:         r.PostForm.Get("bio"),
 		FieldErrors: map[string]string{},
+	}
+
+	if utf8.RuneCountInString(form.DisplayName) > 30 {
+		form.FieldErrors["displayname"] = "Display Name cannot be longer than 30 characters"
 	}
 
 	if form.Email != "" {
