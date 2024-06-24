@@ -79,7 +79,7 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	log.Println("listening on", *addr)
+	infoLog.Println("listening on", *addr)
 	err = srv.ListenAndServe()
 	errLog.Fatalln(err)
 }
