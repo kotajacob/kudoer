@@ -24,6 +24,7 @@ type ItemModel struct {
 	DB *sqlitex.Pool
 }
 
+// Get returns information about a given item.
 func (m *ItemModel) Get(ctx context.Context, uuid ulid.ULID) (Item, error) {
 	conn, err := m.DB.Take(ctx)
 	if err != nil {
@@ -53,32 +54,7 @@ func (m *ItemModel) Get(ctx context.Context, uuid ulid.ULID) (Item, error) {
 	return i, err
 }
 
-func (m *ItemModel) Name(ctx context.Context, uuid ulid.ULID) (string, error) {
-	conn, err := m.DB.Take(ctx)
-	if err != nil {
-		return "", err
-	}
-	defer m.DB.Put(conn)
-
-	var name string
-	var found bool
-	err = sqlitex.Execute(conn,
-		`SELECT name from items WHERE id = ?`,
-		&sqlitex.ExecOptions{
-			ResultFunc: func(stmt *sqlite.Stmt) error {
-				found = true
-				name = stmt.ColumnText(0)
-				return nil
-			},
-			Args: []any{uuid},
-		})
-
-	if !found {
-		return "", ErrNoRecord
-	}
-	return name, err
-}
-
+// Insert adds a new item to the database.
 func (m *ItemModel) Insert(
 	ctx context.Context,
 	creator_username string,

@@ -23,6 +23,7 @@ type UserModel struct {
 	DB *sqlitex.Pool
 }
 
+// Get returns information about a given user.
 func (m *UserModel) Get(ctx context.Context, username string) (User, error) {
 	conn, err := m.DB.Take(ctx)
 	if err != nil {
@@ -48,34 +49,7 @@ func (m *UserModel) Get(ctx context.Context, username string) (User, error) {
 	return u, err
 }
 
-func (m *UserModel) DisplayName(
-	ctx context.Context,
-	username string,
-) (string, error) {
-	conn, err := m.DB.Take(ctx)
-	if err != nil {
-		return "", err
-	}
-	defer m.DB.Put(conn)
-
-	var displayName string
-	var found bool
-	err = sqlitex.Execute(conn, `SELECT displayname from users WHERE username = ?`,
-		&sqlitex.ExecOptions{
-			ResultFunc: func(stmt *sqlite.Stmt) error {
-				found = true
-				displayName = stmt.ColumnText(0)
-				return nil
-			},
-			Args: []any{username},
-		})
-
-	if !found {
-		return displayName, ErrNoRecord
-	}
-	return displayName, err
-}
-
+// Insert adds a new user to the database.
 func (m *UserModel) Insert(
 	ctx context.Context,
 	username string,
@@ -106,6 +80,11 @@ func (m *UserModel) Insert(
 	return err
 }
 
+// Authenticate checks if a given username and password are correct for the
+// user.
+// Success is indicated with a nil error.
+// Failure is indicated with ErrInvalidCredentials. All other errors are server
+// errors.
 func (m *UserModel) Authenticate(
 	ctx context.Context,
 	username string,

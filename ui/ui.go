@@ -7,7 +7,9 @@ import (
 	"html/template"
 	"io/fs"
 	"path/filepath"
-	"time"
+
+	"git.sr.ht/~kota/kudoer/application/emoji"
+	"github.com/oklog/ulid"
 )
 
 const baseTMPL = "base.tmpl"
@@ -36,7 +38,8 @@ func Templates() (map[string]*template.Template, error) {
 
 		ts, err := template.New(baseTMPL).
 			Funcs(template.FuncMap{
-				"Date": Date,
+				"Date":  Date,
+				"Emoji": Emoji,
 			}).
 			ParseFS(EFS, files...)
 		if err != nil {
@@ -48,6 +51,11 @@ func Templates() (map[string]*template.Template, error) {
 	return cache, nil
 }
 
-func Date(t time.Time) string {
-	return t.Format("January 2, 2006")
+func Date(id ulid.ULID) string {
+	return ulid.Time(id.Time()).Format("January 2, 2006")
+}
+
+func Emoji(key int) string {
+	e, _ := emoji.Value(key)
+	return e
 }

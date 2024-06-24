@@ -13,17 +13,20 @@ import (
 )
 
 type Kudo struct {
-	ID              ulid.ULID
-	ItemID          ulid.ULID
-	CreatorUsername string
-	Emoji           int
-	Body            string
+	ID                 ulid.ULID
+	ItemID             ulid.ULID
+	ItemName           string
+	CreatorUsername    string
+	CreatorDisplayName string
+	Emoji              int
+	Body               string
 }
 
 type KudoModel struct {
 	DB *sqlitex.Pool
 }
 
+// ItemAll returns all kudos for a given item.
 func (m *KudoModel) ItemAll(ctx context.Context, itemID ulid.ULID) ([]Kudo, error) {
 	conn, err := m.DB.Take(ctx)
 	if err != nil {
@@ -32,31 +35,37 @@ func (m *KudoModel) ItemAll(ctx context.Context, itemID ulid.ULID) ([]Kudo, erro
 	defer m.DB.Put(conn)
 
 	var kudos []Kudo
-	err = sqlitex.Execute(conn, `SELECT id, creator_username, emoji, body from kudos WHERE item_id = ?`, &sqlitex.ExecOptions{
-		ResultFunc: func(stmt *sqlite.Stmt) error {
-			var k Kudo
+	err = sqlitex.Execute(conn,
+		`SELECT kudos.id, items.name, kudos.creator_username, users.displayname, kudos.emoji, kudos.body FROM kudos JOIN users ON kudos.creator_username = users.username JOIN items on kudos.item_id = items.id WHERE kudos.item_id = ?`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				var k Kudo
 
-			id := stmt.ColumnText(0)
-			k.ID, err = ulid.Parse(id)
-			if err != nil {
-				return err
-			}
+				id := stmt.ColumnText(0)
+				k.ID, err = ulid.Parse(id)
+				if err != nil {
+					return err
+				}
 
-			k.ItemID = itemID
+				k.ItemID = itemID
 
-			k.CreatorUsername = stmt.ColumnText(1)
-			k.Emoji = stmt.ColumnInt(2)
-			k.Body = stmt.ColumnText(3)
+				k.ItemName = stmt.ColumnText(1)
+				k.CreatorUsername = stmt.ColumnText(2)
+				k.CreatorDisplayName = stmt.ColumnText(3)
+				k.Emoji = stmt.ColumnInt(4)
+				k.Body = stmt.ColumnText(5)
 
-			kudos = append(kudos, k)
+				kudos = append(kudos, k)
 
-			return nil
-		},
-		Args: []any{itemID},
-	})
+				return nil
+			},
+			Args: []any{itemID},
+		})
 	return kudos, err
 }
 
+// ItemUser returns the kudo for a given combination of item and user if it
+// exists.
 func (m *KudoModel) ItemUser(
 	ctx context.Context,
 	itemID ulid.ULID,
@@ -70,7 +79,7 @@ func (m *KudoModel) ItemUser(
 
 	var k Kudo
 	err = sqlitex.Execute(conn,
-		`SELECT id, emoji, body from kudos WHERE item_id = ? AND creator_username = ?`,
+		`SELECT kudos.id, items.name, users.displayname, kudos.emoji, kudos.body FROM kudos JOIN users ON kudos.creator_username = users.username JOIN items on kudos.item_id = items.id WHERE kudos.item_id = ? AND kudos.creator_username = ?`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				id := stmt.ColumnText(0)
@@ -80,10 +89,11 @@ func (m *KudoModel) ItemUser(
 				}
 
 				k.ItemID = itemID
+				k.ItemName = stmt.ColumnText(1)
 				k.CreatorUsername = creator_username
-
-				k.Emoji = stmt.ColumnInt(1)
-				k.Body = stmt.ColumnText(2)
+				k.CreatorDisplayName = stmt.ColumnText(2)
+				k.Emoji = stmt.ColumnInt(3)
+				k.Body = stmt.ColumnText(4)
 
 				return nil
 			},
@@ -96,6 +106,7 @@ func (m *KudoModel) ItemUser(
 	return k, err
 }
 
+// User returns all kudos for a given user.
 func (m *KudoModel) User(
 	ctx context.Context,
 	creator_username string,
@@ -108,7 +119,7 @@ func (m *KudoModel) User(
 
 	var kudos []Kudo
 	err = sqlitex.Execute(conn,
-		`SELECT id, item_id, emoji, body from kudos WHERE creator_username = ?`,
+		`SELECT kudos.id, kudos.item_id, items.name, users.displayname, kudos.emoji, kudos.body FROM kudos JOIN users ON kudos.creator_username = users.username JOIN items on kudos.item_id = items.id WHERE kudos.creator_username = ?`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				var k Kudo
@@ -119,16 +130,17 @@ func (m *KudoModel) User(
 					return err
 				}
 
-				k.CreatorUsername = creator_username
-
 				itemID := stmt.ColumnText(1)
 				k.ItemID, err = ulid.Parse(itemID)
 				if err != nil {
 					return err
 				}
 
-				k.Emoji = stmt.ColumnInt(2)
-				k.Body = stmt.ColumnText(3)
+				k.ItemName = stmt.ColumnText(2)
+				k.CreatorUsername = creator_username
+				k.CreatorDisplayName = stmt.ColumnText(3)
+				k.Emoji = stmt.ColumnInt(4)
+				k.Body = stmt.ColumnText(5)
 
 				kudos = append(kudos, k)
 				return nil
@@ -138,6 +150,7 @@ func (m *KudoModel) User(
 	return kudos, err
 }
 
+// Insert a kudo.
 func (m *KudoModel) Insert(
 	ctx context.Context,
 	item_id ulid.ULID,
@@ -165,6 +178,7 @@ func (m *KudoModel) Insert(
 	return uuid, err
 }
 
+// Update a kudo.
 func (m *KudoModel) Update(
 	ctx context.Context,
 	id ulid.ULID,

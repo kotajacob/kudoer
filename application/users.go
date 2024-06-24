@@ -19,7 +19,8 @@ type userViewPage struct {
 	Username    string
 	DisplayName string
 
-	Kudos []Kudo
+	// All kudos this user has given.
+	Kudos []models.Kudo
 }
 
 // userViewHandler presents a user.
@@ -45,7 +46,7 @@ func (app *application) userViewHandler(w http.ResponseWriter, r *http.Request) 
 		Page:        app.newPage(r),
 		Username:    user.Username,
 		DisplayName: user.DisplayName,
-		Kudos:       app.renderKudos(r.Context(), kudos),
+		Kudos:       kudos,
 	})
 }
 

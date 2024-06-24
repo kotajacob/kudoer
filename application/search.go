@@ -11,15 +11,9 @@ import (
 
 type searchPage struct {
 	Page
-	Items []SearchItem
+	Items []models.SearchItem
 
 	Form searchForm
-}
-
-type SearchItem struct {
-	ID          string
-	Name        string
-	Description string
 }
 
 type searchForm struct {
@@ -49,7 +43,7 @@ func (app *application) searchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var items []SearchItem
+	var items []models.SearchItem
 	switch params.Get("type") {
 	case "items":
 		i, err := app.search.Items(r.Context(), form.Query)
@@ -57,7 +51,7 @@ func (app *application) searchHandler(w http.ResponseWriter, r *http.Request) {
 			app.serverError(w, err)
 			return
 		}
-		items = app.renderSearchItems(i)
+		items = i
 	}
 	app.render(w, http.StatusOK, "search.tmpl",
 		searchPage{
@@ -65,19 +59,4 @@ func (app *application) searchHandler(w http.ResponseWriter, r *http.Request) {
 			Items: items,
 			Form:  form,
 		})
-}
-
-// renderSearchItems converts the SearchItem database model into the application
-// type for display.
-func (app *application) renderSearchItems(items []models.SearchItem) []SearchItem {
-	var rendered []SearchItem
-
-	for _, i := range items {
-		var r SearchItem
-		r.ID = i.ID.String()
-		r.Name = i.Name
-		r.Description = i.Description
-		rendered = append(rendered, r)
-	}
-	return rendered
 }
