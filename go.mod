@@ -5,6 +5,7 @@ go 1.22.3
 require (
 	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/justinas/alice v1.2.0
+	github.com/justinas/nosurf v1.1.1
 	github.com/oklog/ulid v1.3.1
 	golang.org/x/crypto v0.24.0
 	zombiezen.com/go/sqlite v1.3.0
@@ -13,7 +14,6 @@ require (
 require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/justinas/nosurf v1.1.1 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect

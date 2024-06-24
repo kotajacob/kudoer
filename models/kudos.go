@@ -186,10 +186,10 @@ func (m *KudoModel) Update(
 	creator_username string,
 	emoji int,
 	body string,
-) (ulid.ULID, error) {
+) error {
 	conn, err := m.DB.Take(ctx)
 	if err != nil {
-		return id, err
+		return err
 	}
 	defer m.DB.Put(conn)
 
@@ -198,5 +198,5 @@ func (m *KudoModel) Update(
 		`UPDATE kudos SET item_id = ?, creator_username = ?, emoji = ?, body = ? WHERE id = ?`,
 		&sqlitex.ExecOptions{Args: []any{item_id, creator_username, emoji, body, id}},
 	)
-	return id, err
+	return err
 }

@@ -1,7 +1,8 @@
 {{ define "main" }}
 	<div class="stack2">
 		<h3>{{ .DisplayName }}</h3>
-		<span class="center">@{{ .Username }}</span>
+		<span class="username">@{{ .Username }}</span>
+		<a class="button" href="/user/settings">Edit Profile</a>
 	</div>
 	{{ range .Kudos }}
 		{{ template "kudo" . }}

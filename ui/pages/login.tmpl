@@ -1,7 +1,6 @@
 {{ define "main" }}
 	<h3>Login</h3>
 	<form class="stack0" action="login" method="post">
-		<input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
 		<div class="stack2">
 			{{ range .Form.NonFieldErrors }}
 				<div class="error">{{ . }}</div>
@@ -38,5 +37,6 @@
 			/>
 		</div>
 		<input type="submit" value="Login" />
+		<input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
 	</form>
 {{ end }}

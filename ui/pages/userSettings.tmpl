@@ -1,23 +1,6 @@
 {{ define "main" }}
-	<h3>Register an account</h3>
-	<form class="stack0" action="register" method="post">
-		<div class="stack2">
-			<label for="username">Username:</label>
-			{{ with .Form.FieldErrors.username }}
-				<label class="error" for="username">{{ . }}</label>
-			{{ end }}
-			<input
-				{{ if .Form.FieldErrors.username }}
-					class="error"
-				{{ end }}
-				{{ if .Form.Username }}value="{{ .Form.Username }}"{{ end }}
-				type="text"
-				name="username"
-				id="username"
-				maxlength="30"
-				required
-			/>
-		</div>
+	<span class="username">@{{ .Username }}</span>
+	<form class="stack0" action="settings" method="post">
 		<div class="stack2">
 			<label for="displayname">Display Name:</label>
 			{{ with .Form.FieldErrors.displayname }}
@@ -63,10 +46,11 @@
 				name="password"
 				id="password"
 				type="password"
-				required
+				placeholder="(unchanged)"
+				autocomplete="new-password"
 			/>
 		</div>
-		<input type="submit" value="Register" />
+		<input type="submit" value="Update Profile" />
 		<input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
 	</form>
 {{ end }}

@@ -101,11 +101,11 @@
 				nav * {
 					font-size: var(--s1);
 					font-weight: bold;
-					text-decoration: underline;
 					cursor: pointer;
 				}
 				nav button {
 					font-size: var(--s1);
+					text-decoration: underline;
 					width: auto;
 					display: inline-block;
 					border: none;
@@ -135,6 +135,7 @@
 					color: var(--color-5);
 				}
 				input,
+				.button,
 				button,
 				textarea {
 					width: 100%;
@@ -148,8 +149,11 @@
 					border-color: var(--color-3);
 				}
 				button,
+				.button,
 				input[type="submit"] {
 					font-weight: bold;
+					text-decoration: none;
+					text-align: center;
 					color: var(--color-bg);
 					background-color: var(--color-fg);
 					cursor: pointer;
@@ -219,7 +223,7 @@
 					text-decoration: underline;
 					text-underline-position: under;
 				}
-				.center {
+				.username {
 					text-align: center;
 					color: var(--color-fg-light);
 				}
@@ -278,14 +282,16 @@
 			<nav>
 				<h3><a href="/search">Search</a></h3>
 				{{ if .Authenticated }}
-					<h3><a href="/item/create">Create</a></h3>
+					<h3>
+						<a href="/user/view/{{ .Authenticated }}">Profile</a>
+					</h3>
 					<form action="/user/logout" method="POST">
+						<button>Logout</button>
 						<input
 							type="hidden"
 							name="csrf_token"
 							value="{{ .CSRFToken }}"
 						/>
-						<button>Logout</button>
 					</form>
 				{{ else }}
 					<h3><a href="/user/register">Register</a></h3>

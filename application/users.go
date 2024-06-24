@@ -26,7 +26,7 @@ type userViewPage struct {
 // userViewHandler presents a user.
 func (app *application) userViewHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.PathValue("username")
-	user, err := app.users.Get(r.Context(), username)
+	displayname, err := app.users.DisplayName(r.Context(), username)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
 			http.NotFound(w, r)
@@ -44,8 +44,8 @@ func (app *application) userViewHandler(w http.ResponseWriter, r *http.Request) 
 
 	app.render(w, http.StatusOK, "userView.tmpl", userViewPage{
 		Page:        app.newPage(r),
-		Username:    user.Username,
-		DisplayName: user.DisplayName,
+		Username:    username,
+		DisplayName: displayname,
 		Kudos:       kudos,
 	})
 }
@@ -85,8 +85,8 @@ func (app *application) userRegisterPostHandler(w http.ResponseWriter, r *http.R
 
 	form := userRegisterForm{
 		Username:    r.PostForm.Get("username"),
-		Email:       r.PostForm.Get("email"),
 		DisplayName: r.PostForm.Get("displayname"),
+		Email:       r.PostForm.Get("email"),
 		FieldErrors: map[string]string{},
 	}
 
@@ -116,6 +116,14 @@ func (app *application) userRegisterPostHandler(w http.ResponseWriter, r *http.R
 		form.FieldErrors["password"] = "Password cannot be larger than 72 bytes as a limitation of bcrypt"
 	}
 
+	if len(form.FieldErrors) > 0 {
+		app.render(w, http.StatusUnprocessableEntity, "userRegister.tmpl", userRegisterPage{
+			Page: app.newPage(r),
+			Form: form,
+		})
+		return
+	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword(
 		[]byte(password),
 		bcrypt.DefaultCost,
@@ -136,14 +144,6 @@ func (app *application) userRegisterPostHandler(w http.ResponseWriter, r *http.R
 		form.FieldErrors["username"] = "Username is already taken"
 	} else if err != nil {
 		app.serverError(w, err)
-		return
-	}
-
-	if len(form.FieldErrors) > 0 {
-		app.render(w, http.StatusUnprocessableEntity, "userRegister.tmpl", userRegisterPage{
-			Page: app.newPage(r),
-			Form: form,
-		})
 		return
 	}
 
@@ -245,4 +245,108 @@ func (app *application) userLogoutPostHandler(w http.ResponseWriter, r *http.Req
 	app.sessionManager.Remove(r.Context(), "authenticatedUsername")
 	app.sessionManager.Put(r.Context(), "flash", "You've been logged out successfully")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+type userSettingsPage struct {
+	Page
+	Username string
+	Form     userSettingsForm
+}
+
+func (app *application) userSettingsHandler(w http.ResponseWriter, r *http.Request) {
+	username := app.sessionManager.GetString(r.Context(), "authenticatedUsername")
+	user, err := app.users.Get(r.Context(), username)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	form := userSettingsForm{
+		DisplayName: user.DisplayName,
+		Email:       user.Email,
+	}
+
+	app.render(w, http.StatusOK, "userSettings.tmpl", userSettingsPage{
+		Page:     app.newPage(r),
+		Username: user.Username,
+		Form:     form,
+	})
+}
+
+type userSettingsForm struct {
+	DisplayName string
+	Email       string
+
+	// NonFieldErrors stores errors which do not relate to a form field.
+	NonFieldErrors []string
+	// FieldErrors stores errors relating to specific form fields.
+	FieldErrors map[string]string
+}
+
+func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 4096)
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form := userSettingsForm{
+		DisplayName: r.PostForm.Get("displayname"),
+		Email:       r.PostForm.Get("email"),
+		FieldErrors: map[string]string{},
+	}
+
+	if form.Email != "" {
+		if len(form.Email) > 254 || !rxEmail.MatchString(form.Email) {
+			// https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address
+			form.FieldErrors["email"] = "Email appears to be invalid"
+		}
+	}
+
+	password := r.PostForm.Get("password")
+	if password != "" {
+		if len(password) > 72 {
+			form.FieldErrors["password"] = "Password cannot be larger than 72 bytes as a limitation of bcrypt"
+		}
+	}
+
+	if len(form.FieldErrors) > 0 {
+		app.render(w, http.StatusUnprocessableEntity, "userSettings.tmpl", userSettingsPage{
+			Page: app.newPage(r),
+			Form: form,
+		})
+		return
+	}
+
+	// Update non-password fields.
+	username := app.sessionManager.GetString(r.Context(), "authenticatedUsername")
+	err = app.users.Update(r.Context(), username, form.DisplayName, form.Email)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	// Update user's password ONLY if changed.
+	if password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword(
+			[]byte(password),
+			bcrypt.DefaultCost,
+		)
+		if err != nil {
+			app.serverError(w, err)
+			return
+		}
+		err = app.users.ChangePassword(
+			r.Context(),
+			username,
+			string(hashedPassword),
+		)
+		if err != nil {
+			app.serverError(w, err)
+			return
+		}
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/user/view/%v", username), http.StatusSeeOther)
 }

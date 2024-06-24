@@ -1,9 +1,8 @@
 {{ define "main" }}
 	<h2>{{ .Name }}</h2>
 	<p>{{ .Description }}</p>
-	<form class="stack0" action="/kudo/{{ .ID }}" method="post">
-		<input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
-		{{ if .Authenticated }}
+	{{ if .Authenticated }}
+		<form class="stack0" action="/kudo/{{ .ID }}" method="post">
 			<div class="kudo">
 				{{ range .Emojis }}
 					<input
@@ -30,8 +29,9 @@
 					value="Update Kudos"
 				{{ end }}
 			/>
-		{{ end }}
-	</form>
+			<input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
+		</form>
+	{{ end }}
 	{{ range .Kudos }}
 		{{ template "kudo" . }}
 	{{ end }}

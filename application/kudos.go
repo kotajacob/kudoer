@@ -69,7 +69,7 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	_, err = app.kudos.Update(
+	err = app.kudos.Update(
 		r.Context(),
 		k.ID,
 		itemID,
