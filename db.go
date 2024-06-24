@@ -38,7 +38,7 @@ func openDB(dsn string) (*sqlitex.Pool, error) {
 		`CREATE TABLE IF NOT EXISTS users (
 			username TEXT NOT NULL PRIMARY KEY,
 			displayname TEXT NOT NULL,
-			email TEXT NOT NULL UNIQUE,
+			email TEXT NOT NULL,
 			password TEXT NOT NULL
 		) WITHOUT ROWID;`,
 		nil,

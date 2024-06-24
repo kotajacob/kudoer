@@ -102,9 +102,11 @@ func (app *application) userRegisterPostHandler(w http.ResponseWriter, r *http.R
 		form.DisplayName = form.Username
 	}
 
-	if len(form.Email) > 254 || !rxEmail.MatchString(form.Email) {
-		// https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address
-		form.FieldErrors["email"] = "Email appears to be invalid"
+	if form.Email != "" {
+		if len(form.Email) > 254 || !rxEmail.MatchString(form.Email) {
+			// https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address
+			form.FieldErrors["email"] = "Email appears to be invalid"
+		}
 	}
 
 	password := r.PostForm.Get("password")
@@ -132,8 +134,6 @@ func (app *application) userRegisterPostHandler(w http.ResponseWriter, r *http.R
 	)
 	if errors.Is(err, models.ErrUsernameExists) {
 		form.FieldErrors["username"] = "Username is already taken"
-	} else if errors.Is(err, models.ErrEmailExists) {
-		form.FieldErrors["email"] = "Email is already in our system"
 	} else if err != nil {
 		app.serverError(w, err)
 		return
