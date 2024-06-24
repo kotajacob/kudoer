@@ -48,12 +48,12 @@ func New(
 
 // Page represents basic information needed on every page.
 type Page struct {
-	CSPNonce      string
-	CSRFToken     string
-	Flash         string
-	Authenticated string
-	Title         string
-	Description   string
+	CSPNonce        string
+	CSRFToken       string
+	Flash           string
+	Authenticated   string
+	Title           string
+	PageDescription string
 }
 
 func (app *application) newPage(r *http.Request, title, description string) Page {
@@ -62,11 +62,11 @@ func (app *application) newPage(r *http.Request, title, description string) Page
 	flash := app.sessionManager.PopString(r.Context(), "flash")
 	authenticated := app.authenticated(r)
 	return Page{
-		CSPNonce:      cspNonce,
-		CSRFToken:     csrfToken,
-		Flash:         flash,
-		Authenticated: authenticated,
-		Title:         title,
-		Description:   description,
+		CSPNonce:        cspNonce,
+		CSRFToken:       csrfToken,
+		Flash:           flash,
+		Authenticated:   authenticated,
+		Title:           title,
+		PageDescription: description,
 	}
 }
