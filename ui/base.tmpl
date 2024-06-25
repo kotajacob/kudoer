@@ -251,11 +251,9 @@
 		</head>
 		<body class="stack0">
 			<nav>
-				<h3><a href="/search">Search</a></h3>
+				<a href="/search">Search</a>
 				{{ if .Authenticated }}
-					<h3>
-						<a href="/user/view/{{ .Authenticated }}">Profile</a>
-					</h3>
+					<a href="/user/view/{{ .Authenticated }}">Profile</a>
 					<form action="/user/logout" method="POST">
 						<button>Logout</button>
 						<input
@@ -265,8 +263,8 @@
 						/>
 					</form>
 				{{ else }}
-					<h3><a href="/user/register">Register</a></h3>
-					<h3><a href="/user/login">Login</a></h3>
+					<a href="/user/register">Register</a>
+					<a href="/user/login">Login</a>
 				{{ end }}
 			</nav>
 			<h1 class="title">
