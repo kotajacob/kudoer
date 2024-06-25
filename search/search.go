@@ -17,7 +17,7 @@ type Item struct {
 
 type User struct {
 	Username    string
-	Displayname string
+	DisplayName string
 }
 
 // Open loads or creates the items and users search indexes.
@@ -89,7 +89,7 @@ func IndexAllUsers(index bleve.Index, users *models.UserModel) (bleve.Index, err
 	for _, user := range all {
 		batch.Index(user.Username, User{
 			Username:    user.Username,
-			Displayname: user.DisplayName,
+			DisplayName: user.DisplayName,
 		})
 	}
 	err = index.Batch(batch)
