@@ -18,6 +18,9 @@ type userViewPage struct {
 	Page
 	models.User
 
+	// Is the logged in user following the user being viewed?
+	Following bool
+
 	// All kudos this user has given.
 	Kudos []models.Kudo
 }
@@ -35,18 +38,29 @@ func (app *application) userViewHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	following, err := app.users.IsFollowing(
+		r.Context(),
+		app.sessionManager.GetString(r.Context(), "authenticatedUsername"),
+		username,
+	)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
 	kudos, err := app.kudos.User(r.Context(), username)
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
 
-	title := user.DisplayName + " - " + "Kudoer"
+	title := user.DisplayName + " - Kudoer"
 	desc := "Viewing " + user.DisplayName + " on Kudoer"
 	app.render(w, http.StatusOK, "userView.tmpl", userViewPage{
-		Page:  app.newPage(r, title, desc),
-		User:  user,
-		Kudos: kudos,
+		Page:      app.newPage(r, title, desc),
+		User:      user,
+		Following: following,
+		Kudos:     kudos,
 	})
 }
 
@@ -406,4 +420,110 @@ func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.R
 	}
 
 	http.Redirect(w, r, fmt.Sprintf("/user/view/%v", username), http.StatusSeeOther)
+}
+
+type userFollowersPage struct {
+	Page
+	models.User
+	Users []models.User
+}
+
+func (app *application) userFollowersHandler(w http.ResponseWriter, r *http.Request) {
+	username := r.PathValue("username")
+	user, err := app.users.Info(r.Context(), username)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
+
+	users, err := app.users.Followers(r.Context(), username)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	title := user.DisplayName + " Followers - Kudoer"
+	desc := "Followers of " + user.DisplayName + " on Kudoer"
+	app.render(w, http.StatusOK, "userFollowers.tmpl", userFollowersPage{
+		Page:  app.newPage(r, title, desc),
+		User:  user,
+		Users: users,
+	})
+}
+
+type userFollowingPage struct {
+	Page
+	models.User
+	Users []models.User
+}
+
+func (app *application) userFollowingHandler(w http.ResponseWriter, r *http.Request) {
+	username := r.PathValue("username")
+	user, err := app.users.Info(r.Context(), username)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
+
+	users, err := app.users.Following(r.Context(), username)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	title := user.DisplayName + " Following - Kudoer"
+	desc := "Users " + user.DisplayName + " is following on Kudoer"
+	app.render(w, http.StatusOK, "userFollowing.tmpl", userFollowingPage{
+		Page:  app.newPage(r, title, desc),
+		User:  user,
+		Users: users,
+	})
+}
+
+func (app *application) userFollowPostHandler(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	username := app.sessionManager.GetString(r.Context(), "authenticatedUsername")
+	toFollow := r.PostForm.Get("follow")
+
+	err = app.users.Follow(r.Context(), username, toFollow)
+	if err != nil && !errors.Is(err, models.ErrAlreadyFollowing) {
+		app.serverError(w, err)
+		return
+	}
+
+	app.sessionManager.Put(r.Context(), "flash", "You're now following "+toFollow)
+	http.Redirect(w, r, fmt.Sprintf("/user/view/%v", toFollow), http.StatusSeeOther)
+}
+
+func (app *application) userUnfollowPostHandler(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	username := app.sessionManager.GetString(r.Context(), "authenticatedUsername")
+	toFollow := r.PostForm.Get("unfollow")
+
+	err = app.users.Unfollow(r.Context(), username, toFollow)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.sessionManager.Put(r.Context(), "flash", "You're no longer following "+toFollow)
+	http.Redirect(w, r, fmt.Sprintf("/user/view/%v", toFollow), http.StatusSeeOther)
 }

@@ -56,7 +56,7 @@ func (m *UserModel) Info(ctx context.Context, username string) (User, error) {
 	defer m.DB.Put(conn)
 
 	var u User
-	err = sqlitex.Execute(conn, `SELECT displayname, email, bio from users WHERE username = ?`,
+	err = sqlitex.Execute(conn, `SELECT displayname, email, bio FROM users WHERE username = ?`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				u.Username = username
@@ -168,9 +168,6 @@ func (m *UserModel) Register(
 		if strings.HasSuffix(err.Error(), "users.username") {
 			return ErrUsernameExists
 		}
-		if strings.HasSuffix(err.Error(), "users.email") {
-			return ErrEmailExists
-		}
 		return err
 	}
 	return err
@@ -197,6 +194,145 @@ func (m *UserModel) UpdateProfile(
 		&sqlitex.ExecOptions{Args: []any{displayname, email, bio, username}},
 	)
 	return err
+}
+
+// Follow makes a user follow another user.
+func (m *UserModel) Follow(
+	ctx context.Context,
+	username string,
+	following_username string,
+) error {
+	conn, err := m.DB.Take(ctx)
+	if err != nil {
+		return err
+	}
+	defer m.DB.Put(conn)
+
+	err = sqlitex.Execute(
+		conn,
+		`INSERT INTO users_following (username, following_username) VALUES (?, ?)`,
+		&sqlitex.ExecOptions{
+			Args: []any{username, following_username},
+		},
+	)
+	if sqlite.ErrCode(err) == sqlite.ResultConstraintPrimaryKey {
+		return ErrAlreadyFollowing
+	}
+	return err
+}
+
+// Unfollow stops a user following another user.
+func (m *UserModel) Unfollow(
+	ctx context.Context,
+	username string,
+	following_username string,
+) error {
+	conn, err := m.DB.Take(ctx)
+	if err != nil {
+		return err
+	}
+	defer m.DB.Put(conn)
+
+	err = sqlitex.Execute(
+		conn,
+		`DELETE FROM users_following WHERE username = ? AND following_username = ?`,
+		&sqlitex.ExecOptions{
+			Args: []any{username, following_username},
+		},
+	)
+	return err
+}
+
+// IsFollowing checks if a user is following another user.
+func (m *UserModel) IsFollowing(
+	ctx context.Context,
+	username string,
+	following_username string,
+) (bool, error) {
+	conn, err := m.DB.Take(ctx)
+	if err != nil {
+		return false, err
+	}
+	defer m.DB.Put(conn)
+
+	var found bool
+	err = sqlitex.Execute(
+		conn,
+		`SELECT following_username FROM users_following
+		WHERE username = ? AND following_username = ?`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				found = true
+				return nil
+			},
+			Args: []any{username, following_username},
+		},
+	)
+	return found, err
+}
+
+// Followers returns a list of all the user's following a given username.
+func (m *UserModel) Followers(
+	ctx context.Context,
+	username string,
+) ([]User, error) {
+	conn, err := m.DB.Take(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer m.DB.Put(conn)
+
+	var users []User
+	err = sqlitex.Execute(
+		conn,
+		`SELECT users_following.username, users.displayname FROM users_following
+		JOIN users ON users_following.username = users.username
+		WHERE users_following.following_username = ?`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				var user User
+				user.Username = stmt.ColumnText(0)
+				user.DisplayName = stmt.ColumnText(1)
+
+				users = append(users, user)
+				return nil
+			},
+			Args: []any{username},
+		},
+	)
+	return users, err
+}
+
+// Following returns a list of all the user's a given user is following.
+func (m *UserModel) Following(
+	ctx context.Context,
+	username string,
+) ([]User, error) {
+	conn, err := m.DB.Take(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer m.DB.Put(conn)
+
+	var users []User
+	err = sqlitex.Execute(
+		conn,
+		`SELECT users_following.following_username, users.displayname FROM users_following
+		JOIN users ON users_following.following_username = users.username
+		WHERE users_following.username = ?`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				var user User
+				user.Username = stmt.ColumnText(0)
+				user.DisplayName = stmt.ColumnText(1)
+
+				users = append(users, user)
+				return nil
+			},
+			Args: []any{username},
+		},
+	)
+	return users, err
 }
 
 // Change a user's password.

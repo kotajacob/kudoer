@@ -1,0 +1,11 @@
+{{ define "main" }}
+	<div class="stack1">
+		<h2>{{ .DisplayName }}</h2>
+		<span>Following</span>
+	</div>
+	<div class="stack1">
+		{{ range .Users }}
+			{{ template "user" . }}
+		{{ end }}
+	</div>
+{{ end }}

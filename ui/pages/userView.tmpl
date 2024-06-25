@@ -1,9 +1,49 @@
 {{ define "main" }}
-	<div class="stack2">
-		<h3>{{ .DisplayName }}</h3>
+	<div class="stack1">
+		<h2>{{ .DisplayName }}</h2>
 		<span class="username">@{{ .Username }}</span>
 		{{ if .Bio }}<p>{{ .Bio }}</p>{{ end }}
-		<a class="button" href="/user/settings">Edit Profile</a>
+		<div class="row1">
+			<a class="button" href="/user/followers/{{ .Username }}"
+				>Followers</a
+			>
+			<a class="button" href="/user/following/{{ .Username }}"
+				>Following</a
+			>
+		</div>
+		{{ if eq .Username .Authenticated }}
+			<a class="button" href="/user/settings">Edit Profile</a>
+		{{ else }}
+			{{ if .Following }}
+				<form action="/user/unfollow" method="POST">
+					<button>Unfollow</button>
+					<input
+						type="hidden"
+						name="unfollow"
+						value="{{ .Username }}"
+					/>
+					<input
+						type="hidden"
+						name="csrf_token"
+						value="{{ .CSRFToken }}"
+					/>
+				</form>
+			{{ else }}
+				<form action="/user/follow" method="POST">
+					<button>Follow</button>
+					<input
+						type="hidden"
+						name="follow"
+						value="{{ .Username }}"
+					/>
+					<input
+						type="hidden"
+						name="csrf_token"
+						value="{{ .CSRFToken }}"
+					/>
+				</form>
+			{{ end }}
+		{{ end }}
 	</div>
 	{{ range .Kudos }}
 		{{ template "kudo" . }}
