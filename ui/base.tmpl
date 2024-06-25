@@ -34,6 +34,7 @@
 					--s2: calc(var(--s1) * var(--ratio));
 					--s3: calc(var(--s2) * var(--ratio));
 					--s4: calc(var(--s3) * var(--ratio));
+					--s5: calc(var(--s4) * var(--ratio));
 					--color-fg: #000;
 					--color-fg-light: #505050;
 					--color-bg: #f8f5f2;
@@ -53,12 +54,15 @@
 					border: 0 solid;
 				}
 				body {
+					display: flex;
+					flex-direction: column;
+					row-gap: var(--s3);
 					color: var(--color-fg);
 					background-color: var(--color-bg);
 					box-sizing: content-box;
 					max-inline-size: 50ch;
 					margin-inline: auto;
-					padding: var(--s1);
+					padding: var(--s0);
 					font-family: system-ui, sans-serif;
 				}
 				a:active {
@@ -86,30 +90,6 @@
 				small {
 					font-size: var(--s-1);
 					color: var(--color-fg-light);
-				}
-				nav {
-					display: flex;
-					column-gap: var(--s0);
-					flex-direction: row;
-					justify-content: center;
-				}
-				nav * {
-					font-size: var(--s1);
-					font-weight: bold;
-					cursor: pointer;
-				}
-				nav button {
-					font-size: var(--s1);
-					text-decoration: underline;
-					width: auto;
-					display: inline-block;
-					border: none;
-					color: var(--color-fg);
-					background-color: var(--color-bg);
-				}
-				nav button:active {
-					color: var(--color-bg);
-					background-color: var(--color-fg);
 				}
 				label {
 					display: block;
@@ -209,6 +189,30 @@
 				.row2 {
 					column-gap: var(--s-2);
 				}
+				nav.row0 {
+					justify-content: center;
+				}
+				nav * {
+					font-size: var(--s0);
+					cursor: pointer;
+				}
+				nav button {
+					text-decoration: underline;
+					font-weight: normal;
+					width: auto;
+					display: inline-block;
+					border: none;
+					color: var(--color-fg);
+					background-color: var(--color-bg);
+				}
+				nav button:active {
+					color: var(--color-bg);
+					background-color: var(--color-fg);
+				}
+				h1 img {
+					height: var(--s5);
+					max-width: 95%;
+				}
 				.emoji {
 					font-size: var(--s2);
 				}
@@ -249,8 +253,8 @@
 				}
 			</style>
 		</head>
-		<body class="stack0">
-			<nav>
+		<body>
+			<nav class="row0">
 				<a href="/search">Search</a>
 				{{ if .Authenticated }}
 					<a href="/user/view/{{ .Authenticated }}">Profile</a>
