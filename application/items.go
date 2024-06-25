@@ -36,7 +36,7 @@ func (app *application) itemViewHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	item, err := app.items.Get(r.Context(), uuid)
+	item, err := app.items.Info(r.Context(), uuid)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
 			http.NotFound(w, r)
@@ -46,7 +46,7 @@ func (app *application) itemViewHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	kudos, err := app.kudos.ItemAll(r.Context(), uuid)
+	kudos, err := app.kudos.Item(r.Context(), uuid)
 	if err != nil {
 		app.serverError(w, err)
 		return

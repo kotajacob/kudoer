@@ -26,8 +26,9 @@ type KudoModel struct {
 	DB *sqlitex.Pool
 }
 
-// ItemAll returns all kudos for a given item.
-func (m *KudoModel) ItemAll(ctx context.Context, itemID ulid.ULID) ([]Kudo, error) {
+// Item returns all kudos for a given item.
+// TODO: Add pagination
+func (m *KudoModel) Item(ctx context.Context, itemID ulid.ULID) ([]Kudo, error) {
 	conn, err := m.DB.Take(ctx)
 	if err != nil {
 		return []Kudo{}, err
@@ -66,6 +67,7 @@ func (m *KudoModel) ItemAll(ctx context.Context, itemID ulid.ULID) ([]Kudo, erro
 
 // ItemUser returns the kudo for a given combination of item and user if it
 // exists.
+// TODO: Add pagination
 func (m *KudoModel) ItemUser(
 	ctx context.Context,
 	itemID ulid.ULID,
@@ -107,6 +109,7 @@ func (m *KudoModel) ItemUser(
 }
 
 // User returns all kudos for a given user.
+// TODO: Add pagination
 func (m *KudoModel) User(
 	ctx context.Context,
 	creator_username string,

@@ -92,7 +92,7 @@ func (app *application) searchItems(q string, r *http.Request) ([]models.Item, e
 		ids = append(ids, hit.ID)
 	}
 
-	return app.items.GetList(r.Context(), ids)
+	return app.items.ListInfo(r.Context(), ids)
 }
 
 func (app *application) searchUsers(q string, r *http.Request) ([]models.User, error) {
@@ -110,5 +110,5 @@ func (app *application) searchUsers(q string, r *http.Request) ([]models.User, e
 		usernames = append(usernames, hit.ID)
 	}
 
-	return app.users.GetList(r.Context(), usernames)
+	return app.users.ListInfo(r.Context(), usernames)
 }

@@ -23,7 +23,7 @@ type UserModel struct {
 	DB *sqlitex.Pool
 }
 
-// Index returns all users to build the initial search index.
+// Index returns all displaynames and usernames to build the initial search index.
 // TODO: Support pagination.
 func (m *UserModel) Index(ctx context.Context) ([]User, error) {
 	conn, err := m.DB.Take(ctx)
@@ -47,8 +47,8 @@ func (m *UserModel) Index(ctx context.Context) ([]User, error) {
 	return users, err
 }
 
-// Get returns information about a given user.
-func (m *UserModel) Get(ctx context.Context, username string) (User, error) {
+// Info returns information about a given user.
+func (m *UserModel) Info(ctx context.Context, username string) (User, error) {
 	conn, err := m.DB.Take(ctx)
 	if err != nil {
 		return User{}, err
@@ -77,10 +77,10 @@ func (m *UserModel) Get(ctx context.Context, username string) (User, error) {
 
 type SortedUsernames []string
 
-// GetList returns information for each user in a list of usernames.
+// ListInfo returns information for each user in a list of usernames.
 // The index of the given users is used to sort the result.
 // That way you can get your list back in the same order you gave it in.
-func (m *UserModel) GetList(
+func (m *UserModel) ListInfo(
 	ctx context.Context,
 	usernames SortedUsernames,
 ) ([]User, error) {
@@ -145,8 +145,8 @@ func (m *UserModel) GetList(
 	return users, err
 }
 
-// Insert adds a new user to the database.
-func (m *UserModel) Insert(
+// Register adds a new user to the database.
+func (m *UserModel) Register(
 	ctx context.Context,
 	username string,
 	displayname string,
@@ -178,7 +178,7 @@ func (m *UserModel) Insert(
 
 // Update a user's profile information in the database.
 // Not for changing the user's password. Use ChangePassword for that.
-func (m *UserModel) Update(
+func (m *UserModel) UpdateProfile(
 	ctx context.Context,
 	username string,
 	displayname string,

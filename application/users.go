@@ -25,7 +25,7 @@ type userViewPage struct {
 // userViewHandler presents a user.
 func (app *application) userViewHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.PathValue("username")
-	user, err := app.users.Get(r.Context(), username)
+	user, err := app.users.Info(r.Context(), username)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
 			http.NotFound(w, r)
@@ -143,7 +143,7 @@ func (app *application) userRegisterPostHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = app.users.Insert(
+	err = app.users.Register(
 		r.Context(),
 		form.Username,
 		form.DisplayName,
@@ -288,7 +288,7 @@ type userSettingsPage struct {
 
 func (app *application) userSettingsHandler(w http.ResponseWriter, r *http.Request) {
 	username := app.sessionManager.GetString(r.Context(), "authenticatedUsername")
-	user, err := app.users.Get(r.Context(), username)
+	user, err := app.users.Info(r.Context(), username)
 	if err != nil {
 		app.serverError(w, err)
 		return
@@ -372,7 +372,7 @@ func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.R
 
 	// Update non-password fields.
 	username := app.sessionManager.GetString(r.Context(), "authenticatedUsername")
-	err = app.users.Update(
+	err = app.users.UpdateProfile(
 		r.Context(),
 		username,
 		form.DisplayName,

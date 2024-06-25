@@ -54,8 +54,8 @@ func (m *ItemModel) Index(ctx context.Context) ([]Item, error) {
 	return items, err
 }
 
-// Get returns information about a given item.
-func (m *ItemModel) Get(ctx context.Context, uuid ulid.ULID) (Item, error) {
+// Info returns information about a given item.
+func (m *ItemModel) Info(ctx context.Context, uuid ulid.ULID) (Item, error) {
 	conn, err := m.DB.Take(ctx)
 	if err != nil {
 		return Item{}, err
@@ -86,10 +86,10 @@ func (m *ItemModel) Get(ctx context.Context, uuid ulid.ULID) (Item, error) {
 
 type SortedIDs []string
 
-// GetList returns information for each item in a list of IDs.
+// ListInfo returns information for each item in a list of IDs.
 // The index of the given items is used to sort the result.
 // That way you can get your list back in the same order you gave it in.
-func (m *ItemModel) GetList(
+func (m *ItemModel) ListInfo(
 	ctx context.Context,
 	ids SortedIDs,
 ) ([]Item, error) {
