@@ -4,7 +4,6 @@ package search
 
 import (
 	"context"
-	"fmt"
 
 	"git.sr.ht/~kota/kudoer/models"
 	"github.com/blevesearch/bleve"
@@ -32,6 +31,7 @@ func Open(
 	itemIndex, err = bleve.Open(itemIndexPath)
 	if err != nil {
 		itemMapping := bleve.NewIndexMapping()
+		itemMapping.DefaultAnalyzer = "en"
 		itemIndex, err = bleve.New(itemIndexPath, itemMapping)
 		if err != nil {
 			return nil, nil, err
@@ -46,6 +46,7 @@ func Open(
 	userIndex, err = bleve.Open(userIndexPath)
 	if err != nil {
 		userMapping := bleve.NewIndexMapping()
+		userMapping.DefaultAnalyzer = "en"
 		userIndex, err = bleve.New(userIndexPath, userMapping)
 		if err != nil {
 			return nil, nil, err
@@ -86,7 +87,6 @@ func IndexAllUsers(index bleve.Index, users *models.UserModel) (bleve.Index, err
 
 	batch := index.NewBatch()
 	for _, user := range all {
-		fmt.Println(user.Username) // DEBUG
 		batch.Index(user.Username, User{
 			Username:    user.Username,
 			Displayname: user.DisplayName,
