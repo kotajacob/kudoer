@@ -21,5 +21,8 @@
 		{{ range .Items }}
 			{{ template "item" . }}
 		{{ end }}
+		{{ range .Users }}
+			{{ template "user" . }}
+		{{ end }}
 	</div>
 {{ end }}

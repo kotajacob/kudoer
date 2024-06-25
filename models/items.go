@@ -26,6 +26,7 @@ type ItemModel struct {
 }
 
 // Index returns all items to build the initial search index.
+// TODO: Support pagination.
 func (m *ItemModel) Index(ctx context.Context) ([]Item, error) {
 	conn, err := m.DB.Take(ctx)
 	if err != nil {
@@ -89,12 +90,17 @@ type SortedID struct {
 }
 
 // GetList returns information for each item in a list of IDs.
-// The score of the given items is used to sort the result.
+// The index of the given items is used to sort the result.
 // That way you can get your list back in the same order you gave it in.
 func (m *ItemModel) GetList(
 	ctx context.Context,
 	ids []SortedID,
 ) ([]Item, error) {
+	// Early exit if given an empty list!
+	if len(ids) == 0 {
+		return []Item{}, nil
+	}
+
 	conn, err := m.DB.Take(ctx)
 	if err != nil {
 		return nil, err

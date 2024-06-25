@@ -24,6 +24,7 @@ func main() {
 	addr := flag.String("addr", ":2024", "HTTP Network Address")
 	dsn := flag.String("dsn", "kudoer.db", "SQLite data source name")
 	itemSearchPath := flag.String("itemsearch", "items.bleve", "Items search cache")
+	userSearchPath := flag.String("usersearch", "users.bleve", "Users search cache")
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO ", log.Ldate|log.Ltime)
@@ -40,8 +41,13 @@ func main() {
 		}
 	}()
 
-	infoLog.Println("loading item search index:", *itemSearchPath)
-	itemSearch, err := search.Open(*itemSearchPath, &models.ItemModel{DB: db})
+	infoLog.Println("loading search indexes")
+	itemSearch, userSearch, err := search.Open(
+		*itemSearchPath,
+		*userSearchPath,
+		&models.ItemModel{DB: db},
+		&models.UserModel{DB: db},
+	)
 	if err != nil {
 		errLog.Fatal(err)
 	}
@@ -78,6 +84,7 @@ func main() {
 		&models.ItemModel{DB: db},
 		&models.KudoModel{DB: db},
 		itemSearch,
+		userSearch,
 	)
 
 	srv := &http.Server{

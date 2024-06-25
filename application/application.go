@@ -24,6 +24,7 @@ type application struct {
 	kudos *models.KudoModel
 
 	itemSearch bleve.Index
+	userSearch bleve.Index
 }
 
 func New(
@@ -35,6 +36,7 @@ func New(
 	items *models.ItemModel,
 	kudos *models.KudoModel,
 	itemSearch bleve.Index,
+	userSearch bleve.Index,
 ) *application {
 	return &application{
 		infoLog:        infoLog,
@@ -45,6 +47,7 @@ func New(
 		items:          items,
 		kudos:          kudos,
 		itemSearch:     itemSearch,
+		userSearch:     userSearch,
 	}
 }
 

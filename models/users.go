@@ -23,6 +23,30 @@ type UserModel struct {
 	DB *sqlitex.Pool
 }
 
+// Index returns all users to build the initial search index.
+// TODO: Support pagination.
+func (m *UserModel) Index(ctx context.Context) ([]User, error) {
+	conn, err := m.DB.Take(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer m.DB.Put(conn)
+
+	var users []User
+	err = sqlitex.Execute(conn,
+		`SELECT username, displayname FROM users`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				var user User
+				user.Username = stmt.ColumnText(0)
+				user.DisplayName = stmt.ColumnText(1)
+				users = append(users, user)
+				return nil
+			},
+		})
+	return users, err
+}
+
 // Get returns information about a given user.
 func (m *UserModel) Get(ctx context.Context, username string) (User, error) {
 	conn, err := m.DB.Take(ctx)
@@ -49,6 +73,79 @@ func (m *UserModel) Get(ctx context.Context, username string) (User, error) {
 		return u, ErrNoRecord
 	}
 	return u, err
+}
+
+type SortedUsername struct {
+	Index    int
+	Username string
+}
+
+// GetList returns information for each user in a list of usernames.
+// The index of the given users is used to sort the result.
+// That way you can get your list back in the same order you gave it in.
+func (m *UserModel) GetList(
+	ctx context.Context,
+	usernames []SortedUsername,
+) ([]User, error) {
+	// Early exit if given an empty list!
+	if len(usernames) == 0 {
+		return []User{}, nil
+	}
+
+	conn, err := m.DB.Take(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer m.DB.Put(conn)
+
+	// Create a temporary table to store the sortedUsernames.
+	err = sqlitex.Execute(conn, `CREATE TEMP TABLE sortedUsernames (
+		idx INTEGER NOT NULL PRIMARY KEY,
+		username TEXT NOT NULL UNIQUE
+	);`, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Fill the temporary table.
+	var q strings.Builder
+	var args []any
+	q.WriteString(`INSERT INTO sortedUsernames (idx, username) VALUES `)
+	for i, username := range usernames {
+		if i != 0 {
+			q.WriteString(`,`)
+		}
+		q.WriteString(`(?, ?)`)
+		args = append(args, username.Index)
+		args = append(args, username.Username)
+	}
+	q.WriteString(`;`)
+	err = sqlitex.Execute(conn,
+		q.String(),
+		&sqlitex.ExecOptions{
+			Args: args,
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	// Join the temporary table and the users table using the temporary tables
+	// index to sort the output.
+	var users []User
+	err = sqlitex.Execute(conn,
+		`SELECT users.username, users.displayname
+		FROM temp.sortedUsernames JOIN users ON temp.sortedUsernames.username = users.username
+		ORDER BY temp.sortedUsernames.idx;`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				var u User
+				u.Username = stmt.ColumnText(0)
+				u.DisplayName = stmt.ColumnText(1)
+				users = append(users, u)
+				return nil
+			},
+		})
+	return users, err
 }
 
 // Insert adds a new user to the database.

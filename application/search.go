@@ -3,6 +3,7 @@
 package application
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -13,6 +14,7 @@ import (
 type searchPage struct {
 	Page
 	Items []models.Item
+	Users []models.User
 
 	Form searchForm
 }
@@ -50,10 +52,18 @@ func (app *application) searchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var items []models.Item
+	var users []models.User
 	switch params.Get("type") {
 	case "items":
 		var err error
 		items, err = app.searchItems(form.Query, r)
+		if err != nil {
+			app.serverError(w, err)
+			return
+		}
+	case "users":
+		var err error
+		users, err = app.searchUsers(form.Query, r)
 		if err != nil {
 			app.serverError(w, err)
 			return
@@ -63,6 +73,7 @@ func (app *application) searchHandler(w http.ResponseWriter, r *http.Request) {
 		searchPage{
 			Page:  app.newPage(r, title, "Search Kudoer for items to review!"),
 			Items: items,
+			Users: users,
 			Form:  form,
 		})
 }
@@ -83,4 +94,23 @@ func (app *application) searchItems(q string, r *http.Request) ([]models.Item, e
 	}
 
 	return app.items.GetList(r.Context(), ids)
+}
+
+func (app *application) searchUsers(q string, r *http.Request) ([]models.User, error) {
+	query := bleve.NewQueryStringQuery(q)
+	searchRequest := bleve.NewSearchRequest(query)
+	searchResult, err := app.userSearch.Search(searchRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	// We take the list of usernames and their rankings and look up their
+	// DisplayName.
+	var usernames []models.SortedUsername
+	for i, hit := range searchResult.Hits {
+		fmt.Println(hit.ID) // DEBUG
+		usernames = append(usernames, models.SortedUsername{Index: i, Username: hit.ID})
+	}
+
+	return app.users.GetList(r.Context(), usernames)
 }
