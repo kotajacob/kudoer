@@ -10,7 +10,9 @@
 						type="radio"
 						id="{{ .Key }}"
 						value="{{ .Key }}"
-					/><label for="{{ .Key }}">{{ .Value }}</label>
+					/><label class="emoji" for="{{ .Key }}">
+						{{ .Value }}
+					</label>
 				{{ end }}
 			</div>
 			<textarea
