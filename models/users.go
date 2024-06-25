@@ -96,7 +96,7 @@ func (m *UserModel) GetList(
 	defer m.DB.Put(conn)
 
 	// Create a temporary table to store the sortedUsernames.
-	err = sqlitex.Execute(conn, `CREATE TEMP TABLE sortedUsernames (
+	err = sqlitex.Execute(conn, `CREATE TEMP TABLE sorted_usernames (
 		idx INTEGER NOT NULL PRIMARY KEY,
 		username TEXT NOT NULL UNIQUE
 	);`, nil)
@@ -107,7 +107,7 @@ func (m *UserModel) GetList(
 	// Fill the temporary table.
 	var q strings.Builder
 	var args []any
-	q.WriteString(`INSERT INTO sortedUsernames (idx, username) VALUES `)
+	q.WriteString(`INSERT INTO sorted_usernames (idx, username) VALUES `)
 	for i, username := range usernames {
 		if i != 0 {
 			q.WriteString(`,`)
@@ -131,8 +131,8 @@ func (m *UserModel) GetList(
 	var users []User
 	err = sqlitex.Execute(conn,
 		`SELECT users.username, users.displayname
-		FROM temp.sortedUsernames JOIN users ON temp.sortedUsernames.username = users.username
-		ORDER BY temp.sortedUsernames.idx;`,
+		FROM temp.sorted_usernames JOIN users ON temp.sorted_usernames.username = users.username
+		ORDER BY temp.sorted_usernames.idx;`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				var u User

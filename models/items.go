@@ -105,7 +105,7 @@ func (m *ItemModel) GetList(
 	defer m.DB.Put(conn)
 
 	// Create a temporary table to store the sortedIDs.
-	err = sqlitex.Execute(conn, `CREATE TEMP TABLE sortedIDs (
+	err = sqlitex.Execute(conn, `CREATE TEMP TABLE sorted_ids (
 		idx INTEGER NOT NULL PRIMARY KEY,
 		id TEXT NOT NULL UNIQUE
 	);`, nil)
@@ -116,7 +116,7 @@ func (m *ItemModel) GetList(
 	// Fill the temporary table.
 	var q strings.Builder
 	var args []any
-	q.WriteString(`INSERT INTO sortedIDs (idx, id) VALUES `)
+	q.WriteString(`INSERT INTO sorted_ids (idx, id) VALUES `)
 	for i, id := range ids {
 		if i != 0 {
 			q.WriteString(`,`)
@@ -140,8 +140,8 @@ func (m *ItemModel) GetList(
 	var items []Item
 	err = sqlitex.Execute(conn,
 		`SELECT items.id, items.creator_username, items.name, items.description
-		FROM temp.sortedIDs JOIN items ON temp.sortedIDs.id = items.id
-		ORDER BY temp.sortedIDs.idx;`,
+		FROM temp.sorted_ids JOIN items ON temp.sorted_ids.id = items.id
+		ORDER BY temp.sorted_ids.idx;`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				var i Item
