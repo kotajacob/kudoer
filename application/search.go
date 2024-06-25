@@ -3,7 +3,6 @@
 package application
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -88,9 +87,9 @@ func (app *application) searchItems(q string, r *http.Request) ([]models.Item, e
 
 	// We take the list of IDs and their rankings and look up their names and
 	// descriptions in the database for rendering the search result.
-	var ids []models.SortedID
-	for i, hit := range searchResult.Hits {
-		ids = append(ids, models.SortedID{Index: i, ID: hit.ID})
+	var ids models.SortedIDs
+	for _, hit := range searchResult.Hits {
+		ids = append(ids, hit.ID)
 	}
 
 	return app.items.GetList(r.Context(), ids)
@@ -106,10 +105,9 @@ func (app *application) searchUsers(q string, r *http.Request) ([]models.User, e
 
 	// We take the list of usernames and their rankings and look up their
 	// DisplayName.
-	var usernames []models.SortedUsername
-	for i, hit := range searchResult.Hits {
-		fmt.Println(hit.ID) // DEBUG
-		usernames = append(usernames, models.SortedUsername{Index: i, Username: hit.ID})
+	var usernames models.SortedUsernames
+	for _, hit := range searchResult.Hits {
+		usernames = append(usernames, hit.ID)
 	}
 
 	return app.users.GetList(r.Context(), usernames)

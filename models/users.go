@@ -75,17 +75,14 @@ func (m *UserModel) Get(ctx context.Context, username string) (User, error) {
 	return u, err
 }
 
-type SortedUsername struct {
-	Index    int
-	Username string
-}
+type SortedUsernames []string
 
 // GetList returns information for each user in a list of usernames.
 // The index of the given users is used to sort the result.
 // That way you can get your list back in the same order you gave it in.
 func (m *UserModel) GetList(
 	ctx context.Context,
-	usernames []SortedUsername,
+	usernames SortedUsernames,
 ) ([]User, error) {
 	// Early exit if given an empty list!
 	if len(usernames) == 0 {
@@ -116,8 +113,8 @@ func (m *UserModel) GetList(
 			q.WriteString(`,`)
 		}
 		q.WriteString(`(?, ?)`)
-		args = append(args, username.Index)
-		args = append(args, username.Username)
+		args = append(args, i)
+		args = append(args, username)
 	}
 	q.WriteString(`;`)
 	err = sqlitex.Execute(conn,

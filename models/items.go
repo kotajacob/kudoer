@@ -84,17 +84,14 @@ func (m *ItemModel) Get(ctx context.Context, uuid ulid.ULID) (Item, error) {
 	return i, err
 }
 
-type SortedID struct {
-	Index int
-	ID    string
-}
+type SortedIDs []string
 
 // GetList returns information for each item in a list of IDs.
 // The index of the given items is used to sort the result.
 // That way you can get your list back in the same order you gave it in.
 func (m *ItemModel) GetList(
 	ctx context.Context,
-	ids []SortedID,
+	ids SortedIDs,
 ) ([]Item, error) {
 	// Early exit if given an empty list!
 	if len(ids) == 0 {
@@ -125,8 +122,8 @@ func (m *ItemModel) GetList(
 			q.WriteString(`,`)
 		}
 		q.WriteString(`(?, ?)`)
-		args = append(args, id.Index)
-		args = append(args, id.ID)
+		args = append(args, i)
+		args = append(args, id)
 	}
 	q.WriteString(`;`)
 	err = sqlitex.Execute(conn,
