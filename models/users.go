@@ -146,7 +146,7 @@ func (m *UserModel) ListInfo(
 		return nil, err
 	}
 
-	err = sqlitex.Execute(conn, `DROP TABLE tmp.sorted_usernames`, nil)
+	err = sqlitex.Execute(conn, `DROP TABLE IF EXISTS tmp.sorted_usernames`, nil)
 	return users, err
 }
 

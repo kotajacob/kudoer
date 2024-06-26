@@ -162,7 +162,7 @@ func (m *ItemModel) ListInfo(
 		return nil, err
 	}
 
-	err = sqlitex.Execute(conn, `DROP TABLE tmp.sorted_ids`, nil)
+	err = sqlitex.Execute(conn, `DROP TABLE IF EXISTS tmp.sorted_ids`, nil)
 	return items, err
 }
 

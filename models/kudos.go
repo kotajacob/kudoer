@@ -26,6 +26,101 @@ type KudoModel struct {
 	DB *sqlitex.Pool
 }
 
+// Following returns a list of all kudos from everyone a user is following.
+// TODO: Pagination
+func (m *KudoModel) Following(ctx context.Context, username string) ([]Kudo, error) {
+	conn, err := m.DB.Take(ctx)
+	if err != nil {
+		return []Kudo{}, err
+	}
+	defer m.DB.Put(conn)
+
+	var kudos []Kudo
+	err = sqlitex.Execute(conn,
+		`SELECT kudos.id, kudos.item_id, items.name, kudos.creator_username,
+		users.displayname, kudos.emoji, kudos.body FROM users_following
+		JOIN kudos ON users_following.following_username = kudos.creator_username
+		JOIN users ON users_following.following_username = users.username
+		JOIN items ON kudos.item_id = items.id
+		WHERE users_following.username = ?
+		ORDER BY kudos.id DESC`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				var k Kudo
+
+				id := stmt.ColumnText(0)
+				k.ID, err = ulid.Parse(id)
+				if err != nil {
+					return err
+				}
+
+				item_id := stmt.ColumnText(1)
+				k.ItemID, err = ulid.Parse(item_id)
+				if err != nil {
+					return err
+				}
+
+				k.ItemName = stmt.ColumnText(2)
+				k.CreatorUsername = stmt.ColumnText(3)
+				k.CreatorDisplayName = stmt.ColumnText(4)
+				k.Emoji = stmt.ColumnInt(5)
+				k.Body = stmt.ColumnText(6)
+
+				kudos = append(kudos, k)
+
+				return nil
+			},
+			Args: []any{username},
+		})
+	return kudos, err
+}
+
+// All returns a list of all kudos by recency.
+// TODO: Pagination
+func (m *KudoModel) All(ctx context.Context) ([]Kudo, error) {
+	conn, err := m.DB.Take(ctx)
+	if err != nil {
+		return []Kudo{}, err
+	}
+	defer m.DB.Put(conn)
+
+	var kudos []Kudo
+	err = sqlitex.Execute(conn,
+		`SELECT kudos.id, kudos.item_id, items.name, kudos.creator_username,
+		users.displayname, kudos.emoji, kudos.body FROM kudos
+		JOIN users ON kudos.creator_username = users.username
+		JOIN items on kudos.item_id = items.id
+		ORDER BY kudos.id DESC`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				var k Kudo
+
+				id := stmt.ColumnText(0)
+				k.ID, err = ulid.Parse(id)
+				if err != nil {
+					return err
+				}
+
+				item_id := stmt.ColumnText(1)
+				k.ItemID, err = ulid.Parse(item_id)
+				if err != nil {
+					return err
+				}
+
+				k.ItemName = stmt.ColumnText(2)
+				k.CreatorUsername = stmt.ColumnText(3)
+				k.CreatorDisplayName = stmt.ColumnText(4)
+				k.Emoji = stmt.ColumnInt(5)
+				k.Body = stmt.ColumnText(6)
+
+				kudos = append(kudos, k)
+
+				return nil
+			},
+		})
+	return kudos, err
+}
+
 // Item returns all kudos for a given item.
 // The list is from newest to oldest.
 // TODO: Add pagination

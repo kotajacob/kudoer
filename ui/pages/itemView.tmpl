@@ -34,7 +34,9 @@
 			<input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
 		</form>
 	{{ end }}
-	{{ range .Kudos }}
-		{{ template "kudo" . }}
-	{{ end }}
+	<div class="stack0">
+		{{ range .Kudos }}
+			{{ template "kudo" . }}
+		{{ end }}
+	</div>
 {{ end }}
