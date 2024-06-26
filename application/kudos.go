@@ -7,21 +7,16 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"unicode/utf8"
 
+	"git.sr.ht/~kota/kudoer/application/emoji"
 	"git.sr.ht/~kota/kudoer/models"
 	"github.com/oklog/ulid"
 )
 
-type kudoForm struct {
-	Emoji int
-	Body  string
-
-	// FieldErrors stores errors relating to specific form fields.
-	FieldErrors map[string]string
-}
-
 // kudoPostHandler creates a kudo.
 func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) {
+	username := app.sessionManager.GetString(r.Context(), "authenticatedUsername")
 	r.Body = http.MaxBytesReader(w, r.Body, 4096)
 	err := r.ParseForm()
 	if err != nil {
@@ -35,18 +30,25 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	username := app.sessionManager.GetString(r.Context(), "authenticatedUsername")
-	if username == "" {
-		// Shouldn't be possible due to authenticated middleware.
-		app.clientError(w, http.StatusForbidden)
-		return
+	var fieldError string
+	e, err := strconv.Atoi(r.PostForm.Get("emoji"))
+	if err != nil {
+		fieldError = "Invalid emoji payload"
+	}
+	if _, err := emoji.Value(e); err != nil {
+		fieldError = "Invalid emoji selected"
 	}
 
-	emoji, err := strconv.Atoi(r.PostForm.Get("emoji"))
-	if err != nil {
-		app.clientError(w, http.StatusUnprocessableEntity)
+	body := r.PostForm.Get("body")
+	if utf8.RuneCountInString(body) > 1000 {
+		fieldError = "Body of kudo cannot be longer than 1000 characters"
 	}
-	body := r.PostForm.Get("body") // TODO: Max length 1000 characters.
+
+	if fieldError != "" {
+		app.sessionManager.Put(r.Context(), "flash", fieldError)
+		http.Redirect(w, r, fmt.Sprintf("/item/view/%v", itemID), http.StatusSeeOther)
+		return
+	}
 
 	k, err := app.kudos.ItemUser(
 		r.Context(),
@@ -59,7 +61,7 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 				r.Context(),
 				itemID,
 				username,
-				emoji,
+				e,
 				body,
 			)
 			app.sessionManager.Put(r.Context(), "flash", "Kudos given")
@@ -74,7 +76,7 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 		k.ID,
 		itemID,
 		username,
-		emoji,
+		e,
 		body,
 	)
 	app.sessionManager.Put(r.Context(), "flash", "Kudos updated")
