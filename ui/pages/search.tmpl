@@ -17,12 +17,10 @@
 		</div>
 		<a class="button" href="/item/create">Create Item</a>
 	</form>
-	<div class="stack0">
-		{{ range .Items }}
-			{{ template "item" . }}
-		{{ end }}
-		{{ range .Users }}
-			{{ template "user" . }}
-		{{ end }}
-	</div>
+	{{ range .Items }}
+		{{ template "item" . }}
+	{{ end }}
+	{{ range .Users }}
+		{{ template "user" . }}
+	{{ end }}
 {{ end }}

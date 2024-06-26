@@ -1,7 +1,5 @@
 {{ define "main" }}
-	<div class="stack0">
-		{{ range .Kudos }}
-			{{ template "kudo" . }}
-		{{ end }}
-	</div>
+	{{ range .Kudos }}
+		{{ template "kudo" . }}
+	{{ end }}
 {{ end }}
