@@ -158,6 +158,11 @@ func (m *ItemModel) ListInfo(
 				return nil
 			},
 		})
+	if err != nil {
+		return nil, err
+	}
+
+	err = sqlitex.Execute(conn, `DROP TABLE tmp.sorted_ids`, nil)
 	return items, err
 }
 

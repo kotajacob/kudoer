@@ -142,6 +142,11 @@ func (m *UserModel) ListInfo(
 				return nil
 			},
 		})
+	if err != nil {
+		return nil, err
+	}
+
+	err = sqlitex.Execute(conn, `DROP TABLE tmp.sorted_usernames`, nil)
 	return users, err
 }
 
