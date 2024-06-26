@@ -45,7 +45,9 @@
 			{{ end }}
 		{{ end }}
 	</div>
-	{{ range .Kudos }}
-		{{ template "kudo" . }}
-	{{ end }}
+	<div class="stack1">
+		{{ range .Kudos }}
+			{{ template "kudo" . }}
+		{{ end }}
+	</div>
 {{ end }}
