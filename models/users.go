@@ -287,7 +287,7 @@ func (m *UserModel) Followers(
 		conn,
 		`SELECT users_following.username, users.displayname FROM users_following
 		JOIN users ON users_following.username = users.username
-		WHERE users_following.following_username = ?`,
+		WHERE users_following.following_username = ? ORDER BY users_following.username`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				var user User
@@ -319,7 +319,7 @@ func (m *UserModel) Following(
 		conn,
 		`SELECT users_following.following_username, users.displayname FROM users_following
 		JOIN users ON users_following.following_username = users.username
-		WHERE users_following.username = ?`,
+		WHERE users_following.username = ? ORDER BY users_following.following_username`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				var user User
