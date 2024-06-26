@@ -27,6 +27,7 @@ type KudoModel struct {
 }
 
 // Item returns all kudos for a given item.
+// The list is from newest to oldest.
 // TODO: Add pagination
 func (m *KudoModel) Item(ctx context.Context, itemID ulid.ULID) ([]Kudo, error) {
 	conn, err := m.DB.Take(ctx)
@@ -37,7 +38,7 @@ func (m *KudoModel) Item(ctx context.Context, itemID ulid.ULID) ([]Kudo, error) 
 
 	var kudos []Kudo
 	err = sqlitex.Execute(conn,
-		`SELECT kudos.id, items.name, kudos.creator_username, users.displayname, kudos.emoji, kudos.body FROM kudos JOIN users ON kudos.creator_username = users.username JOIN items on kudos.item_id = items.id WHERE kudos.item_id = ?`,
+		`SELECT kudos.id, items.name, kudos.creator_username, users.displayname, kudos.emoji, kudos.body FROM kudos JOIN users ON kudos.creator_username = users.username JOIN items on kudos.item_id = items.id WHERE kudos.item_id = ? ORDER BY kudos.id DESC`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				var k Kudo
@@ -109,6 +110,7 @@ func (m *KudoModel) ItemUser(
 }
 
 // User returns all kudos for a given user.
+// The list is from newest to oldest.
 // TODO: Add pagination
 func (m *KudoModel) User(
 	ctx context.Context,
@@ -122,7 +124,7 @@ func (m *KudoModel) User(
 
 	var kudos []Kudo
 	err = sqlitex.Execute(conn,
-		`SELECT kudos.id, kudos.item_id, items.name, users.displayname, kudos.emoji, kudos.body FROM kudos JOIN users ON kudos.creator_username = users.username JOIN items on kudos.item_id = items.id WHERE kudos.creator_username = ?`,
+		`SELECT kudos.id, kudos.item_id, items.name, users.displayname, kudos.emoji, kudos.body FROM kudos JOIN users ON kudos.creator_username = users.username JOIN items on kudos.item_id = items.id WHERE kudos.creator_username = ? ORDER BY kudos.id DESC`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				var k Kudo
