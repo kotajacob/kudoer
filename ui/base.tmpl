@@ -11,13 +11,13 @@
 			<link
 				rel="icon"
 				sizes="any"
-				href="/static/favicon.svg"
+				href="{{ index .StaticFiles.ToHash "/static/favicon.svg" }}"
 				type="image/svg+xml"
 			/>
 			<link
 				rel="icon"
 				sizes="any"
-				href="/static/favicon.ico"
+				href="{{ index .StaticFiles.ToHash "/static/favicon.ico" }}"
 				type="image/x-icon"
 			/>
 			<title>{{ .Title }}</title>
@@ -273,7 +273,10 @@
 			</nav>
 			<h1 class="title">
 				<a href="/">
-					<img src="/static/title.svg" alt="Kudoer site title" />
+					<img
+						src="{{ index .StaticFiles.ToHash "/static/title.svg" }}"
+						alt="Kudoer site title"
+					/>
 				</a>
 			</h1>
 			{{ with .Flash }}

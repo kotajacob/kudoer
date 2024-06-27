@@ -8,9 +8,32 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/justinas/nosurf"
 )
+
+// FromHash removes the hash from static files so they can be served from the
+// embeded files (which do not contain a hash in the name).
+//
+// Additionally, the cache-control header is set to an extremely high value so
+// as to keep these assets caches as long as the browser is willing.
+func (app *application) FromHash(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		p := app.staticFiles.FromHash[r.URL.Path]
+		rp := app.staticFiles.FromHash[r.URL.RawPath]
+
+		w.Header().Set("cache-control", "max-age=31557600, immutable")
+
+		r2 := new(http.Request)
+		*r2 = *r
+		r2.URL = new(url.URL)
+		*r2.URL = *r.URL
+		r2.URL.Path = p
+		r2.URL.RawPath = rp
+		next.ServeHTTP(w, r2)
+	})
+}
 
 // noSurf sets a random CSRF token as a cookie.
 // This is then checked in potentially vulnerable forms against a random embeded

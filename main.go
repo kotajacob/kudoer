@@ -52,6 +52,11 @@ func main() {
 		errLog.Fatal(err)
 	}
 
+	staticFiles, err := ui.Statics()
+	if err != nil {
+		errLog.Fatal(err)
+	}
+
 	templates, err := ui.Templates()
 	if err != nil {
 		errLog.Fatal(err)
@@ -78,6 +83,7 @@ func main() {
 	app := application.New(
 		infoLog,
 		errLog,
+		staticFiles,
 		templates,
 		sessionManager,
 		&models.UserModel{DB: db},

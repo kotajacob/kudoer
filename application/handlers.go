@@ -18,7 +18,7 @@ var rxEmail = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9
 func (app *application) Routes() http.Handler {
 	mux := http.NewServeMux()
 
-	mux.Handle("GET /static/", http.FileServerFS(ui.EFS))
+	mux.Handle("GET /static/", app.FromHash(http.FileServerFS(ui.EFS)))
 
 	dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf)
 

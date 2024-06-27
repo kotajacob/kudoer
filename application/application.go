@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"git.sr.ht/~kota/kudoer/models"
+	"git.sr.ht/~kota/kudoer/ui"
 	"github.com/alexedwards/scs/v2"
 	"github.com/blevesearch/bleve"
 	"github.com/justinas/nosurf"
@@ -16,6 +17,7 @@ import (
 type application struct {
 	infoLog        *log.Logger
 	errLog         *log.Logger
+	staticFiles    ui.StaticFiles
 	templates      map[string]*template.Template
 	sessionManager *scs.SessionManager
 
@@ -30,6 +32,7 @@ type application struct {
 func New(
 	infoLog *log.Logger,
 	errLog *log.Logger,
+	staticFiles ui.StaticFiles,
 	templates map[string]*template.Template,
 	sessionManager *scs.SessionManager,
 	users *models.UserModel,
@@ -41,6 +44,7 @@ func New(
 	return &application{
 		infoLog:        infoLog,
 		errLog:         errLog,
+		staticFiles:    staticFiles,
 		templates:      templates,
 		sessionManager: sessionManager,
 		users:          users,
@@ -53,6 +57,7 @@ func New(
 
 // Page represents basic information needed on every page.
 type Page struct {
+	StaticFiles     ui.StaticFiles
 	CSPNonce        string
 	CSRFToken       string
 	Flash           string
@@ -62,11 +67,13 @@ type Page struct {
 }
 
 func (app *application) newPage(r *http.Request, title, description string) Page {
+	staticFiles := app.staticFiles
 	cspNonce := nonce(r.Context())
 	csrfToken := nosurf.Token(r)
 	flash := app.sessionManager.PopString(r.Context(), "flash")
 	authenticated := app.authenticated(r)
 	return Page{
+		StaticFiles:     staticFiles,
 		CSPNonce:        cspNonce,
 		CSRFToken:       csrfToken,
 		Flash:           flash,
