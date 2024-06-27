@@ -5,6 +5,7 @@ package application
 import (
 	"bytes"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"regexp"
 
@@ -19,6 +20,12 @@ func (app *application) Routes() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.Handle("GET /static/", app.FromHash(http.FileServerFS(ui.EFS)))
+
+	subFS, err := fs.Sub(ui.EFS, "static")
+	if err != nil {
+		app.errLog.Fatal(err) // Should be impossible with embedded FS.
+	}
+	mux.Handle("GET /robots.txt", http.FileServerFS(subFS))
 
 	dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf)
 
