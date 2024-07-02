@@ -26,8 +26,7 @@ type ItemModel struct {
 }
 
 // Index returns all items to build the initial search index.
-// TODO: Support pagination.
-func (m *ItemModel) Index(ctx context.Context) ([]Item, error) {
+func (m *ItemModel) Index(ctx context.Context, limit, offset int) ([]Item, error) {
 	conn, err := m.DB.Take(ctx)
 	if err != nil {
 		return nil, err
@@ -36,7 +35,7 @@ func (m *ItemModel) Index(ctx context.Context) ([]Item, error) {
 
 	var items []Item
 	err = sqlitex.Execute(conn,
-		`SELECT id, name, description FROM items LIMIT 1000`,
+		`SELECT id, name, description FROM items LIMIT ? OFFSET ?`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				var i Item
@@ -50,6 +49,7 @@ func (m *ItemModel) Index(ctx context.Context) ([]Item, error) {
 				items = append(items, i)
 				return nil
 			},
+			Args: []any{limit, offset},
 		})
 	return items, err
 }

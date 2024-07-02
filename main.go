@@ -43,6 +43,7 @@ func main() {
 
 	infoLog.Println("loading search indexes")
 	itemSearch, userSearch, err := search.Open(
+		infoLog,
 		*itemSearchPath,
 		*userSearchPath,
 		&models.ItemModel{DB: db},

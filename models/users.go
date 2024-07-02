@@ -24,8 +24,7 @@ type UserModel struct {
 }
 
 // Index returns all displaynames and usernames to build the initial search index.
-// TODO: Support pagination.
-func (m *UserModel) Index(ctx context.Context) ([]User, error) {
+func (m *UserModel) Index(ctx context.Context, limit, offset int) ([]User, error) {
 	conn, err := m.DB.Take(ctx)
 	if err != nil {
 		return nil, err
@@ -34,7 +33,7 @@ func (m *UserModel) Index(ctx context.Context) ([]User, error) {
 
 	var users []User
 	err = sqlitex.Execute(conn,
-		`SELECT username, displayname FROM users`,
+		`SELECT username, displayname FROM users LIMIT ? OFFSET ?`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				var user User
@@ -43,6 +42,7 @@ func (m *UserModel) Index(ctx context.Context) ([]User, error) {
 				users = append(users, user)
 				return nil
 			},
+			Args: []any{limit, offset},
 		})
 	return users, err
 }
