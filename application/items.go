@@ -85,7 +85,6 @@ func (app *application) itemCreateHandler(w http.ResponseWriter, r *http.Request
 type itemCreateForm struct {
 	Name        string
 	Description string
-	Image       string
 
 	// FieldErrors stores errors relating to specific form fields.
 	FieldErrors map[string]string
@@ -103,7 +102,6 @@ func (app *application) itemCreatePostHandler(w http.ResponseWriter, r *http.Req
 	form := itemCreateForm{
 		Name:        r.PostForm.Get("name"),
 		Description: r.PostForm.Get("description"),
-		Image:       r.PostForm.Get("image"),
 		FieldErrors: map[string]string{},
 	}
 
@@ -133,7 +131,6 @@ func (app *application) itemCreatePostHandler(w http.ResponseWriter, r *http.Req
 		username,
 		form.Name,
 		form.Description,
-		form.Image,
 	)
 	if err != nil {
 		app.serverError(w, err)

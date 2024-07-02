@@ -47,15 +47,6 @@
 				></textarea>
 			{{ end }}
 		</div>
-		<div class="stack2">
-			<label for="image">Image:</label>
-			{{ with .Form.FieldErrors.image }}
-				<label class="error" for="image">{{ . }}</label>
-				<input class="error" type="url" name="image" id="image" />
-			{{ else }}
-				<input type="url" name="image" id="image" />
-			{{ end }}
-		</div>
 		<input type="submit" value="Create" />
 		<input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
 	</form>

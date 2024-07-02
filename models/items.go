@@ -5,6 +5,7 @@ package models
 import (
 	"context"
 	"crypto/rand"
+	"fmt"
 	"strings"
 	"time"
 
@@ -18,7 +19,6 @@ type Item struct {
 	CreatorUsername string
 	Name            string
 	Description     string
-	Image           string
 }
 
 type ItemModel struct {
@@ -36,7 +36,7 @@ func (m *ItemModel) Index(ctx context.Context) ([]Item, error) {
 
 	var items []Item
 	err = sqlitex.Execute(conn,
-		`SELECT id, name, description FROM items`,
+		`SELECT id, name, description FROM items LIMIT 1000`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				var i Item
@@ -64,7 +64,7 @@ func (m *ItemModel) Info(ctx context.Context, uuid ulid.ULID) (Item, error) {
 
 	var i Item
 	err = sqlitex.Execute(conn,
-		`SELECT creator_username, name, description, image FROM items WHERE id = ?`,
+		`SELECT creator_username, name, description FROM items WHERE id = ?`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				i.ID = uuid
@@ -72,13 +72,13 @@ func (m *ItemModel) Info(ctx context.Context, uuid ulid.ULID) (Item, error) {
 				i.CreatorUsername = stmt.ColumnText(0)
 				i.Name = stmt.ColumnText(1)
 				i.Description = stmt.ColumnText(2)
-				i.Image = stmt.ColumnText(3)
 				return nil
 			},
 			Args: []any{uuid},
 		})
 
 	if i.ID.Compare(uuid) != 0 {
+		fmt.Println("uuid", uuid.String(), i.ID.String())
 		return i, ErrNoRecord
 	}
 	return i, err
@@ -172,7 +172,6 @@ func (m *ItemModel) Insert(
 	creator_username string,
 	name string,
 	description string,
-	image string,
 ) (ulid.ULID, error) {
 	ms := ulid.Timestamp(time.Now())
 	uuid, err := ulid.New(ms, rand.Reader)
@@ -188,8 +187,8 @@ func (m *ItemModel) Insert(
 
 	err = sqlitex.Execute(
 		conn,
-		`INSERT INTO items (id, creator_username, name, description, image) VALUES (?, ?, ?, ?, ?)`,
-		&sqlitex.ExecOptions{Args: []any{uuid, creator_username, name, description, image}},
+		`INSERT INTO items (id, creator_username, name, description) VALUES (?, ?, ?, ?)`,
+		&sqlitex.ExecOptions{Args: []any{uuid, creator_username, name, description}},
 	)
 	return uuid, err
 }
