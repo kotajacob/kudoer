@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"git.sr.ht/~kota/kudoer/ui"
 	"github.com/justinas/nosurf"
 )
 
@@ -20,8 +21,8 @@ import (
 // as to keep these assets caches as long as the browser is willing.
 func (app *application) FromHash(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		p := app.staticFiles.FromHash[r.URL.Path]
-		rp := app.staticFiles.FromHash[r.URL.RawPath]
+		p := ui.FromHash(r.URL.Path)
+		rp := ui.FromHash(r.URL.RawPath)
 
 		w.Header().Set("cache-control", "max-age=31557600, immutable")
 

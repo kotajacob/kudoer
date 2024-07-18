@@ -29,6 +29,16 @@ type StaticFiles struct {
 	FromHash map[string]string
 }
 
+var statics StaticFiles
+
+func init() {
+	var err error
+	statics, err = Statics()
+	if err != nil {
+		panic(err)
+	}
+}
+
 func Statics() (StaticFiles, error) {
 	entries, err := fs.ReadDir(EFS, "static")
 	if err != nil {
@@ -81,8 +91,10 @@ func Templates() (map[string]*template.Template, error) {
 
 		ts, err := template.New(baseTMPL).
 			Funcs(template.FuncMap{
-				"Date":  Date,
-				"Emoji": Emoji,
+				"Date":     Date,
+				"Emoji":    Emoji,
+				"ToHash":   ToHash,
+				"FromHash": FromHash,
 			}).
 			ParseFS(EFS, files...)
 		if err != nil {
@@ -101,4 +113,14 @@ func Date(id ulid.ULID) string {
 func Emoji(key int) string {
 	e, _ := emoji.Value(key)
 	return e
+}
+
+// ToHash maps static filenames to the hashed version.
+func ToHash(f string) string {
+	return statics.ToHash[f]
+}
+
+// FromHash maps hashed filenames back to their originals.
+func FromHash(f string) string {
+	return statics.FromHash[f]
 }
