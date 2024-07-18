@@ -11,7 +11,6 @@ import (
 
 	"git.sr.ht/~kota/kudoer/application/emoji"
 	"git.sr.ht/~kota/kudoer/models"
-	"git.sr.ht/~kota/kudoer/search"
 	"github.com/oklog/ulid"
 )
 
@@ -132,16 +131,6 @@ func (app *application) itemCreatePostHandler(w http.ResponseWriter, r *http.Req
 		form.Name,
 		form.Description,
 	)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-
-	err = app.itemSearch.Index(id.String(), search.Item{
-		ID:          id.String(),
-		Name:        form.Name,
-		Description: form.Description,
-	})
 	if err != nil {
 		app.serverError(w, err)
 		return

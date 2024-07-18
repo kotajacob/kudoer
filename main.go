@@ -15,7 +15,6 @@ import (
 	"git.sr.ht/~kota/kudoer/db"
 	"git.sr.ht/~kota/kudoer/litesession"
 	"git.sr.ht/~kota/kudoer/models"
-	"git.sr.ht/~kota/kudoer/search"
 	"git.sr.ht/~kota/kudoer/ui"
 	"github.com/alexedwards/scs/v2"
 )
@@ -23,8 +22,6 @@ import (
 func main() {
 	addr := flag.String("addr", ":2024", "HTTP Network Address")
 	dsn := flag.String("dsn", "kudoer.db", "SQLite data source name")
-	itemSearchPath := flag.String("itemsearch", "items.bleve", "Items search cache")
-	userSearchPath := flag.String("usersearch", "users.bleve", "Users search cache")
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO ", log.Ldate|log.Ltime)
@@ -40,18 +37,6 @@ func main() {
 			log.Fatal(err)
 		}
 	}()
-
-	infoLog.Println("loading search indexes")
-	itemSearch, userSearch, err := search.Open(
-		infoLog,
-		*itemSearchPath,
-		*userSearchPath,
-		&models.ItemModel{DB: db},
-		&models.UserModel{DB: db},
-	)
-	if err != nil {
-		errLog.Fatal(err)
-	}
 
 	staticFiles, err := ui.Statics()
 	if err != nil {
@@ -90,8 +75,7 @@ func main() {
 		&models.UserModel{DB: db},
 		&models.ItemModel{DB: db},
 		&models.KudoModel{DB: db},
-		itemSearch,
-		userSearch,
+		&models.SearchModel{DB: db},
 	)
 
 	srv := &http.Server{

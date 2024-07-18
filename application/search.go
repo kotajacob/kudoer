@@ -7,13 +7,12 @@ import (
 	"strings"
 
 	"git.sr.ht/~kota/kudoer/models"
-	"github.com/blevesearch/bleve"
 )
 
 type searchPage struct {
 	Page
-	Items []models.Item
-	Users []models.User
+	Items []models.SearchItem
+	Users []models.SearchUser
 
 	Form searchForm
 }
@@ -50,23 +49,23 @@ func (app *application) searchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var items []models.Item
-	var users []models.User
+	var items []models.SearchItem
+	var users []models.SearchUser
 	switch params.Get("type") {
 	case "items":
-		var err error
-		items, err = app.searchItems(form.Query, r)
+		i, err := app.search.Items(r.Context(), form.Query)
 		if err != nil {
 			app.serverError(w, err)
 			return
 		}
+		items = i
 	case "users":
-		var err error
-		users, err = app.searchUsers(form.Query, r)
+		u, err := app.search.Users(r.Context(), form.Query)
 		if err != nil {
 			app.serverError(w, err)
 			return
 		}
+		users = u
 	}
 	app.render(w, http.StatusOK, "search.tmpl",
 		searchPage{
@@ -75,40 +74,4 @@ func (app *application) searchHandler(w http.ResponseWriter, r *http.Request) {
 			Users: users,
 			Form:  form,
 		})
-}
-
-func (app *application) searchItems(q string, r *http.Request) ([]models.Item, error) {
-	query := bleve.NewQueryStringQuery(q)
-	searchRequest := bleve.NewSearchRequest(query)
-	searchResult, err := app.itemSearch.Search(searchRequest)
-	if err != nil {
-		return nil, err
-	}
-
-	// We take the list of IDs and their rankings and look up their names and
-	// descriptions in the database for rendering the search result.
-	var ids models.SortedIDs
-	for _, hit := range searchResult.Hits {
-		ids = append(ids, hit.ID)
-	}
-
-	return app.items.ListInfo(r.Context(), ids)
-}
-
-func (app *application) searchUsers(q string, r *http.Request) ([]models.User, error) {
-	query := bleve.NewQueryStringQuery(q)
-	searchRequest := bleve.NewSearchRequest(query)
-	searchResult, err := app.userSearch.Search(searchRequest)
-	if err != nil {
-		return nil, err
-	}
-
-	// We take the list of usernames and their rankings and look up their
-	// DisplayName.
-	var usernames models.SortedUsernames
-	for _, hit := range searchResult.Hits {
-		usernames = append(usernames, hit.ID)
-	}
-
-	return app.users.ListInfo(r.Context(), usernames)
 }

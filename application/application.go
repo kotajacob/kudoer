@@ -10,7 +10,6 @@ import (
 	"git.sr.ht/~kota/kudoer/models"
 	"git.sr.ht/~kota/kudoer/ui"
 	"github.com/alexedwards/scs/v2"
-	"github.com/blevesearch/bleve"
 	"github.com/justinas/nosurf"
 )
 
@@ -21,12 +20,10 @@ type application struct {
 	templates      map[string]*template.Template
 	sessionManager *scs.SessionManager
 
-	users *models.UserModel
-	items *models.ItemModel
-	kudos *models.KudoModel
-
-	itemSearch bleve.Index
-	userSearch bleve.Index
+	users  *models.UserModel
+	items  *models.ItemModel
+	kudos  *models.KudoModel
+	search *models.SearchModel
 }
 
 func New(
@@ -38,8 +35,7 @@ func New(
 	users *models.UserModel,
 	items *models.ItemModel,
 	kudos *models.KudoModel,
-	itemSearch bleve.Index,
-	userSearch bleve.Index,
+	search *models.SearchModel,
 ) *application {
 	return &application{
 		infoLog:        infoLog,
@@ -50,8 +46,7 @@ func New(
 		users:          users,
 		items:          items,
 		kudos:          kudos,
-		itemSearch:     itemSearch,
-		userSearch:     userSearch,
+		search:         search,
 	}
 }
 

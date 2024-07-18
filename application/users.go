@@ -10,7 +10,6 @@ import (
 	"unicode/utf8"
 
 	"git.sr.ht/~kota/kudoer/models"
-	"git.sr.ht/~kota/kudoer/search"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -177,10 +176,6 @@ func (app *application) userRegisterPostHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = app.userSearch.Index(form.Username, search.User{
-		Username:    form.Username,
-		DisplayName: form.DisplayName,
-	})
 	app.sessionManager.Put(r.Context(), "authenticatedUsername", form.Username)
 	http.Redirect(w, r, fmt.Sprintf("/user/view/%v", form.Username), http.StatusSeeOther)
 }
