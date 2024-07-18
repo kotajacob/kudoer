@@ -1,0 +1,27 @@
+<svg width="600px" height="120px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 120">
+<path d="
+	M 10 120
+	l 0 -60
+	q 10 0 10 -10
+	l 230.7 0
+	a 50 50 0 0 0 98.6 0
+	l 230.7 0
+	q 0 10 10 10
+	l 0 60
+" stroke="#000" stroke-width="4" fill="none" />
+<path d="
+	M 20 120
+	l 0 -50
+	q 10 0 10 -10
+	l 213 0
+	a 60 60 0 0 0 114 0
+	l 213 0
+	q 0 10 10 10
+	l 0 50
+" stroke="#000" stroke-width="2" fill="none" />
+<path d="
+	M 300 2
+	a 40 40 0 0 0 0 80
+	a 40 40 0 0 0 0 -80
+" stroke="#000" stroke-width="4" fill="#f8f5f2" />
+</svg>
