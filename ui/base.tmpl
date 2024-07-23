@@ -233,10 +233,20 @@
 					text-decoration: underline;
 					text-underline-position: under;
 				}
+				.portrait {
+					margin: 0 auto min(2ch, 4vw) auto;
+					width: min(5.75ch, 11.5vw);
+					height: min(5.75ch, 11.5vw);
+					z-index: -2;
+				}
+				#mask-svg {
+					height: 9.6ch;
+					margin-bottom: calc((var(--s3) + 9.6ch) * -1);
+				}
 				.kudo {
 					position: relative;
-					padding: min(3ch, 6vw);
-					padding-top: min(9ch, 18vw);
+					padding: min(5ch, 10vw);
+					padding-top: min(0.5ch, 1vw);
 					min-height: 16ch;
 				}
 				.kudo > * {
