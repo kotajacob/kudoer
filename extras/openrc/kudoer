@@ -1,0 +1,18 @@
+#!/sbin/openrc-run
+supervisor=supervise-daemon
+
+name="kudoer"
+description="kudoer"
+
+command=${command:-/usr/bin/kudoer}
+command_background=true
+command_user="kudoer:kudoer"
+
+pidfile="/run/${RC_SVCNAME}.pid"
+output_log="/var/log/kudoer/kudoer.log"
+error_log="/var/log/kudoer/kudoer.err"
+
+depend() {
+	need net
+	use dns logger netmount
+}
