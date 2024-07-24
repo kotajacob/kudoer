@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"time"
 
 	"git.sr.ht/~kota/kudoer/models"
 	"github.com/alexedwards/scs/v2"
@@ -69,4 +70,17 @@ func (app *application) newPage(r *http.Request, title, description string) Page
 		Title:           title,
 		PageDescription: description,
 	}
+}
+
+func (app *application) Serve(addr string) error {
+	srv := &http.Server{
+		Addr:         addr,
+		ErrorLog:     app.errLog,
+		Handler:      app.Routes(),
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 30 * time.Second,
+	}
+	app.infoLog.Println("listening on", addr)
+	return srv.ListenAndServe()
 }

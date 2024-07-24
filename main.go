@@ -72,16 +72,8 @@ func main() {
 		&models.SearchModel{DB: db},
 	)
 
-	srv := &http.Server{
-		Addr:         *addr,
-		ErrorLog:     errLog,
-		Handler:      app.Routes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
+	err = app.Serve(*addr)
+	if err != nil {
+		errLog.Fatalln(err)
 	}
-
-	infoLog.Println("listening on", *addr)
-	err = srv.ListenAndServe()
-	errLog.Fatalln(err)
 }
