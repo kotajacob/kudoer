@@ -3,9 +3,14 @@
 package application
 
 import (
+	"context"
+	"errors"
 	"html/template"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"git.sr.ht/~kota/kudoer/models"
@@ -81,6 +86,34 @@ func (app *application) Serve(addr string) error {
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
+
+	// Handle shutdown signals gracefully.
+	shutdownError := make(chan error)
+	go func() {
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+		s := <-quit
+
+		app.infoLog.Println("shutting down server:", s.String())
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		shutdownError <- srv.Shutdown(ctx)
+	}()
+
 	app.infoLog.Println("listening on", addr)
-	return srv.ListenAndServe()
+
+	err := srv.ListenAndServe()
+	if !errors.Is(err, http.ErrServerClosed) {
+		return err
+	}
+
+	err = <-shutdownError
+	if err != nil {
+		return err
+	}
+
+	app.infoLog.Println("stopped server")
+	return nil
 }
