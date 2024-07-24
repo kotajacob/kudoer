@@ -11,7 +11,11 @@
 				>
 				gave
 			</span>
-			<span class="emoji">{{ Emoji .Emoji }}</span>
+			<img
+				class="emoji"
+				src="{{ .Emoji | printf "/static/emoji%v.svg" | ToHash }}"
+				alt=""
+			/>
 			<span>
 				to
 				<a href="/item/view/{{ .ItemID }}">{{ .ItemName }}</a>

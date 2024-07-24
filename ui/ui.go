@@ -12,7 +12,6 @@ import (
 	"path"
 	"path/filepath"
 
-	"git.sr.ht/~kota/kudoer/application/emoji"
 	"github.com/oklog/ulid"
 )
 
@@ -92,7 +91,6 @@ func Templates() (map[string]*template.Template, error) {
 		ts, err := template.New(baseTMPL).
 			Funcs(template.FuncMap{
 				"Date":     Date,
-				"Emoji":    Emoji,
 				"ToHash":   ToHash,
 				"FromHash": FromHash,
 			}).
@@ -108,11 +106,6 @@ func Templates() (map[string]*template.Template, error) {
 
 func Date(id ulid.ULID) string {
 	return ulid.Time(id.Time()).Format("January 2, 2006")
-}
-
-func Emoji(key int) string {
-	e, _ := emoji.Value(key)
-	return e
 }
 
 // ToHash maps static filenames to the hashed version.

@@ -35,7 +35,7 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		fieldError = "Invalid emoji payload"
 	}
-	if _, err := emoji.Value(e); err != nil {
+	if !emoji.Validate(e) {
 		fieldError = "Invalid emoji selected"
 	}
 

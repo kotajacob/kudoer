@@ -217,10 +217,11 @@
 					max-width: 95%;
 				}
 				.emoji {
-					font-size: var(--s2);
+					height: var(--s2);
 				}
 				.emoji-options {
-					justify-content: space-evenly;
+					display: grid;
+					grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
 				}
 				.emoji-options > input {
 					appearance: none;
@@ -228,10 +229,13 @@
 				}
 				.emoji-options > label {
 					cursor: pointer;
+					margin: var(--s-1) auto;
 				}
 				.emoji-options input[type="radio"]:checked + label {
 					text-decoration: underline;
 					text-underline-position: under;
+					border-bottom: 4px solid;
+					margin-bottom: calc(var(--s-1) - 4px);
 				}
 				.portrait {
 					margin: 0 auto min(2ch, 4vw) auto;

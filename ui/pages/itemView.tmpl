@@ -4,15 +4,19 @@
 	<p>{{ .Description }}</p>
 	{{ if .Authenticated }}
 		<form class="stack0" action="/kudo/{{ .ID }}" method="post">
-			<div class="emoji-options row2">
+			<div class="emoji-options">
 				{{ range .Emojis }}
 					<input
 						name="emoji"
 						type="radio"
 						id="{{ .Key }}"
 						value="{{ .Key }}"
-					/><label class="emoji" for="{{ .Key }}">
-						{{ .Value }}
+					/><label for="{{ .Key }}">
+						<img
+							class="emoji"
+							src="{{ .Key | printf "/static/emoji%v.svg" | ToHash }}"
+							alt=""
+						/>
 					</label>
 				{{ end }}
 			</div>

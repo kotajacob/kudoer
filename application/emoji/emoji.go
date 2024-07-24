@@ -1,39 +1,85 @@
 package emoji
 
-import "fmt"
-
 // Emoji represents an emoji used for a kudo. The Key is an integer, which is
-// used in the forms and stored in our database. The Value is the actual
-// corresponding unicode symbol.
+// used in the forms, to reference the svgs, and stored in our database. Alt
+// is the alt text to be added to the emoji images.
 type Emoji struct {
-	Key   int
-	Value string
+	Key int
+	Alt string
 }
 
 var all = []Emoji{
 	{
-		Key:   1,
-		Value: "🤮",
+		Key: 0,
+		Alt: "",
 	},
 	{
-		Key:   2,
-		Value: "🫠",
+		Key: 1,
+		Alt: "",
 	},
 	{
-		Key:   3,
-		Value: "🤔",
+		Key: 2,
+		Alt: "",
 	},
 	{
-		Key:   4,
-		Value: "😐",
+		Key: 3,
+		Alt: "",
 	},
 	{
-		Key:   5,
-		Value: "🥰",
+		Key: 4,
+		Alt: "",
 	},
 	{
-		Key:   6,
-		Value: "🤩",
+		Key: 5,
+		Alt: "",
+	},
+	{
+		Key: 6,
+		Alt: "",
+	},
+	{
+		Key: 7,
+		Alt: "",
+	},
+	{
+		Key: 8,
+		Alt: "",
+	},
+	{
+		Key: 9,
+		Alt: "",
+	},
+	{
+		Key: 10,
+		Alt: "",
+	},
+	{
+		Key: 11,
+		Alt: "",
+	},
+	{
+		Key: 12,
+		Alt: "",
+	},
+	{
+		Key: 13,
+		Alt: "",
+	},
+	{
+		Key: 14,
+		Alt: "",
+	},
+	{
+		Key: 15,
+		Alt: "",
+	},
+	{
+		Key: 16,
+		Alt: "",
+	},
+	{
+		Key: 17,
+		Alt: "",
 	},
 }
 
@@ -42,7 +88,7 @@ var lookup map[int]string
 func init() {
 	lookup = make(map[int]string, len(all))
 	for _, e := range all {
-		lookup[e.Key] = e.Value
+		lookup[e.Key] = e.Alt
 	}
 }
 
@@ -51,10 +97,8 @@ func List() []Emoji {
 	return all
 }
 
-// Value returns the actual unicode symbol for a given Emoji key.
-func Value(key int) (string, error) {
-	if value, ok := lookup[key]; ok {
-		return value, nil
-	}
-	return "", fmt.Errorf("invalid emoji %v\n", key)
+// Validate returns true if a given emoji ID is valid.
+func Validate(key int) bool {
+	_, ok := lookup[key]
+	return ok
 }
