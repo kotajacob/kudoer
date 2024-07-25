@@ -340,6 +340,44 @@ func (m *UserModel) Following(
 	return users, err
 }
 
+// SetPic sets a user's profile picture.
+// The user's old profile picture or a blank string is returned so it can be
+// removed from the media store.
+func (m *UserModel) SetPic(
+	ctx context.Context,
+	username string,
+	pic string,
+) (string, error) {
+	conn, err := m.DB.Take(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer m.DB.Put(conn)
+
+	var old string
+	err = sqlitex.Execute(
+		conn,
+		`SELECT pic FROM users WHERE username = ?`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				old = stmt.ColumnText(0)
+				return nil
+			},
+			Args: []any{username},
+		},
+	)
+	if err != nil {
+		return old, err
+	}
+
+	err = sqlitex.Execute(
+		conn,
+		`UPDATE users SET pic = ? WHERE username = ?`,
+		&sqlitex.ExecOptions{Args: []any{pic, username}},
+	)
+	return old, err
+}
+
 // Change a user's password.
 func (m *UserModel) ChangePassword(
 	ctx context.Context,

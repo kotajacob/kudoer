@@ -1,6 +1,13 @@
 {{ define "kudo" }}
 	<div class="stack2 kudo">
-		<img class="portrait" src="{{ ToHash "/static/portrait.png" }}" />
+		{{ if .CreatorPic }}
+			<img class="portrait" src="/media/{{ .CreatorPic }}" />
+		{{ else }}
+			<img
+				class="portrait"
+				src="{{ ToHash "/static/default-profile.png" }}"
+			/>
+		{{ end }}
 		<svg class="frame" width="600" height="200" alt="">
 			<use href="#frame0" />
 		</svg>

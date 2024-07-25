@@ -332,17 +332,55 @@ type userSettingsForm struct {
 }
 
 func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	err := r.ParseMultipartForm(1024 * 1024 * 5) // Ram cap, not total.
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
 
+	username := app.sessionManager.GetString(r.Context(), "authenticatedUsername")
 	form := userSettingsForm{
 		DisplayName: r.PostForm.Get("displayname"),
 		Email:       r.PostForm.Get("email"),
 		Bio:         r.PostForm.Get("bio"),
 		FieldErrors: map[string]string{},
+	}
+
+	file, fileHeader, err := r.FormFile("pic")
+	if err == nil {
+		defer file.Close()
+
+		if fileHeader.Size > (1024 * 1024 * 10) {
+			form.FieldErrors["pic"] = "Profile picture must be less than 10MB"
+		}
+
+		// Store the profile picture.
+		pic, err := app.mediaStore.StorePic(file)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		old, err := app.users.SetPic(
+			r.Context(),
+			username,
+			pic,
+		)
+		if err != nil {
+			app.serverError(w, err)
+			return
+		}
+
+		// Remove the old profile picture if it exists.
+		if old != "" {
+			err = app.mediaStore.DeletePic(old)
+			if err != nil {
+				app.errLog.Println(err)
+			}
+		}
+	} else if !errors.Is(err, http.ErrMissingFile) {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	if utf8.RuneCountInString(form.DisplayName) > 30 {
@@ -374,13 +412,13 @@ func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.R
 				"Editing your profile",
 				"Change your profile settings",
 			),
-			Form: form,
+			Username: username,
+			Form:     form,
 		})
 		return
 	}
 
-	// Update non-password fields.
-	username := app.sessionManager.GetString(r.Context(), "authenticatedUsername")
+	// Update basic fields.
 	err = app.users.UpdateProfile(
 		r.Context(),
 		username,

@@ -16,16 +16,10 @@ import (
 
 // FromHash removes the hash from static files so they can be served from the
 // embeded files (which do not contain a hash in the name).
-//
-// Additionally, the cache-control header is set to an extremely high value so
-// as to keep these assets caches as long as the browser is willing.
 func (app *application) FromHash(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := ui.FromHash(r.URL.Path)
 		rp := ui.FromHash(r.URL.RawPath)
-
-		w.Header().Set("cache-control", "max-age=31557600, immutable")
-
 		r2 := new(http.Request)
 		*r2 = *r
 		r2.URL = new(url.URL)
@@ -33,6 +27,16 @@ func (app *application) FromHash(next http.Handler) http.Handler {
 		r2.URL.Path = p
 		r2.URL.RawPath = rp
 		next.ServeHTTP(w, r2)
+	})
+}
+
+// immutable sets an extremely high cache control timeout so as to keep these
+// items cached forever.
+// ONLY USE FOR ITEMS WITH A HASH IN THEIR NAME!
+func immutable(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("cache-control", "max-age=31557600, immutable")
+		next.ServeHTTP(w, r)
 	})
 }
 

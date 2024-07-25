@@ -13,6 +13,7 @@ import (
 	"syscall"
 	"time"
 
+	"git.sr.ht/~kota/kudoer/media"
 	"git.sr.ht/~kota/kudoer/models"
 	"github.com/alexedwards/scs/v2"
 	"github.com/justinas/nosurf"
@@ -23,6 +24,7 @@ type application struct {
 	errLog         *log.Logger
 	templates      map[string]*template.Template
 	sessionManager *scs.SessionManager
+	mediaStore     *media.MediaStore
 
 	users  *models.UserModel
 	items  *models.ItemModel
@@ -35,6 +37,7 @@ func New(
 	errLog *log.Logger,
 	templates map[string]*template.Template,
 	sessionManager *scs.SessionManager,
+	mediaStore *media.MediaStore,
 	users *models.UserModel,
 	items *models.ItemModel,
 	kudos *models.KudoModel,
@@ -45,6 +48,7 @@ func New(
 		errLog:         errLog,
 		templates:      templates,
 		sessionManager: sessionManager,
+		mediaStore:     mediaStore,
 		users:          users,
 		items:          items,
 		kudos:          kudos,

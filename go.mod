@@ -6,6 +6,7 @@ require (
 	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/justinas/alice v1.2.0
 	github.com/justinas/nosurf v1.1.1
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/oklog/ulid v1.3.1
 	golang.org/x/crypto v0.24.0
 	zombiezen.com/go/sqlite v1.3.0

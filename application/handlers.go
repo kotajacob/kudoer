@@ -19,7 +19,9 @@ var rxEmail = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9
 func (app *application) Routes() http.Handler {
 	mux := http.NewServeMux()
 
-	mux.Handle("GET /static/", app.FromHash(http.FileServerFS(ui.EFS)))
+	media := http.FileServer(http.Dir(app.mediaStore.Dir()))
+	mux.Handle("GET /media/", immutable(http.StripPrefix("/media", media)))
+	mux.Handle("GET /static/", app.FromHash(immutable(http.FileServerFS(ui.EFS))))
 
 	subFS, err := fs.Sub(ui.EFS, "static")
 	if err != nil {

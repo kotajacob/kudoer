@@ -1,6 +1,11 @@
 {{ define "main" }}
 	<span class="username">@{{ .Username }}</span>
-	<form class="stack0" action="settings" method="post">
+	<form
+		class="stack0"
+		action="settings"
+		method="post"
+		enctype="multipart/form-data"
+	>
 		<div class="stack2">
 			<label for="displayname">Display Name:</label>
 			{{ with .Form.FieldErrors.displayname }}
@@ -17,6 +22,21 @@
 				name="displayname"
 				id="displayname"
 				maxlength="30"
+			/>
+		</div>
+		<div class="stack2">
+			<label for="pic">Display Name:</label>
+			{{ with .Form.FieldErrors.pic }}
+				<label class="error" for="pic">{{ . }}</label>
+			{{ end }}
+			<input
+				{{ if .Form.FieldErrors.pic }}
+					class="error"
+				{{ end }}
+				type="file"
+				name="pic"
+				id="pic"
+				accept="image/png, image/jpeg"
 			/>
 		</div>
 		<div class="stack2">

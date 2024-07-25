@@ -14,6 +14,7 @@ import (
 	"git.sr.ht/~kota/kudoer/application"
 	"git.sr.ht/~kota/kudoer/db"
 	"git.sr.ht/~kota/kudoer/litesession"
+	"git.sr.ht/~kota/kudoer/media"
 	"git.sr.ht/~kota/kudoer/models"
 	"git.sr.ht/~kota/kudoer/ui"
 	"github.com/alexedwards/scs/v2"
@@ -22,6 +23,7 @@ import (
 func main() {
 	addr := flag.String("addr", ":2024", "HTTP Network Address")
 	dsn := flag.String("dsn", "kudoer.db", "SQLite data source name")
+	msn := flag.String("media", "media_store", "Media source name")
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO ", log.Ldate|log.Ltime)
@@ -37,6 +39,11 @@ func main() {
 			log.Fatal(err)
 		}
 	}()
+
+	mediaStore, err := media.Open(*msn)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	templates, err := ui.Templates()
 	if err != nil {
@@ -66,6 +73,7 @@ func main() {
 		errLog,
 		templates,
 		sessionManager,
+		mediaStore,
 		&models.UserModel{DB: db},
 		&models.ItemModel{DB: db},
 		&models.KudoModel{DB: db},
