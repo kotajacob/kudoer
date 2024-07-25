@@ -18,6 +18,8 @@ import (
 	"git.sr.ht/~kota/kudoer/models"
 	"git.sr.ht/~kota/kudoer/ui"
 	"github.com/alexedwards/scs/v2"
+	"github.com/throttled/throttled/v2"
+	throttledstore "github.com/throttled/throttled/v2/store/memstore"
 )
 
 func main() {
@@ -50,6 +52,7 @@ func main() {
 		errLog.Fatal(err)
 	}
 
+	// Setup session storage.
 	sessionManager := scs.New()
 	sessionManager.Store = litesession.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
@@ -68,11 +71,34 @@ func main() {
 		return
 	}
 
+	// Set up HTTP request throttling.
+	tstore, err := throttledstore.NewCtx(65536)
+	if err != nil {
+		errLog.Fatal(err)
+	}
+	quota := throttled.RateQuota{
+		MaxRate:  throttled.PerMin(20),
+		MaxBurst: 5,
+	}
+	throttler, err := throttled.NewGCRARateLimiterCtx(tstore, quota)
+	if err != nil {
+		errLog.Fatal(err)
+	}
+	rateLimiter := &throttled.HTTPRateLimiterCtx{
+		RateLimiter: throttler,
+		VaryBy: &throttled.VaryBy{
+			Path:    true,
+			Method:  true,
+			Headers: []string{"X-Forwarded-For"},
+		},
+	}
+
 	app := application.New(
 		infoLog,
 		errLog,
 		templates,
 		sessionManager,
+		rateLimiter,
 		mediaStore,
 		&models.UserModel{DB: db},
 		&models.ItemModel{DB: db},

@@ -17,6 +17,7 @@ import (
 	"git.sr.ht/~kota/kudoer/models"
 	"github.com/alexedwards/scs/v2"
 	"github.com/justinas/nosurf"
+	"github.com/throttled/throttled/v2"
 )
 
 type application struct {
@@ -24,6 +25,7 @@ type application struct {
 	errLog         *log.Logger
 	templates      map[string]*template.Template
 	sessionManager *scs.SessionManager
+	rateLimiter    *throttled.HTTPRateLimiterCtx
 	mediaStore     *media.MediaStore
 
 	users  *models.UserModel
@@ -37,6 +39,7 @@ func New(
 	errLog *log.Logger,
 	templates map[string]*template.Template,
 	sessionManager *scs.SessionManager,
+	rateLimiter *throttled.HTTPRateLimiterCtx,
 	mediaStore *media.MediaStore,
 	users *models.UserModel,
 	items *models.ItemModel,
@@ -48,6 +51,7 @@ func New(
 		errLog:         errLog,
 		templates:      templates,
 		sessionManager: sessionManager,
+		rateLimiter:    rateLimiter,
 		mediaStore:     mediaStore,
 		users:          users,
 		items:          items,

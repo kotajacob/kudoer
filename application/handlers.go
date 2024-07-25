@@ -53,7 +53,12 @@ func (app *application) Routes() http.Handler {
 	mux.Handle("POST /item/create", protected.ThenFunc(app.itemCreatePostHandler))
 	mux.Handle("POST /kudo/{id}", protected.ThenFunc(app.kudoPostHandler))
 
-	standard := alice.New(app.recoverPanic, app.logRequest, app.secureHeaders)
+	standard := alice.New(
+		app.recoverPanic,
+		app.rateLimiter.RateLimit,
+		app.logRequest,
+		app.secureHeaders,
+	)
 	return standard.Then(mux)
 }
 

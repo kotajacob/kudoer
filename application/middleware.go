@@ -97,9 +97,16 @@ func nonce(c context.Context) string {
 // logRequest is a middleware that prints each request to the info log.
 func (app *application) logRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		addr := r.RemoteAddr
+
+		// Use correct address if behind proxy.
+		if proxyAddr := r.Header.Get("X-Forwarded-For"); proxyAddr != "" {
+			addr = proxyAddr
+		}
+
 		app.infoLog.Printf(
 			"%s - %s %s %s",
-			r.RemoteAddr,
+			addr,
 			r.Proto,
 			r.Method,
 			r.URL.RequestURI(),
