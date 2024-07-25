@@ -10,6 +10,7 @@ import (
 	"unicode/utf8"
 
 	"git.sr.ht/~kota/kudoer/application/emoji"
+	"git.sr.ht/~kota/kudoer/application/frames"
 	"git.sr.ht/~kota/kudoer/models"
 	"github.com/oklog/ulid"
 )
@@ -39,9 +40,18 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 		fieldError = "Invalid emoji selected"
 	}
 
+	frame, err := strconv.Atoi(r.PostForm.Get("frame"))
+	if err != nil {
+		fieldError = "Invalid frame payload"
+	}
+	if !frames.Validate(frame) {
+		fieldError = "Invalid frame selected"
+	}
+
 	body := r.PostForm.Get("body")
-	if utf8.RuneCountInString(body) > 1000 {
-		fieldError = "Body of kudo cannot be longer than 1000 characters"
+	if utf8.RuneCountInString(body) > 5500 {
+		fmt.Println(utf8.RuneCountInString(body))
+		fieldError = "Body of kudo cannot be longer than 5000 characters"
 	}
 
 	if fieldError != "" {
@@ -61,6 +71,7 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 				r.Context(),
 				itemID,
 				username,
+				frame,
 				e,
 				body,
 			)
@@ -76,6 +87,7 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 		k.ID,
 		itemID,
 		username,
+		frame,
 		e,
 		body,
 	)

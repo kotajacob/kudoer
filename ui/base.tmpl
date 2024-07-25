@@ -246,16 +246,13 @@
 				#clip-path-svg {
 					margin-bottom: calc(var(--s3) * -1);
 				}
-				.kudo {
+				.frame-parent {
 					position: relative;
 					padding: min(5ch, 10vw);
 					padding-top: min(0.5ch, 1vw);
 					min-height: 16ch;
 				}
-				.kudo > * {
-					text-align: start;
-				}
-				.kudo > .frame {
+				.frame {
 					position: absolute;
 					top: 0;
 					bottom: 0;
@@ -267,6 +264,9 @@
 				}
 				symbol > svg {
 					overflow: visible;
+				}
+				.kudo > * {
+					text-align: start;
 				}
 				.kudo > h2 {
 					justify-content: center;

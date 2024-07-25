@@ -378,6 +378,30 @@ func (m *UserModel) SetPic(
 	return old, err
 }
 
+// GetPic gets a user's profile picture.
+func (m *UserModel) GetPic(
+	ctx context.Context,
+	username string,
+) (string, error) {
+	conn, err := m.DB.Take(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer m.DB.Put(conn)
+
+	var pic string
+	err = sqlitex.Execute(conn, `SELECT pic from users WHERE username = ?`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				pic = stmt.ColumnText(0)
+				return nil
+			},
+			Args: []any{username},
+		})
+
+	return pic, err
+}
+
 // Change a user's password.
 func (m *UserModel) ChangePassword(
 	ctx context.Context,

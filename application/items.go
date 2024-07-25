@@ -5,11 +5,13 @@ package application
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"strings"
 	"unicode/utf8"
 
 	"git.sr.ht/~kota/kudoer/application/emoji"
+	"git.sr.ht/~kota/kudoer/application/frames"
 	"git.sr.ht/~kota/kudoer/models"
 	"github.com/oklog/ulid"
 )
@@ -19,6 +21,12 @@ type itemViewPage struct {
 	models.Item
 
 	Emojis []emoji.Emoji
+
+	CreatorPic string
+
+	// Random default frame for the user.
+	Frame      int
+	FrameCount int
 
 	// Has the user already given kudos for this item?
 	Kudoed bool
@@ -52,19 +60,27 @@ func (app *application) itemViewHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	var kudoed bool
+	var creatorPic string
 	if username := app.sessionManager.GetString(r.Context(), "authenticatedUsername"); username != "" {
 		if _, err := app.kudos.ItemUser(r.Context(), uuid, username); errors.Is(err, models.ErrNoRecord) {
 			kudoed = true
+		}
+
+		if pic, err := app.users.GetPic(r.Context(), username); err == nil {
+			creatorPic = pic
 		}
 	}
 
 	title := item.Name + " - " + "Kudoer"
 	app.render(w, http.StatusOK, "itemView.tmpl", itemViewPage{
-		Page:   app.newPage(r, title, item.Description),
-		Item:   item,
-		Emojis: emoji.List(),
-		Kudoed: kudoed,
-		Kudos:  kudos,
+		Page:       app.newPage(r, title, item.Description),
+		Item:       item,
+		Emojis:     emoji.List(),
+		CreatorPic: creatorPic,
+		Frame:      rand.Intn(frames.Count),
+		FrameCount: frames.Count,
+		Kudoed:     kudoed,
+		Kudos:      kudos,
 	})
 }
 

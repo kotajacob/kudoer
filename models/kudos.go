@@ -19,6 +19,7 @@ type Kudo struct {
 	CreatorUsername    string
 	CreatorDisplayName string
 	CreatorPic         string
+	Frame              int
 	Emoji              int
 	Body               string
 }
@@ -39,7 +40,7 @@ func (m *KudoModel) Following(ctx context.Context, username string) ([]Kudo, err
 	var kudos []Kudo
 	err = sqlitex.Execute(conn,
 		`SELECT kudos.id, kudos.item_id, items.name, kudos.creator_username,
-		users.displayname, users.pic, kudos.emoji, kudos.body FROM users_following
+		users.displayname, users.pic, kudos.frame, kudos.emoji, kudos.body FROM users_following
 		JOIN kudos ON users_following.following_username = kudos.creator_username
 		JOIN users ON users_following.following_username = users.username
 		JOIN items ON kudos.item_id = items.id
@@ -65,8 +66,9 @@ func (m *KudoModel) Following(ctx context.Context, username string) ([]Kudo, err
 				k.CreatorUsername = stmt.ColumnText(3)
 				k.CreatorDisplayName = stmt.ColumnText(4)
 				k.CreatorPic = stmt.ColumnText(5)
-				k.Emoji = stmt.ColumnInt(6)
-				k.Body = stmt.ColumnText(7)
+				k.Frame = stmt.ColumnInt(6)
+				k.Emoji = stmt.ColumnInt(7)
+				k.Body = stmt.ColumnText(8)
 
 				kudos = append(kudos, k)
 
@@ -89,7 +91,7 @@ func (m *KudoModel) All(ctx context.Context) ([]Kudo, error) {
 	var kudos []Kudo
 	err = sqlitex.Execute(conn,
 		`SELECT kudos.id, kudos.item_id, items.name, kudos.creator_username,
-		users.displayname, users.pic, kudos.emoji, kudos.body FROM kudos
+		users.displayname, users.pic, kudos.frame, kudos.emoji, kudos.body FROM kudos
 		JOIN users ON kudos.creator_username = users.username
 		JOIN items on kudos.item_id = items.id
 		ORDER BY kudos.id DESC`,
@@ -113,8 +115,9 @@ func (m *KudoModel) All(ctx context.Context) ([]Kudo, error) {
 				k.CreatorUsername = stmt.ColumnText(3)
 				k.CreatorDisplayName = stmt.ColumnText(4)
 				k.CreatorPic = stmt.ColumnText(5)
-				k.Emoji = stmt.ColumnInt(6)
-				k.Body = stmt.ColumnText(7)
+				k.Frame = stmt.ColumnInt(6)
+				k.Emoji = stmt.ColumnInt(7)
+				k.Body = stmt.ColumnText(8)
 
 				kudos = append(kudos, k)
 
@@ -137,7 +140,7 @@ func (m *KudoModel) Item(ctx context.Context, itemID ulid.ULID) ([]Kudo, error) 
 	var kudos []Kudo
 	err = sqlitex.Execute(conn,
 		`SELECT kudos.id, items.name, kudos.creator_username,
-		users.displayname, users.pic, kudos.emoji, kudos.body FROM kudos
+		users.displayname, users.pic, kudos.frame, kudos.emoji, kudos.body FROM kudos
 		JOIN users ON kudos.creator_username = users.username
 		JOIN items on kudos.item_id = items.id WHERE kudos.item_id = ?
 		ORDER BY kudos.id DESC`,
@@ -157,8 +160,9 @@ func (m *KudoModel) Item(ctx context.Context, itemID ulid.ULID) ([]Kudo, error) 
 				k.CreatorUsername = stmt.ColumnText(2)
 				k.CreatorDisplayName = stmt.ColumnText(3)
 				k.CreatorPic = stmt.ColumnText(4)
-				k.Emoji = stmt.ColumnInt(5)
-				k.Body = stmt.ColumnText(6)
+				k.Frame = stmt.ColumnInt(5)
+				k.Emoji = stmt.ColumnInt(6)
+				k.Body = stmt.ColumnText(7)
 
 				kudos = append(kudos, k)
 
@@ -186,7 +190,7 @@ func (m *KudoModel) ItemUser(
 	var k Kudo
 	err = sqlitex.Execute(conn,
 		`SELECT kudos.id, items.name, users.displayname, users.pic,
-		kudos.emoji, kudos.body FROM kudos
+		kudos.frame, kudos.emoji, kudos.body FROM kudos
 		JOIN users ON kudos.creator_username = users.username
 		JOIN items on kudos.item_id = items.id
 		WHERE kudos.item_id = ? AND kudos.creator_username = ?`,
@@ -203,8 +207,9 @@ func (m *KudoModel) ItemUser(
 				k.CreatorUsername = creator_username
 				k.CreatorDisplayName = stmt.ColumnText(2)
 				k.CreatorPic = stmt.ColumnText(3)
-				k.Emoji = stmt.ColumnInt(4)
-				k.Body = stmt.ColumnText(5)
+				k.Frame = stmt.ColumnInt(4)
+				k.Emoji = stmt.ColumnInt(5)
+				k.Body = stmt.ColumnText(6)
 
 				return nil
 			},
@@ -233,7 +238,7 @@ func (m *KudoModel) User(
 	var kudos []Kudo
 	err = sqlitex.Execute(conn,
 		`SELECT kudos.id, kudos.item_id, items.name, users.displayname,
-		users.pic, kudos.emoji, kudos.body FROM kudos
+		users.pic, kudos.frame, kudos.emoji, kudos.body FROM kudos
 		JOIN users ON kudos.creator_username = users.username
 		JOIN items on kudos.item_id = items.id
 		WHERE kudos.creator_username = ? ORDER BY kudos.id DESC`,
@@ -257,8 +262,9 @@ func (m *KudoModel) User(
 				k.CreatorUsername = creator_username
 				k.CreatorDisplayName = stmt.ColumnText(3)
 				k.CreatorPic = stmt.ColumnText(4)
-				k.Emoji = stmt.ColumnInt(5)
-				k.Body = stmt.ColumnText(6)
+				k.Frame = stmt.ColumnInt(5)
+				k.Emoji = stmt.ColumnInt(6)
+				k.Body = stmt.ColumnText(7)
 
 				kudos = append(kudos, k)
 				return nil
@@ -273,6 +279,7 @@ func (m *KudoModel) Insert(
 	ctx context.Context,
 	item_id ulid.ULID,
 	creator_username string,
+	frame int,
 	emoji int,
 	body string,
 ) (ulid.ULID, error) {
@@ -290,8 +297,15 @@ func (m *KudoModel) Insert(
 
 	err = sqlitex.Execute(
 		conn,
-		`INSERT INTO kudos (id, item_id, creator_username, emoji, body) VALUES (?, ?, ?, ?, ?)`,
-		&sqlitex.ExecOptions{Args: []any{uuid, item_id, creator_username, emoji, body}},
+		`INSERT INTO kudos (id, item_id, creator_username, frame, emoji, body) VALUES (?, ?, ?, ?, ?, ?)`,
+		&sqlitex.ExecOptions{Args: []any{
+			uuid,
+			item_id,
+			creator_username,
+			frame,
+			emoji,
+			body,
+		}},
 	)
 	return uuid, err
 }
@@ -302,6 +316,7 @@ func (m *KudoModel) Update(
 	id ulid.ULID,
 	item_id ulid.ULID,
 	creator_username string,
+	frame int,
 	emoji int,
 	body string,
 ) error {
@@ -313,8 +328,15 @@ func (m *KudoModel) Update(
 
 	err = sqlitex.Execute(
 		conn,
-		`UPDATE kudos SET item_id = ?, creator_username = ?, emoji = ?, body = ? WHERE id = ?`,
-		&sqlitex.ExecOptions{Args: []any{item_id, creator_username, emoji, body, id}},
+		`UPDATE kudos SET item_id = ?, creator_username = ?, frame = ?, emoji = ?, body = ? WHERE id = ?`,
+		&sqlitex.ExecOptions{Args: []any{
+			item_id,
+			creator_username,
+			frame,
+			emoji,
+			body,
+			id,
+		}},
 	)
 	return err
 }

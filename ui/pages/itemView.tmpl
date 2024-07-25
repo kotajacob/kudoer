@@ -9,6 +9,7 @@
 					<input
 						name="emoji"
 						type="radio"
+						required
 						id="{{ .Key }}"
 						value="{{ .Key }}"
 					/><label for="{{ .Key }}">
@@ -20,24 +21,95 @@
 					</label>
 				{{ end }}
 			</div>
-			<textarea
-				type="text"
-				name="body"
-				id="body"
-				rows="5"
-				maxlength="1000"
-				required
-			></textarea>
-			<input
-				type="submit"
-				{{ if .Kudoed }}
-					value="Give Kudos"
+			<span class="stack2 frame-parent">
+				{{ if .CreatorPic }}
+					<img class="portrait" src="/media/{{ .CreatorPic }}" />
 				{{ else }}
-					value="Update Kudos"
+					<img
+						class="portrait"
+						src="{{ ToHash "/static/default-profile.png" }}"
+					/>
 				{{ end }}
+				<svg class="frame" width="600" height="200" alt="">
+					<use id="frame-use" href="#frame{{ .Frame }}" />
+				</svg>
+				<textarea
+					type="text"
+					name="body"
+					id="body"
+					placeholder="Give your kudos..."
+					rows="5"
+					maxlength="5000"
+					required
+				></textarea>
+			</span>
+			<span class="row2">
+				<input
+					type="submit"
+					{{ if .Kudoed }}
+						value="Give Kudos"
+					{{ else }}
+						value="Update Kudos"
+					{{ end }}
+				/>
+				<button id="frame-change" type="button">Change Frame</button>
+			</span>
+			<input
+				type="hidden"
+				id="frame-input"
+				name="frame"
+				value="{{ .Frame }}"
 			/>
 			<input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
 		</form>
+		<script nonce="{{ .CSPNonce }}">
+			let button = document.getElementById("frame-change");
+			let frameUse = document.getElementById("frame-use");
+			let frameInput = document.getElementById("frame-input");
+
+			button.onclick = function () {
+				let id = semiRandomFrameIndex();
+				frameUse.setAttribute("href", "#frame"+id.toString());
+				frameInput.value=id.toString();
+			}
+
+			let frameIndices = [];
+			for (let i = 0; i < {{ .FrameCount }}; i++) {
+				if (i !== {{ .Frame }}) {
+					frameIndices.push(i);
+				}
+			}
+			frameIndices = shuffleArray(frameIndices);
+			frameIndices.push({{ .Frame }});
+
+			function randomFrameIndex() {
+				return Math.floor(Math.random() * ({{ .FrameCount }} - 1));
+			}
+
+			function semiRandomFrameIndex() {
+				let weightedIndex = Math.min(randomFrameIndex(),
+					randomFrameIndex());
+				let response = frameIndices[weightedIndex];
+				frameIndices.splice(weightedIndex, 1);
+				frameIndices.push(response);
+				return response;
+			}
+
+			function shuffleArray(array) {
+				let currentIndex = array.length;
+				let randomIndex;
+
+				while (currentIndex != 0) {
+					randomIndex = Math.floor(Math.random() * currentIndex);
+					currentIndex--;
+
+					[array[currentIndex], array[randomIndex] ] =
+					[array[randomIndex] , array[currentIndex]];
+				}
+
+				return array;
+			}
+		</script>
 	{{ end }}
 	<div class="stack0">
 		{{ range .Kudos }}
