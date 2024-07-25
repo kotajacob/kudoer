@@ -1,0 +1,28 @@
+{{ define "clipPath" }}
+	<svg
+		id="clip-path-svg"
+		width="0"
+		height="0"
+		xmlns="http://www.w3.org/2000/svg"
+		viewBox="0 0 600 120"
+		preserveAspectRatio="xMidYMin"
+	>
+		<clipPath id="portrait-clip">
+			<path
+				d="
+					M 300 12
+					a 30 30 0 0 0 0 60
+					a 30 30 0 0 0 0 -60
+					l 0 -12
+					l 300 0
+					l 0 120
+					l -600 0
+					l 0 -120
+					l 300 0
+					"
+				stroke="none"
+				fill="#000"
+			/>
+		</clipPath>
+	</svg>
+{{ end }}
