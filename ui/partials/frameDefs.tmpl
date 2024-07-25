@@ -1,5 +1,9 @@
 {{ define "frameDefs" }}
 	{{ template "mask" }}
-	{{ template "frame0" }}
-	{{ template "frame1" }}
+	<svg class="undisplay" xmlns="http://www.w3.org/2000/svg">
+		<defs>
+			{{ template "frame0" }}
+			{{ template "frame1" }}
+		</defs>
+	</svg>
 {{ end }}
