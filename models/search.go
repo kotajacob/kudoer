@@ -61,7 +61,7 @@ func (m *SearchModel) Users(ctx context.Context, query string) ([]SearchUser, er
 
 	var users []SearchUser
 	err = sqlitex.Execute(conn,
-		`SELECT id, name FROM users_search WHERE users_search MATCH ?
+		`SELECT username, displayname FROM users_search WHERE users_search MATCH ?
 		ORDER BY bm25(users_search, 0, 1) LIMIT 100`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
