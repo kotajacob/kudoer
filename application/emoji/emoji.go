@@ -11,75 +11,75 @@ type Emoji struct {
 var all = []Emoji{
 	{
 		Key: 0,
-		Alt: "",
+		Alt: "A pair of eyes, glancing slightly to the left.",
 	},
 	{
 		Key: 1,
-		Alt: "",
+		Alt: "A whitish-gray, cartoon-styled human skull with large, black eye sockets.",
 	},
 	{
 		Key: 2,
-		Alt: "",
+		Alt: "A flame, as produced when something is on fire.",
 	},
 	{
 		Key: 3,
-		Alt: "",
+		Alt: "A yellow face with a big grin, uplifted eyebrows, and smiling eyes, each shedding a tear from laughing so hard.",
 	},
 	{
 		Key: 4,
-		Alt: "",
+		Alt: "A yellow face with simple, open eyes and a flat, closed mouth.",
 	},
 	{
 		Key: 5,
-		Alt: "",
+		Alt: "A red face with an angry expression: frowning mouth with eyes and eyebrows scrunched downward.",
 	},
 	{
 		Key: 6,
-		Alt: "",
+		Alt: "A yellow face with simple open eyes showing clenched teeth.",
 	},
 	{
 		Key: 7,
-		Alt: "",
+		Alt: "A yellow face with an open mouth wailing and streams of heavy tears flowing from closed eyes.",
 	},
 	{
 		Key: 8,
-		Alt: "",
+		Alt: "A person with arms crossed forming an ‘X’ to indicate ‘no’ or ‘no good’.",
 	},
 	{
 		Key: 9,
-		Alt: "",
+		Alt: "A yellow face with furrowed eyebrows looking upwards with thumb and index finger resting on its chin.",
 	},
 	{
 		Key: 10,
-		Alt: "",
+		Alt: "A yellow face with a broad, open smile, showing upper teeth on most platforms, with stars for eyes, as if seeing a beloved celebrity.",
 	},
 	{
 		Key: 11,
-		Alt: "",
+		Alt: "A yellow face with scrunched, X-shaped eyes spewing bright-green vomit.",
 	},
 	{
 		Key: 12,
-		Alt: "",
+		Alt: "A yellow face with an open mouth, the top of its head exploding in the shape of a brain-like mushroom cloud.",
 	},
 	{
 		Key: 13,
-		Alt: "",
+		Alt: "A yellow face with smiling eyes, a closed smile, rosy cheeks, and several hearts floating around its head.",
 	},
 	{
 		Key: 14,
-		Alt: "",
+		Alt: "A yellow face with eyes closed and mouth wide open covered by a hand, mid yawn.",
 	},
 	{
 		Key: 15,
-		Alt: "",
+		Alt: "A yellow face with tears welling up at the bottom of its two large eyes.",
 	},
 	{
 		Key: 16,
-		Alt: "",
+		Alt: "A yellow smiley face melting into a puddle.",
 	},
 	{
 		Key: 17,
-		Alt: "",
+		Alt: "A classic red love heart emoji.",
 	},
 }
 

@@ -15,7 +15,7 @@
 						<img
 							class="emoji"
 							src="{{ .Key | printf "/static/emoji%v.svg" | ToHash }}"
-							alt=""
+							alt="{{ .Alt }}"
 						/>
 					</label>
 				{{ end }}
