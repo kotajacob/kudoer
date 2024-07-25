@@ -19,6 +19,7 @@ type Item struct {
 	CreatorUsername string
 	Name            string
 	Description     string
+	Source          string
 }
 
 type ItemModel struct {
@@ -35,7 +36,7 @@ func (m *ItemModel) Info(ctx context.Context, uuid ulid.ULID) (Item, error) {
 
 	var i Item
 	err = sqlitex.Execute(conn,
-		`SELECT creator_username, name, description FROM items WHERE id = ?`,
+		`SELECT creator_username, name, description, source FROM items WHERE id = ?`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				i.ID = uuid
@@ -43,6 +44,7 @@ func (m *ItemModel) Info(ctx context.Context, uuid ulid.ULID) (Item, error) {
 				i.CreatorUsername = stmt.ColumnText(0)
 				i.Name = stmt.ColumnText(1)
 				i.Description = stmt.ColumnText(2)
+				i.Source = stmt.ColumnText(3)
 				return nil
 			},
 			Args: []any{uuid},

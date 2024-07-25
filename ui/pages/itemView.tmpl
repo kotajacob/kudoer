@@ -2,6 +2,9 @@
 	{{ template "frameDefs" }}
 	<h2>{{ .Name }}</h2>
 	<p>{{ .Description }}</p>
+	{{ if .Source }}
+		<p>Source: <a href="{{ .Source }}">{{ .Source }}</a></p>
+	{{ end }}
 	{{ if .Authenticated }}
 		<form class="stack0" action="/kudo/{{ .ID }}" method="post">
 			<div class="emoji-options">
