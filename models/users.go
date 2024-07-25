@@ -23,30 +23,6 @@ type UserModel struct {
 	DB *sqlitex.Pool
 }
 
-// Index returns all displaynames and usernames to build the initial search index.
-func (m *UserModel) Index(ctx context.Context, limit, offset int) ([]User, error) {
-	conn, err := m.DB.Take(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer m.DB.Put(conn)
-
-	var users []User
-	err = sqlitex.Execute(conn,
-		`SELECT username, displayname FROM users LIMIT ? OFFSET ?`,
-		&sqlitex.ExecOptions{
-			ResultFunc: func(stmt *sqlite.Stmt) error {
-				var user User
-				user.Username = stmt.ColumnText(0)
-				user.DisplayName = stmt.ColumnText(1)
-				users = append(users, user)
-				return nil
-			},
-			Args: []any{limit, offset},
-		})
-	return users, err
-}
-
 // Info returns information about a given user.
 func (m *UserModel) Info(ctx context.Context, username string) (User, error) {
 	conn, err := m.DB.Take(ctx)

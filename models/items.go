@@ -25,35 +25,6 @@ type ItemModel struct {
 	DB *sqlitex.Pool
 }
 
-// Index returns all items to build the initial search index.
-func (m *ItemModel) Index(ctx context.Context, limit, offset int) ([]Item, error) {
-	conn, err := m.DB.Take(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer m.DB.Put(conn)
-
-	var items []Item
-	err = sqlitex.Execute(conn,
-		`SELECT id, name, description FROM items LIMIT ? OFFSET ?`,
-		&sqlitex.ExecOptions{
-			ResultFunc: func(stmt *sqlite.Stmt) error {
-				var i Item
-				uuid, err := ulid.Parse(stmt.ColumnText(0))
-				if err != nil {
-					return err
-				}
-				i.ID = uuid
-				i.Name = stmt.ColumnText(1)
-				i.Description = stmt.ColumnText(2)
-				items = append(items, i)
-				return nil
-			},
-			Args: []any{limit, offset},
-		})
-	return items, err
-}
-
 // Info returns information about a given item.
 func (m *ItemModel) Info(ctx context.Context, uuid ulid.ULID) (Item, error) {
 	conn, err := m.DB.Take(ctx)
