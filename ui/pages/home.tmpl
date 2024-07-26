@@ -3,4 +3,13 @@
 	{{ range .Kudos }}
 		{{ template "kudo" . }}
 	{{ end }}
+	<span class="stack2"
+		><a class="button" href="/search">Find users to follow</a>
+		<span class="row2">
+			<a class="button" href="https://git.sr.ht/~kota/kudoer">Source</a>
+			<a class="button" href="https://lists.sr.ht/~kota/kudoer"
+				>Contact</a
+			>
+		</span>
+	</span>
 {{ end }}
