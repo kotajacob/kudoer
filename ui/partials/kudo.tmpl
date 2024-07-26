@@ -21,7 +21,7 @@
 			<img
 				class="emoji"
 				src="{{ .Emoji | printf "/static/emoji%v.svg" | ToHash }}"
-				alt=""
+				alt="{{ EmojiAlt .Emoji }}"
 			/>
 			<span>
 				to

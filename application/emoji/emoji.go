@@ -102,3 +102,8 @@ func Validate(key int) bool {
 	_, ok := lookup[key]
 	return ok
 }
+
+// Alt returns the alt text for a given emoji ID.
+func Alt(key int) string {
+	return lookup[key]
+}

@@ -12,6 +12,7 @@ import (
 	"path"
 	"path/filepath"
 
+	"git.sr.ht/~kota/kudoer/application/emoji"
 	"github.com/oklog/ulid"
 )
 
@@ -93,6 +94,7 @@ func Templates() (map[string]*template.Template, error) {
 				"Date":     Date,
 				"ToHash":   ToHash,
 				"FromHash": FromHash,
+				"EmojiAlt": emoji.Alt,
 			}).
 			ParseFS(EFS, files...)
 		if err != nil {
