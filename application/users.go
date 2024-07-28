@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"git.sr.ht/~kota/kudoer/models"
+	"git.sr.ht/~kota/kudoer/db/models"
 	"golang.org/x/crypto/bcrypt"
 )
 

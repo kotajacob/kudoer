@@ -5,7 +5,7 @@ package application
 import (
 	"net/http"
 
-	"git.sr.ht/~kota/kudoer/models"
+	"git.sr.ht/~kota/kudoer/db/models"
 )
 
 type homePage struct {

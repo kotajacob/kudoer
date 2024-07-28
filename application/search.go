@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"git.sr.ht/~kota/kudoer/models"
+	"git.sr.ht/~kota/kudoer/db/models"
 )
 
 type searchPage struct {

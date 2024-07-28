@@ -12,7 +12,7 @@ import (
 
 	"git.sr.ht/~kota/kudoer/application/emoji"
 	"git.sr.ht/~kota/kudoer/application/frames"
-	"git.sr.ht/~kota/kudoer/models"
+	"git.sr.ht/~kota/kudoer/db/models"
 	"github.com/oklog/ulid"
 )
 

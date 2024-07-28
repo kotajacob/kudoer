@@ -13,9 +13,9 @@ import (
 	"syscall"
 	"time"
 
-	"git.sr.ht/~kota/kudoer/mail"
-	"git.sr.ht/~kota/kudoer/media"
-	"git.sr.ht/~kota/kudoer/models"
+	"git.sr.ht/~kota/kudoer/application/mail"
+	"git.sr.ht/~kota/kudoer/application/media"
+	"git.sr.ht/~kota/kudoer/db/models"
 	"github.com/alexedwards/scs/v2"
 	"github.com/justinas/nosurf"
 	"github.com/throttled/throttled/v2"

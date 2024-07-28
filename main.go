@@ -1,4 +1,4 @@
-// License: AGPL-3.0-only
+// License: AGPL-3.0-onlymain
 // (c) 2024 Dakota Walsh <kota@nilsu.org>
 package main
 
@@ -12,11 +12,11 @@ import (
 	"time"
 
 	"git.sr.ht/~kota/kudoer/application"
+	"git.sr.ht/~kota/kudoer/application/mail"
+	"git.sr.ht/~kota/kudoer/application/media"
 	"git.sr.ht/~kota/kudoer/db"
-	"git.sr.ht/~kota/kudoer/litesession"
-	"git.sr.ht/~kota/kudoer/mail"
-	"git.sr.ht/~kota/kudoer/media"
-	"git.sr.ht/~kota/kudoer/models"
+	"git.sr.ht/~kota/kudoer/db/litesession"
+	"git.sr.ht/~kota/kudoer/db/models"
 	"git.sr.ht/~kota/kudoer/ui"
 	"github.com/alexedwards/scs/v2"
 	"github.com/throttled/throttled/v2"
