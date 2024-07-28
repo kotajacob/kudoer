@@ -152,6 +152,6 @@ func (app *application) itemCreatePostHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	app.sessionManager.Put(r.Context(), "flash", "Item created")
+	app.flash(r, "Item created")
 	http.Redirect(w, r, fmt.Sprintf("/item/view/%v", id), http.StatusSeeOther)
 }

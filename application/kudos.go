@@ -55,7 +55,7 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if fieldError != "" {
-		app.sessionManager.Put(r.Context(), "flash", fieldError)
+		app.flash(r, fieldError)
 		http.Redirect(w, r, fmt.Sprintf("/item/view/%v", itemID), http.StatusSeeOther)
 		return
 	}
@@ -75,7 +75,7 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 				e,
 				body,
 			)
-			app.sessionManager.Put(r.Context(), "flash", "Kudos given")
+			app.flash(r, "Kudos given")
 		} else {
 			app.serverError(w, err)
 			return
@@ -91,6 +91,6 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 		e,
 		body,
 	)
-	app.sessionManager.Put(r.Context(), "flash", "Kudos updated")
+	app.flash(r, "Kudos updated")
 	http.Redirect(w, r, fmt.Sprintf("/item/view/%v", itemID), http.StatusSeeOther)
 }

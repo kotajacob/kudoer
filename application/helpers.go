@@ -52,6 +52,12 @@ func (app *application) logout(r *http.Request) error {
 	return nil
 }
 
+// flash will show a given message on the next page load for the current
+// session.
+func (app *application) flash(r *http.Request, msg string) {
+	app.sessionManager.Put(r.Context(), "flash", msg)
+}
+
 // strip removes any characters which are not letters, numbers, or space.
 func strip(s string) string {
 	var result strings.Builder

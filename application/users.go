@@ -336,11 +336,7 @@ func (app *application) userForgotPostHandler(w http.ResponseWriter, r *http.Req
 	if email == "" {
 		// Lie about it to prevent attackers from being able to "confirm" a
 		// user's email address.
-		app.sessionManager.Put(
-			r.Context(),
-			"flash",
-			"If that email is in our system for your user instructions will be sent shortly",
-		)
+		app.flash(r, "If that email is in our system for your user instructions will be sent shortly")
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
@@ -377,11 +373,7 @@ func (app *application) userForgotPostHandler(w http.ResponseWriter, r *http.Req
 		}
 	}()
 
-	app.sessionManager.Put(
-		r.Context(),
-		"flash",
-		"If that email is in our system for your user instructions will be sent shortly",
-	)
+	app.flash(r, "If that email is in our system for your user instructions will be sent shortly")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -486,7 +478,7 @@ func (app *application) userLogoutPostHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	app.sessionManager.Put(r.Context(), "flash", "You've been logged out successfully")
+	app.flash(r, "You've been logged out successfully")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -738,7 +730,7 @@ func (app *application) userFollowPostHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	app.sessionManager.Put(r.Context(), "flash", "You're now following "+toFollow)
+	app.flash(r, "You're now following "+toFollow)
 	http.Redirect(w, r, fmt.Sprintf("/user/view/%v", toFollow), http.StatusSeeOther)
 }
 
@@ -758,6 +750,6 @@ func (app *application) userUnfollowPostHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	app.sessionManager.Put(r.Context(), "flash", "You're no longer following "+toFollow)
+	app.flash(r, "You're no longer following "+toFollow)
 	http.Redirect(w, r, fmt.Sprintf("/user/view/%v", toFollow), http.StatusSeeOther)
 }
