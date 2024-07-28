@@ -61,7 +61,7 @@ func (app *application) itemViewHandler(w http.ResponseWriter, r *http.Request) 
 
 	var kudoed bool
 	var creatorPic string
-	if username := app.sessionManager.GetString(r.Context(), "authenticatedUsername"); username != "" {
+	if username := app.authenticated(r); username != "" {
 		if _, err := app.kudos.ItemUser(r.Context(), uuid, username); errors.Is(err, models.ErrNoRecord) {
 			kudoed = true
 		}
@@ -140,7 +140,7 @@ func (app *application) itemCreatePostHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	username := app.sessionManager.GetString(r.Context(), "authenticatedUsername")
+	username := app.authenticated(r)
 	id, err := app.items.Insert(
 		r.Context(),
 		username,

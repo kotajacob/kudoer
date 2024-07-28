@@ -32,6 +32,26 @@ func (app *application) authenticated(r *http.Request) string {
 	return app.sessionManager.GetString(r.Context(), "authenticatedUsername")
 }
 
+// login will authenticate the current session as the provided user.
+func (app *application) login(r *http.Request, username string) error {
+	err := app.sessionManager.RenewToken(r.Context())
+	if err != nil {
+		return err
+	}
+	app.sessionManager.Put(r.Context(), "authenticatedUsername", username)
+	return nil
+}
+
+// logout will dis-authenticate the current session.
+func (app *application) logout(r *http.Request) error {
+	err := app.sessionManager.RenewToken(r.Context())
+	if err != nil {
+		return err
+	}
+	app.sessionManager.Remove(r.Context(), "authenticatedUsername")
+	return nil
+}
+
 // strip removes any characters which are not letters, numbers, or space.
 func strip(s string) string {
 	var result strings.Builder

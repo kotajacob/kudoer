@@ -17,7 +17,7 @@ import (
 
 // kudoPostHandler creates a kudo.
 func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) {
-	username := app.sessionManager.GetString(r.Context(), "authenticatedUsername")
+	username := app.authenticated(r)
 	r.Body = http.MaxBytesReader(w, r.Body, 4096)
 	err := r.ParseForm()
 	if err != nil {

@@ -18,7 +18,7 @@ type homePage struct {
 // homeHandler presents the homeHandler page.
 func (app *application) homeHandler(w http.ResponseWriter, r *http.Request) {
 	var kudos []models.Kudo
-	username := app.sessionManager.GetString(r.Context(), "authenticatedUsername")
+	username := app.authenticated(r)
 	if username != "" {
 		var err error
 		kudos, err = app.kudos.Following(r.Context(), username)

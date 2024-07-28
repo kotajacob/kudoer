@@ -39,7 +39,7 @@ func (app *application) userViewHandler(w http.ResponseWriter, r *http.Request) 
 
 	following, err := app.users.IsFollowing(
 		r.Context(),
-		app.sessionManager.GetString(r.Context(), "authenticatedUsername"),
+		app.authenticated(r),
 		username,
 	)
 	if err != nil {
@@ -170,13 +170,12 @@ func (app *application) userRegisterPostHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = app.sessionManager.RenewToken(r.Context())
+	err = app.login(r, form.Username)
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
 
-	app.sessionManager.Put(r.Context(), "authenticatedUsername", form.Username)
 	http.Redirect(w, r, fmt.Sprintf("/user/view/%v", form.Username), http.StatusSeeOther)
 }
 
@@ -267,13 +266,12 @@ func (app *application) userLoginPostHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	err = app.sessionManager.RenewToken(r.Context())
+	err = app.login(r, form.Username)
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
 
-	app.sessionManager.Put(r.Context(), "authenticatedUsername", form.Username)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -472,24 +470,22 @@ func (app *application) userResetPostHandler(w http.ResponseWriter, r *http.Requ
 		app.errLog.Println(err)
 	}
 
-	err = app.sessionManager.RenewToken(r.Context())
+	err = app.login(r, username)
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
 
-	app.sessionManager.Put(r.Context(), "authenticatedUsername", username)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (app *application) userLogoutPostHandler(w http.ResponseWriter, r *http.Request) {
-	err := app.sessionManager.RenewToken(r.Context())
+	err := app.logout(r)
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
 
-	app.sessionManager.Remove(r.Context(), "authenticatedUsername")
 	app.sessionManager.Put(r.Context(), "flash", "You've been logged out successfully")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
@@ -501,7 +497,7 @@ type userSettingsPage struct {
 }
 
 func (app *application) userSettingsHandler(w http.ResponseWriter, r *http.Request) {
-	username := app.sessionManager.GetString(r.Context(), "authenticatedUsername")
+	username := app.authenticated(r)
 	user, err := app.users.Info(r.Context(), username)
 	if err != nil {
 		app.serverError(w, err)
@@ -543,7 +539,7 @@ func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	username := app.sessionManager.GetString(r.Context(), "authenticatedUsername")
+	username := app.authenticated(r)
 	form := userSettingsForm{
 		DisplayName: r.PostForm.Get("displayname"),
 		Email:       r.PostForm.Get("email"),
@@ -733,7 +729,7 @@ func (app *application) userFollowPostHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	username := app.sessionManager.GetString(r.Context(), "authenticatedUsername")
+	username := app.authenticated(r)
 	toFollow := r.PostForm.Get("follow")
 
 	err = app.users.Follow(r.Context(), username, toFollow)
@@ -753,7 +749,7 @@ func (app *application) userUnfollowPostHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	username := app.sessionManager.GetString(r.Context(), "authenticatedUsername")
+	username := app.authenticated(r)
 	toFollow := r.PostForm.Get("unfollow")
 
 	err = app.users.Unfollow(r.Context(), username, toFollow)
