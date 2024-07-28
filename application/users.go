@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"unicode/utf8"
 
+	"git.sr.ht/~kota/kudoer/application/validator"
 	"git.sr.ht/~kota/kudoer/db/models"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -85,8 +85,6 @@ type userRegisterForm struct {
 	DisplayName string
 	Email       string
 
-	// NonFieldErrors stores errors which do not relate to a form field.
-	NonFieldErrors []string
 	// FieldErrors stores errors relating to specific form fields.
 	FieldErrors map[string]string
 }
@@ -101,41 +99,26 @@ func (app *application) userRegisterPostHandler(w http.ResponseWriter, r *http.R
 	}
 
 	form := userRegisterForm{
-		Username:    r.PostForm.Get("username"),
-		DisplayName: r.PostForm.Get("displayname"),
-		Email:       r.PostForm.Get("email"),
-		FieldErrors: map[string]string{},
+		Username:    strings.TrimSpace(r.PostForm.Get("username")),
+		DisplayName: strings.TrimSpace(r.PostForm.Get("displayname")),
+		Email:       strings.TrimSpace(r.PostForm.Get("email")),
 	}
 
-	if strings.TrimSpace(form.Username) == "" {
-		form.FieldErrors["username"] = "Username cannot be blank"
-	} else if utf8.RuneCountInString(form.Username) > 30 {
-		form.FieldErrors["username"] = "Username cannot be longer than 30 characters"
-	} else if !rxUsername.MatchString(form.Username) {
-		form.FieldErrors["username"] = "Username may only contain lowercase letters, numbers, hyphen, and underscore"
-	}
-
-	if strings.TrimSpace(form.DisplayName) == "" {
-		form.DisplayName = form.Username
-	} else if utf8.RuneCountInString(form.DisplayName) > 30 {
-		form.FieldErrors["displayname"] = "Display Name cannot be longer than 30 characters"
-	}
-
-	if form.Email != "" {
-		if len(form.Email) > 254 || !rxEmail.MatchString(form.Email) {
-			// https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address
-			form.FieldErrors["email"] = "Email appears to be invalid"
-		}
-	}
+	v := validator.New()
+	v.Username(form.Username)
+	v.Optional(form.DisplayName, v.DisplayName)
+	v.Optional(form.Email, v.Email)
 
 	password := r.PostForm.Get("password")
-	if strings.TrimSpace(password) == "" {
-		form.FieldErrors["password"] = "Password cannot be blank"
-	} else if len(password) > 72 {
-		form.FieldErrors["password"] = "Password cannot be larger than 72 bytes as a limitation of bcrypt"
+	confirmation := r.PostForm.Get("confirmation")
+	v.Password(password, confirmation)
+
+	// Set displayname to username if missing.
+	if strings.TrimSpace(form.DisplayName) == "" {
+		form.DisplayName = form.Username
 	}
 
-	if len(form.FieldErrors) > 0 {
+	validationError := func() {
 		app.render(w, http.StatusUnprocessableEntity, "userRegister.tmpl", userRegisterPage{
 			Page: app.newPage(
 				r,
@@ -144,6 +127,10 @@ func (app *application) userRegisterPostHandler(w http.ResponseWriter, r *http.R
 			),
 			Form: form,
 		})
+	}
+	var valid bool
+	if _, form.FieldErrors, valid = v.Valid(); !valid {
+		validationError()
 		return
 	}
 
@@ -164,7 +151,12 @@ func (app *application) userRegisterPostHandler(w http.ResponseWriter, r *http.R
 		string(hashedPassword),
 	)
 	if errors.Is(err, models.ErrUsernameExists) {
-		form.FieldErrors["username"] = "Username is already taken"
+		v.AddFieldError("username", "Username is already taken")
+		var valid bool
+		if _, form.FieldErrors, valid = v.Valid(); !valid {
+			validationError()
+			return
+		}
 	} else if err != nil {
 		app.serverError(w, err)
 		return
@@ -218,22 +210,10 @@ func (app *application) userLoginPostHandler(w http.ResponseWriter, r *http.Requ
 		FieldErrors:    map[string]string{},
 	}
 
-	if strings.TrimSpace(form.Username) == "" {
-		form.FieldErrors["username"] = "Username cannot be blank"
-	} else if utf8.RuneCountInString(form.Username) > 30 {
-		form.FieldErrors["username"] = "Username cannot be longer than 30 characters"
-	} else if !rxUsername.MatchString(form.Username) {
-		form.FieldErrors["username"] = "Username may only contain lowercase letters, numbers, hyphen, and underscore"
-	}
+	v := validator.New()
+	v.Username(form.Username)
 
-	password := r.PostForm.Get("password")
-	if strings.TrimSpace(password) == "" {
-		form.FieldErrors["password"] = "Password cannot be blank"
-	} else if len(password) > 72 {
-		form.FieldErrors["password"] = "Password cannot be larger than 72 bytes as a limitation of bcrypt"
-	}
-
-	if len(form.FieldErrors) > 0 {
+	validationError := func() {
 		app.render(w, http.StatusUnprocessableEntity, "login.tmpl", userLoginPage{
 			Page: app.newPage(
 				r,
@@ -244,22 +224,19 @@ func (app *application) userLoginPostHandler(w http.ResponseWriter, r *http.Requ
 		})
 		return
 	}
+	var valid bool
+	if form.NonFieldErrors, form.FieldErrors, valid = v.Valid(); !valid {
+		validationError()
+		return
+	}
 
+	password := r.PostForm.Get("password")
 	err = app.users.Authenticate(r.Context(), form.Username, password)
 	if err != nil {
 		if errors.Is(err, models.ErrInvalidCredentials) {
-			form.NonFieldErrors = append(
-				form.NonFieldErrors,
-				"Email or password is incorrect",
-			)
-			app.render(w, http.StatusUnprocessableEntity, "login.tmpl", userLoginPage{
-				Page: app.newPage(
-					r,
-					"Login on Kudoer",
-					"Provide your login details to access Kudoer",
-				),
-				Form: form,
-			})
+			v.AddNonFieldError("Email or password is incorrect")
+			form.NonFieldErrors = v.NonFieldErrors
+			validationError()
 		} else {
 			app.serverError(w, err)
 		}
@@ -316,32 +293,12 @@ func (app *application) userForgotPostHandler(w http.ResponseWriter, r *http.Req
 		FieldErrors:    map[string]string{},
 	}
 
-	if strings.TrimSpace(form.Username) == "" {
-		form.FieldErrors["username"] = "Username cannot be blank"
-	} else if utf8.RuneCountInString(form.Username) > 30 {
-		form.FieldErrors["username"] = "Username cannot be longer than 30 characters"
-	} else if !rxUsername.MatchString(form.Username) {
-		form.FieldErrors["username"] = "Username may only contain lowercase letters, numbers, hyphen, and underscore"
-	}
+	v := validator.New()
+	v.Username(form.Username)
+	v.Email(form.Email)
 
-	if strings.TrimSpace(form.Email) == "" {
-		form.FieldErrors["email"] = "Email cannot be blank"
-	}
-	if len(form.Email) > 254 || !rxEmail.MatchString(form.Email) {
-		// https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address
-		form.FieldErrors["email"] = "Email appears to be invalid"
-	}
-
-	email, err := app.users.GetEmail(r.Context(), form.Username)
-	if email == "" {
-		// Lie about it to prevent attackers from being able to "confirm" a
-		// user's email address.
-		app.flash(r, "If that email is in our system for your user instructions will be sent shortly")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-
-	if len(form.FieldErrors) > 0 || len(form.NonFieldErrors) > 0 {
+	var valid bool
+	if form.NonFieldErrors, form.FieldErrors, valid = v.Valid(); !valid {
 		app.render(w, http.StatusUnprocessableEntity, "forgot.html", userForgotPage{
 			Page: app.newPage(
 				r,
@@ -350,6 +307,16 @@ func (app *application) userForgotPostHandler(w http.ResponseWriter, r *http.Req
 			),
 			Form: form,
 		})
+	}
+
+	email, err := app.users.GetEmail(r.Context(), form.Username)
+	flashMsg := "If that email is in our system for your user instructions will be sent shortly"
+	if email == "" {
+		// Lie about it to prevent attackers from being able to "confirm" a
+		// user's email address.
+		app.flash(r, flashMsg)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
 	}
 
 	token, err := app.pwresets.New(r.Context(), form.Username)
@@ -373,7 +340,7 @@ func (app *application) userForgotPostHandler(w http.ResponseWriter, r *http.Req
 		}
 	}()
 
-	app.flash(r, "If that email is in our system for your user instructions will be sent shortly")
+	app.flash(r, flashMsg)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -396,6 +363,8 @@ func (app *application) userResetHandler(w http.ResponseWriter, r *http.Request)
 type userResetForm struct {
 	// NonFieldErrors stores errors which do not relate to a form field.
 	NonFieldErrors []string
+	// FieldErrors stores errors relating to specific form fields.
+	FieldErrors map[string]string
 }
 
 func (app *application) userResetPostHandler(w http.ResponseWriter, r *http.Request) {
@@ -408,34 +377,33 @@ func (app *application) userResetPostHandler(w http.ResponseWriter, r *http.Requ
 
 	form := userResetForm{}
 
+	password := r.PostForm.Get("password")
+	confirmation := r.PostForm.Get("confirmation")
+
+	v := validator.New()
+	v.Password(password, confirmation)
+
+	// If the user is not logged in, they must provide a token which they
+	// would've recieved in a password reset email.
+	//
 	// The Token is not part of the URL.
+	//
 	// This is to absolutely prevent the token from being leaked via the
 	// referrer header.
 	token := r.PostForm.Get("token")
-	password := r.PostForm.Get("password")
-	confirmation := r.PostForm.Get("confirmation")
-	if strings.TrimSpace(password) == "" {
-		form.NonFieldErrors = append(
-			form.NonFieldErrors,
-			"Password cannot be blank",
-		)
-	} else if len(password) > 72 {
-		form.NonFieldErrors = append(
-			form.NonFieldErrors,
-			"Password cannot be larger than 72 bytes as a limitation of bcrypt",
-		)
+	var username string
+	if token == "" {
+		username = app.authenticated(r)
+		v.Username(username)
+	} else {
+		username, err = app.pwresets.Validate(r.Context(), token)
+		if err != nil || username == "" {
+			v.AddNonFieldError("Token is invalid")
+		}
 	}
 
-	if password != confirmation {
-		form.NonFieldErrors = append(form.NonFieldErrors, "Passwords do not match")
-	}
-
-	username, err := app.pwresets.Validate(r.Context(), token)
-	if err != nil || username == "" {
-		form.NonFieldErrors = append(form.NonFieldErrors, "Token is invalid")
-	}
-
-	if len(form.NonFieldErrors) > 0 {
+	var valid bool
+	if form.NonFieldErrors, form.FieldErrors, valid = v.Valid(); !valid {
 		app.render(w, http.StatusUnprocessableEntity, "resetPassword.tmpl", userResetPage{
 			Page: app.newPage(
 				r,
@@ -539,12 +507,14 @@ func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.R
 		FieldErrors: map[string]string{},
 	}
 
+	v := validator.New()
+
 	file, fileHeader, err := r.FormFile("pic")
 	if err == nil {
 		defer file.Close()
 
 		if fileHeader.Size > (1024 * 1024 * 10) {
-			form.FieldErrors["pic"] = "Profile picture must be less than 10MB"
+			v.AddFieldError("pic", "Profile picture must be less than 10MB")
 		}
 
 		// Store the profile picture.
@@ -576,29 +546,12 @@ func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if utf8.RuneCountInString(form.DisplayName) > 30 {
-		form.FieldErrors["displayname"] = "Display Name cannot be longer than 30 characters"
-	}
+	v.Optional(form.DisplayName, v.DisplayName)
+	v.Optional(form.Email, v.Email)
+	v.Optional(form.Bio, v.Bio)
 
-	if form.Email != "" {
-		if len(form.Email) > 254 || !rxEmail.MatchString(form.Email) {
-			// https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address
-			form.FieldErrors["email"] = "Email appears to be invalid"
-		}
-	}
-
-	if utf8.RuneCountInString(form.Bio) > 1000 {
-		form.FieldErrors["bio"] = "Bio cannot be longer than 1000 characters"
-	}
-
-	password := r.PostForm.Get("password")
-	if password != "" {
-		if len(password) > 72 {
-			form.FieldErrors["password"] = "Password cannot be larger than 72 bytes as a limitation of bcrypt"
-		}
-	}
-
-	if len(form.FieldErrors) > 0 {
+	var valid bool
+	if form.NonFieldErrors, form.FieldErrors, valid = v.Valid(); !valid {
 		app.render(w, http.StatusUnprocessableEntity, "userSettings.tmpl", userSettingsPage{
 			Page: app.newPage(
 				r,
@@ -611,7 +564,6 @@ func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	// Update basic fields.
 	err = app.users.UpdateProfile(
 		r.Context(),
 		username,
@@ -622,27 +574,6 @@ func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.R
 	if err != nil {
 		app.serverError(w, err)
 		return
-	}
-
-	// Update user's password ONLY if changed.
-	if password != "" {
-		hashedPassword, err := bcrypt.GenerateFromPassword(
-			[]byte(password),
-			bcrypt.DefaultCost,
-		)
-		if err != nil {
-			app.serverError(w, err)
-			return
-		}
-		err = app.users.ChangePassword(
-			r.Context(),
-			username,
-			string(hashedPassword),
-		)
-		if err != nil {
-			app.serverError(w, err)
-			return
-		}
 	}
 
 	http.Redirect(w, r, fmt.Sprintf("/user/view/%v", username), http.StatusSeeOther)

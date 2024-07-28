@@ -6,11 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
-	"unicode/utf8"
 
-	"git.sr.ht/~kota/kudoer/application/emoji"
-	"git.sr.ht/~kota/kudoer/application/frames"
+	"git.sr.ht/~kota/kudoer/application/validator"
 	"git.sr.ht/~kota/kudoer/db/models"
 	"github.com/oklog/ulid"
 )
@@ -31,31 +28,16 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	var fieldError string
-	e, err := strconv.Atoi(r.PostForm.Get("emoji"))
-	if err != nil {
-		fieldError = "Invalid emoji payload"
-	}
-	if !emoji.Validate(e) {
-		fieldError = "Invalid emoji selected"
-	}
+	v := validator.New()
+	e, f, body := v.Kudo(
+		r.PostForm.Get("emoji"),
+		r.PostForm.Get("frame"),
+		r.PostForm.Get("body"),
+	)
 
-	frame, err := strconv.Atoi(r.PostForm.Get("frame"))
-	if err != nil {
-		fieldError = "Invalid frame payload"
-	}
-	if !frames.Validate(frame) {
-		fieldError = "Invalid frame selected"
-	}
-
-	body := r.PostForm.Get("body")
-	if utf8.RuneCountInString(body) > 5500 {
-		fmt.Println(utf8.RuneCountInString(body))
-		fieldError = "Body of kudo cannot be longer than 5000 characters"
-	}
-
-	if fieldError != "" {
-		app.flash(r, fieldError)
+	_, fieldErrors, valid := v.Valid()
+	if !valid {
+		app.flash(r, fieldErrors["kudo"])
 		http.Redirect(w, r, fmt.Sprintf("/item/view/%v", itemID), http.StatusSeeOther)
 		return
 	}
@@ -71,7 +53,7 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 				r.Context(),
 				itemID,
 				username,
-				frame,
+				f,
 				e,
 				body,
 			)
@@ -87,7 +69,7 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 		k.ID,
 		itemID,
 		username,
-		frame,
+		f,
 		e,
 		body,
 	)

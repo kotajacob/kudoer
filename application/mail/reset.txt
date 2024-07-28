@@ -1,0 +1,9 @@
+A password reset request was made for your Kudoer account.
+
+To reset your password follow this link:
+https://kudoer.com/user/reset
+
+Enter the following secret code along with your new password:
+{{ . }}
+
+This reset request will expire in 45 minutes.

@@ -7,11 +7,10 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
-	"strings"
-	"unicode/utf8"
 
 	"git.sr.ht/~kota/kudoer/application/emoji"
 	"git.sr.ht/~kota/kudoer/application/frames"
+	"git.sr.ht/~kota/kudoer/application/validator"
 	"git.sr.ht/~kota/kudoer/db/models"
 	"github.com/oklog/ulid"
 )
@@ -120,19 +119,12 @@ func (app *application) itemCreatePostHandler(w http.ResponseWriter, r *http.Req
 		FieldErrors: map[string]string{},
 	}
 
-	if strings.TrimSpace(form.Name) == "" {
-		form.FieldErrors["name"] = "Name cannot be blank"
-	} else if utf8.RuneCountInString(form.Name) > 100 {
-		form.FieldErrors["name"] = "Name cannot be longer than 100 characters"
-	}
+	v := validator.New()
+	v.ItemName(form.Name)
+	v.ItemDescription(form.Description)
 
-	if strings.TrimSpace(form.Description) == "" {
-		form.FieldErrors["description"] = "Description cannot be blank"
-	} else if utf8.RuneCountInString(form.Description) > 1000 {
-		form.FieldErrors["description"] = "Description cannot be longer than 1000 characters"
-	}
-
-	if len(form.FieldErrors) > 0 {
+	var valid bool
+	if _, form.FieldErrors, valid = v.Valid(); !valid {
 		app.render(w, http.StatusUnprocessableEntity, "itemCreate.tmpl", itemCreatePage{
 			Page: app.newPage(r, "Create an item", "Create a new item on Kudoer"),
 			Form: form,

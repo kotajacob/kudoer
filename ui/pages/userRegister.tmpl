@@ -63,6 +63,22 @@
 				name="password"
 				id="password"
 				type="password"
+				autocomplete="new-password"
+				required
+			/>
+		</div>
+		<div class="stack2">
+			<label for="confirmation">Confirm Password:</label>
+			{{ with .Form.FieldErrors.confirmation }}
+				<label class="error" for="confirmation">{{ . }}</label>
+			{{ end }}
+			<input
+				{{ if .Form.FieldErrors.confirmation }}
+					class="error"
+				{{ end }}
+				name="confirmation"
+				id="confirmation"
+				type="password"
 				required
 			/>
 		</div>

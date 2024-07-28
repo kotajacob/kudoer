@@ -12,9 +12,9 @@ import (
 	"github.com/go-mail/mail/v2"
 )
 
-const resetTMPL = "reset.tmpl"
+const resetTMPL = "reset.txt"
 
-//go:embed "reset.tmpl"
+//go:embed "reset.txt"
 var EFS embed.FS
 
 type Mailer struct {

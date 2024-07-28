@@ -4,8 +4,8 @@ package application
 
 import (
 	"net/http"
-	"strings"
 
+	"git.sr.ht/~kota/kudoer/application/validator"
 	"git.sr.ht/~kota/kudoer/db/models"
 )
 
@@ -33,15 +33,18 @@ func (app *application) searchHandler(w http.ResponseWriter, r *http.Request) {
 		FieldErrors: map[string]string{},
 	}
 
+	v := validator.New()
+
 	if params.Has("q") {
-		if strings.TrimSpace(form.Query) == "" {
-			form.FieldErrors["query"] = "Please enter a search term"
+		if form.Query == "" {
+			v.AddFieldError("query", "Please enter a search term")
 		} else {
 			title = form.Query + " - " + title
 		}
 	}
 
-	if len(form.FieldErrors) > 0 {
+	var valid bool
+	if _, form.FieldErrors, valid = v.Valid(); !valid {
 		app.render(w, http.StatusUnprocessableEntity, "search.tmpl", searchPage{
 			Page: app.newPage(r, title, "Search Kudoer for items to review!"),
 			Form: form,
