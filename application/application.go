@@ -13,6 +13,7 @@ import (
 	"syscall"
 	"time"
 
+	"git.sr.ht/~kota/kudoer/mail"
 	"git.sr.ht/~kota/kudoer/media"
 	"git.sr.ht/~kota/kudoer/models"
 	"github.com/alexedwards/scs/v2"
@@ -27,11 +28,13 @@ type application struct {
 	sessionManager *scs.SessionManager
 	rateLimiter    *throttled.HTTPRateLimiterCtx
 	mediaStore     *media.MediaStore
+	mailer         *mail.Mailer
 
-	users  *models.UserModel
-	items  *models.ItemModel
-	kudos  *models.KudoModel
-	search *models.SearchModel
+	users    *models.UserModel
+	items    *models.ItemModel
+	kudos    *models.KudoModel
+	search   *models.SearchModel
+	pwresets *models.PWResetModel
 }
 
 func New(
@@ -41,10 +44,12 @@ func New(
 	sessionManager *scs.SessionManager,
 	rateLimiter *throttled.HTTPRateLimiterCtx,
 	mediaStore *media.MediaStore,
+	mailer *mail.Mailer,
 	users *models.UserModel,
 	items *models.ItemModel,
 	kudos *models.KudoModel,
 	search *models.SearchModel,
+	pwresets *models.PWResetModel,
 ) *application {
 	return &application{
 		infoLog:        infoLog,
@@ -53,10 +58,12 @@ func New(
 		sessionManager: sessionManager,
 		rateLimiter:    rateLimiter,
 		mediaStore:     mediaStore,
+		mailer:         mailer,
 		users:          users,
 		items:          items,
 		kudos:          kudos,
 		search:         search,
+		pwresets:       pwresets,
 	}
 }
 

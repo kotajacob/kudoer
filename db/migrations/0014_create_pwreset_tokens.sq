@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS pwreset_tokens (
+	hash BLOB NOT NULL PRIMARY KEY,
+	username TEXT NOT NULL,
+	expiry INTEGER NOT NULL,
+	FOREIGN KEY (username) REFERENCES users (username) ON DELETE CASCADE
+);

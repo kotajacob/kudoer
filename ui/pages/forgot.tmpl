@@ -1,10 +1,7 @@
 {{ define "main" }}
-	<h2>Login</h2>
-	<form class="stack0" action="login" method="post">
+	<h2>Forgot password?</h2>
+	<form class="stack0" action="forgot" method="post">
 		<div class="stack2">
-			{{ range .Form.NonFieldErrors }}
-				<div class="error">{{ . }}</div>
-			{{ end }}
 			<label for="username">Username:</label>
 			{{ with .Form.FieldErrors.username }}
 				<label class="error" for="username">{{ . }}</label>
@@ -14,7 +11,7 @@
 					class="error"
 				{{ end }}
 				{{ if .Form.Username }}value="{{ .Form.Username }}"{{ end }}
-				type="text"
+				type="username"
 				name="username"
 				id="username"
 				maxlength="30"
@@ -22,22 +19,22 @@
 			/>
 		</div>
 		<div class="stack2">
-			<label for="password">Password:</label>
-			{{ with .Form.FieldErrors.password }}
-				<label class="error" for="password">{{ . }}</label>
+			<label for="email">Email:</label>
+			{{ with .Form.FieldErrors.email }}
+				<label class="error" for="email">{{ . }}</label>
 			{{ end }}
 			<input
-				{{ if .Form.FieldErrors.password }}
+				{{ if .Form.FieldErrors.email }}
 					class="error"
 				{{ end }}
-				name="password"
-				id="password"
-				type="password"
+				{{ if .Form.Email }}value="{{ .Form.Email }}"{{ end }}
+				type="email"
+				name="email"
+				id="email"
 				required
 			/>
 		</div>
-		<input type="submit" value="Login" />
+		<input type="submit" value="Continue" />
 		<input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
-		<a href="forgot">Forgot your password?</a>
 	</form>
 {{ end }}

@@ -14,6 +14,7 @@ import (
 	"git.sr.ht/~kota/kudoer/application"
 	"git.sr.ht/~kota/kudoer/db"
 	"git.sr.ht/~kota/kudoer/litesession"
+	"git.sr.ht/~kota/kudoer/mail"
 	"git.sr.ht/~kota/kudoer/media"
 	"git.sr.ht/~kota/kudoer/models"
 	"git.sr.ht/~kota/kudoer/ui"
@@ -26,6 +27,11 @@ func main() {
 	addr := flag.String("addr", ":2024", "HTTP Network Address")
 	dsn := flag.String("dsn", "kudoer.db", "SQLite data source name")
 	msn := flag.String("media", "media_store", "Media source name")
+	mailHost := flag.String("mail-host", "", "Mail server host")
+	mailPort := flag.Int("mail-port", 25, "Mail server port")
+	mailUsername := flag.String("mail-username", "", "Mail server username")
+	mailPassword := flag.String("mail-password", "", "Mail server password")
+	mailSender := flag.String("mail-sender", "Kudoer <no-reply@kudoer.com>", "Mail server sender")
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO ", log.Ldate|log.Ltime)
@@ -41,6 +47,14 @@ func main() {
 			log.Fatal(err)
 		}
 	}()
+
+	mailer := mail.New(
+		*mailHost,
+		*mailPort,
+		*mailUsername,
+		*mailPassword,
+		*mailSender,
+	)
 
 	mediaStore, err := media.Open(*msn)
 	if err != nil {
@@ -100,10 +114,12 @@ func main() {
 		sessionManager,
 		rateLimiter,
 		mediaStore,
+		mailer,
 		&models.UserModel{DB: db},
 		&models.ItemModel{DB: db},
 		&models.KudoModel{DB: db},
 		&models.SearchModel{DB: db},
+		&models.PWResetModel{DB: db},
 	)
 
 	err = app.Serve(*addr)

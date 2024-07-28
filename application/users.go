@@ -277,6 +277,211 @@ func (app *application) userLoginPostHandler(w http.ResponseWriter, r *http.Requ
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+type userForgotPage struct {
+	Page
+	Form userForgotForm
+}
+
+func (app *application) userForgotHandler(w http.ResponseWriter, r *http.Request) {
+	app.render(w, http.StatusOK, "forgot.tmpl", userForgotPage{
+		Page: app.newPage(
+			r,
+			"Forgot your password?",
+			"Provide an email to reset your password",
+		),
+		Form: userForgotForm{},
+	})
+}
+
+type userForgotForm struct {
+	Username string
+	Email    string
+
+	// NonFieldErrors stores errors which do not relate to a form field.
+	NonFieldErrors []string
+	// FieldErrors stores errors relating to specific form fields.
+	FieldErrors map[string]string
+}
+
+func (app *application) userForgotPostHandler(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 4096)
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form := userForgotForm{
+		Username:       r.PostForm.Get("username"),
+		Email:          r.PostForm.Get("email"),
+		NonFieldErrors: []string{},
+		FieldErrors:    map[string]string{},
+	}
+
+	if strings.TrimSpace(form.Username) == "" {
+		form.FieldErrors["username"] = "Username cannot be blank"
+	} else if utf8.RuneCountInString(form.Username) > 30 {
+		form.FieldErrors["username"] = "Username cannot be longer than 30 characters"
+	} else if !rxUsername.MatchString(form.Username) {
+		form.FieldErrors["username"] = "Username may only contain lowercase letters, numbers, hyphen, and underscore"
+	}
+
+	if strings.TrimSpace(form.Email) == "" {
+		form.FieldErrors["email"] = "Email cannot be blank"
+	}
+	if len(form.Email) > 254 || !rxEmail.MatchString(form.Email) {
+		// https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address
+		form.FieldErrors["email"] = "Email appears to be invalid"
+	}
+
+	email, err := app.users.GetEmail(r.Context(), form.Username)
+	if email == "" {
+		// Lie about it to prevent attackers from being able to "confirm" a
+		// user's email address.
+		app.sessionManager.Put(
+			r.Context(),
+			"flash",
+			"If that email is in our system for your user instructions will be sent shortly",
+		)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	if len(form.FieldErrors) > 0 || len(form.NonFieldErrors) > 0 {
+		app.render(w, http.StatusUnprocessableEntity, "forgot.html", userForgotPage{
+			Page: app.newPage(
+				r,
+				"Forgot your password?",
+				"Provide an email to reset your password",
+			),
+			Form: form,
+		})
+	}
+
+	token, err := app.pwresets.New(r.Context(), form.Username)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	go func() {
+		defer func() {
+			if err := recover(); err != nil {
+				app.errLog.Println(err)
+			}
+		}()
+
+		// Emails can be case sensitive; so we use the stored email rather than
+		// the given email.
+		err = app.mailer.PasswordReset(email, token)
+		if err != nil {
+			app.errLog.Println(err)
+		}
+	}()
+
+	app.sessionManager.Put(
+		r.Context(),
+		"flash",
+		"If that email is in our system for your user instructions will be sent shortly",
+	)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+type userResetPage struct {
+	Page
+	Form userResetForm
+}
+
+func (app *application) userResetHandler(w http.ResponseWriter, r *http.Request) {
+	app.render(w, http.StatusOK, "resetPassword.tmpl", userResetPage{
+		Page: app.newPage(
+			r,
+			"Reset your password",
+			"Enter a new password for your account",
+		),
+		Form: userResetForm{},
+	})
+}
+
+type userResetForm struct {
+	// NonFieldErrors stores errors which do not relate to a form field.
+	NonFieldErrors []string
+}
+
+func (app *application) userResetPostHandler(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 4096)
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form := userResetForm{}
+
+	// The Token is not part of the URL.
+	// This is to absolutely prevent the token from being leaked via the
+	// referrer header.
+	token := r.PostForm.Get("token")
+	password := r.PostForm.Get("password")
+	confirmation := r.PostForm.Get("confirmation")
+	if strings.TrimSpace(password) == "" {
+		form.NonFieldErrors = append(
+			form.NonFieldErrors,
+			"Password cannot be blank",
+		)
+	} else if len(password) > 72 {
+		form.NonFieldErrors = append(
+			form.NonFieldErrors,
+			"Password cannot be larger than 72 bytes as a limitation of bcrypt",
+		)
+	}
+
+	if password != confirmation {
+		form.NonFieldErrors = append(form.NonFieldErrors, "Passwords do not match")
+	}
+
+	username, err := app.pwresets.Validate(r.Context(), token)
+	if err != nil || username == "" {
+		form.NonFieldErrors = append(form.NonFieldErrors, "Token is invalid")
+	}
+
+	if len(form.NonFieldErrors) > 0 {
+		app.render(w, http.StatusUnprocessableEntity, "resetPassword.tmpl", userResetPage{
+			Page: app.newPage(
+				r,
+				"Reset your password",
+				"Enter a new password for your account",
+			),
+			Form: form,
+		})
+		return
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword(
+		[]byte(password),
+		bcrypt.DefaultCost,
+	)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	app.users.ChangePassword(r.Context(), username, string(hashedPassword))
+
+	err = app.pwresets.DeleteAllUser(r.Context(), username)
+	if err != nil {
+		app.errLog.Println(err)
+	}
+
+	err = app.sessionManager.RenewToken(r.Context())
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.sessionManager.Put(r.Context(), "authenticatedUsername", username)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 func (app *application) userLogoutPostHandler(w http.ResponseWriter, r *http.Request) {
 	err := app.sessionManager.RenewToken(r.Context())
 	if err != nil {

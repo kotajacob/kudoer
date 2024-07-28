@@ -355,6 +355,7 @@ func (m *UserModel) SetPic(
 }
 
 // GetPic gets a user's profile picture.
+// A blank string indicates that they have not set a profile picture.
 func (m *UserModel) GetPic(
 	ctx context.Context,
 	username string,
@@ -376,6 +377,32 @@ func (m *UserModel) GetPic(
 		})
 
 	return pic, err
+}
+
+// GetEmail gets a user's email.
+// A blank string indicates that they have not set an email (or the user was not
+// found).
+func (m *UserModel) GetEmail(
+	ctx context.Context,
+	username string,
+) (string, error) {
+	conn, err := m.DB.Take(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer m.DB.Put(conn)
+
+	var email string
+	err = sqlitex.Execute(conn, `SELECT email from users WHERE username = ?`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				email = stmt.ColumnText(0)
+				return nil
+			},
+			Args: []any{username},
+		})
+
+	return email, err
 }
 
 // Change a user's password.

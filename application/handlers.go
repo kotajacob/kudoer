@@ -40,6 +40,10 @@ func (app *application) Routes() http.Handler {
 	mux.Handle("POST /user/register", dynamic.ThenFunc(app.userRegisterPostHandler))
 	mux.Handle("GET /user/login", dynamic.ThenFunc(app.userLoginHandler))
 	mux.Handle("POST /user/login", dynamic.ThenFunc(app.userLoginPostHandler))
+	mux.Handle("GET /user/forgot", dynamic.ThenFunc(app.userForgotHandler))
+	mux.Handle("POST /user/forgot", dynamic.ThenFunc(app.userForgotPostHandler))
+	mux.Handle("GET /user/reset", dynamic.ThenFunc(app.userResetHandler))
+	mux.Handle("POST /user/reset", dynamic.ThenFunc(app.userResetPostHandler))
 	mux.Handle("GET /item/view/{id}", dynamic.ThenFunc(app.itemViewHandler))
 
 	protected := dynamic.Append(app.requireAuthentication)
@@ -66,7 +70,7 @@ func (app *application) render(
 	w http.ResponseWriter,
 	status int,
 	page string,
-	data interface{},
+	data any,
 ) {
 	ts, ok := app.templates[page]
 	if !ok {
