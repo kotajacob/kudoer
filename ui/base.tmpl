@@ -39,6 +39,7 @@
 					--color-fg-light: #505050;
 					--color-bg: #f8f5f2;
 					--color-bg-light: #ccc;
+					--color-red: #aa2200;
 					font-size: calc(0.333vw + 1em);
 				}
 				*,
@@ -60,14 +61,10 @@
 					color: var(--color-fg);
 					background-color: var(--color-bg);
 					box-sizing: content-box;
-					max-inline-size: 48ch;
+					max-inline-size: 60ch;
 					margin-inline: auto;
 					padding: var(--s0);
 					font-family: system-ui, sans-serif;
-				}
-				a:active {
-					color: var(--color-bg);
-					background-color: var(--color-fg);
 				}
 				h1,
 				h2,
@@ -97,17 +94,20 @@
 				label.error {
 					font-size: var(--s-1);
 					font-weight: bold;
-					color: var(--color-3);
+					color: var(--color-red);
 				}
 				div.error {
 					text-align: center;
 					font-weight: bold;
-					color: var(--color-3);
+					color: var(--color-red);
+				}
+				input.error,
+				textarea.error {
+					border-color: var(--color-red);
 				}
 				div.flash {
 					text-align: center;
 					font-weight: bold;
-					color: var(--color-5);
 				}
 				input,
 				.button,
@@ -115,6 +115,7 @@
 				textarea {
 					width: 100%;
 					display: block;
+					padding: var(--s-4);
 					border-width: 1px;
 					border-color: var(--color-fg-light);
 					font-size: var(--s0);
@@ -122,9 +123,12 @@
 				textarea {
 					resize: vertical;
 				}
-				input.error,
-				textarea.error {
-					border-color: var(--color-3);
+				.link {
+					text-decoration: none;
+					transition: 0.2s ease;
+				}
+				.link:hover {
+					text-decoration: underline;
 				}
 				button,
 				.button,
@@ -135,6 +139,11 @@
 					color: var(--color-bg);
 					background-color: var(--color-fg);
 					cursor: pointer;
+				}
+				button:hover,
+				.button:hover,
+				input[type="submit"]:hover {
+					background-color: var(--color-fg-light);
 				}
 				.username {
 					text-align: center;
@@ -199,18 +208,19 @@
 					font-size: var(--s0);
 					cursor: pointer;
 				}
-				nav button {
+				nav .nav-option {
 					text-decoration: underline;
 					font-weight: normal;
 					width: auto;
 					display: inline-block;
+					padding: var(--s-3);
+					border-radius: var(--s-3);
 					border: none;
 					color: var(--color-fg);
 					background-color: var(--color-bg);
 				}
-				nav button:active {
-					color: var(--color-bg);
-					background-color: var(--color-fg);
+				nav .nav-option:hover {
+					background-color: var(--color-bg-light);
 				}
 				h1 img {
 					height: var(--s5);
@@ -238,9 +248,9 @@
 					margin-bottom: calc(var(--s-1) - 4px);
 				}
 				.portrait {
-					margin: 0 auto min(2ch, 4vw) auto;
-					width: min(5.75ch, 11.5vw);
-					height: min(5.75ch, 11.5vw);
+					margin: 0 auto min(3ch, 4.5vw) auto;
+					width: min(7ch, 10.5vw);
+					height: min(7ch, 10.5vw);
 					z-index: -2;
 				}
 				#clip-path-svg {
@@ -248,9 +258,9 @@
 				}
 				.frame-parent {
 					position: relative;
-					padding: min(5ch, 10vw);
-					padding-top: min(0.5ch, 1vw);
-					min-height: 16ch;
+					padding: min(6ch, 9vw);
+					padding-top: min(0.66ch, 1vw);
+					min-height: 20ch;
 				}
 				.frame {
 					position: absolute;
@@ -293,11 +303,13 @@
 		</head>
 		<body>
 			<nav class="row0">
-				<a href="/search">Search</a>
+				<a class="nav-option" href="/search">Search</a>
 				{{ if .Authenticated }}
-					<a href="/user/view/{{ .Authenticated }}">Profile</a>
+					<a class="nav-option" href="/user/view/{{ .Authenticated }}"
+						>Profile</a
+					>
 					<form action="/user/logout" method="POST">
-						<button>Logout</button>
+						<button class="nav-option">Logout</button>
 						<input
 							type="hidden"
 							name="csrf_token"
@@ -305,8 +317,8 @@
 						/>
 					</form>
 				{{ else }}
-					<a href="/user/register">Register</a>
-					<a href="/user/login">Login</a>
+					<a class="nav-option" href="/user/register">Register</a>
+					<a class="nav-option" href="/user/login">Login</a>
 				{{ end }}
 			</nav>
 			<h1 class="title">

@@ -1,8 +1,14 @@
 {{ define "user" }}
 	<div class="box stack2">
-		<h2>{{ .DisplayName }}</h2>
+		<h2>
+			<a class="link" href="/user/view/{{ .Username }}"
+				>{{ .DisplayName }}</a
+			>
+		</h2>
 		<span class="username"
-			><a href="/user/view/{{ .Username }}">@{{ .Username }}</a></span
+			><a class="link" href="/user/view/{{ .Username }}"
+				>@{{ .Username }}</a
+			></span
 		>
 	</div>
 {{ end }}

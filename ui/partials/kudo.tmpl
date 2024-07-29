@@ -13,7 +13,7 @@
 		</svg>
 		<h2 class="row1">
 			<span>
-				<a href="/user/view/{{ .CreatorUsername }}"
+				<a class="link" href="/user/view/{{ .CreatorUsername }}"
 					>{{ .CreatorDisplayName }}</a
 				>
 				gave
@@ -25,13 +25,15 @@
 			/>
 			<span>
 				to
-				<a href="/item/view/{{ .ItemID }}">{{ .ItemName }}</a>
+				<a class="link" href="/item/view/{{ .ItemID }}"
+					>{{ .ItemName }}</a
+				>
 			</span>
 		</h2>
 		<p>{{ .Body }}</p>
 		<p>
 			<small>
-				<a href="/user/view/{{ .CreatorUsername }}"
+				<a class="link" href="/user/view/{{ .CreatorUsername }}"
 					>@{{ .CreatorUsername }}</a
 				>
 				&ndash;
