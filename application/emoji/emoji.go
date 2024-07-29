@@ -15,7 +15,7 @@ var all = []Emoji{
 	},
 	{
 		Key: 1,
-		Alt: "A whitish-gray, cartoon-styled human skull with large, black eye sockets.",
+		Alt: "A yellow face, smiling and drooling as though thinking of something delicious.",
 	},
 	{
 		Key: 2,
@@ -71,7 +71,7 @@ var all = []Emoji{
 	},
 	{
 		Key: 15,
-		Alt: "A yellow face with tears welling up at the bottom of its two large eyes.",
+		Alt: "A gold star.",
 	},
 	{
 		Key: 16,
