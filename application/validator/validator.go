@@ -77,7 +77,7 @@ func (v *Validator) Optional(value string, fn func(value string)) {
 func (v *Validator) Username(username string) {
 	v.Check(username != "", "username", "Username cannot be blank")
 	v.Check(
-		utf8.RuneCountInString(username) < 30,
+		utf8.RuneCountInString(username) <= 30,
 		"username",
 		"Username cannot be longer than 30 characters",
 	)
@@ -100,7 +100,7 @@ func (v *Validator) Email(email string) {
 func (v *Validator) DisplayName(displayname string) {
 	v.Check(displayname != "", "displayname", "DisplayName cannot be blank")
 	v.Check(
-		utf8.RuneCountInString(displayname) < 30,
+		utf8.RuneCountInString(displayname) <= 30,
 		"displayname",
 		"Display Name cannot be longer than 30 characters",
 	)
