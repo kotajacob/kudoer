@@ -63,8 +63,13 @@
 					box-sizing: content-box;
 					max-inline-size: 60ch;
 					margin-inline: auto;
-					padding: var(--s0);
+					padding: var(--s0) 5vw;
 					font-family: system-ui, sans-serif;
+				}
+				body > * {
+					inline-size: 100%;
+					max-inline-size: 48ch;
+					margin-inline: auto;
 				}
 				h1,
 				h2,
@@ -258,6 +263,7 @@
 				}
 				.frame-parent {
 					position: relative;
+					max-inline-size: 60ch;
 					padding: min(6ch, 9vw);
 					padding-top: min(0.66ch, 1vw);
 					min-height: 20ch;
