@@ -520,7 +520,7 @@ func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.R
 		// Store the profile picture.
 		pic, err := app.mediaStore.StorePic(file)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			app.serverError(w, err)
 			return
 		}
 
