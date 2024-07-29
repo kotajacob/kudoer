@@ -1,5 +1,7 @@
 package emoji
 
+import "math/rand"
+
 // Emoji represents an emoji used for a kudo. The Key is an integer, which is
 // used in the forms, to reference the svgs, and stored in our database. Alt
 // is the alt text to be added to the emoji images.
@@ -95,6 +97,16 @@ func init() {
 // List returns a list of all Emoji.
 func List() []Emoji {
 	return all
+}
+
+// Shuffle returns a shuffled list of all emoji
+func Shuffle() []Emoji {
+	var shuffled []Emoji
+	shuffled = append(shuffled, all...)
+	rand.Shuffle(len(shuffled), func(i, j int) {
+		shuffled[i], shuffled[j] = shuffled[j], shuffled[i]
+	})
+	return shuffled
 }
 
 // Validate returns true if a given emoji ID is valid.

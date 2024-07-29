@@ -74,7 +74,7 @@ func (app *application) itemViewHandler(w http.ResponseWriter, r *http.Request) 
 	app.render(w, http.StatusOK, "itemView.tmpl", itemViewPage{
 		Page:       app.newPage(r, title, item.Description),
 		Item:       item,
-		Emojis:     emoji.List(),
+		Emojis:     emoji.Shuffle(),
 		CreatorPic: creatorPic,
 		Frame:      rand.Intn(frames.Count),
 		FrameCount: frames.Count,
