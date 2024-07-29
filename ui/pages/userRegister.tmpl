@@ -19,7 +19,7 @@
 			/>
 		</div>
 		<div class="stack2">
-			<label for="displayname">Display Name:</label>
+			<label for="displayname">Display Name (optional):</label>
 			{{ with .Form.FieldErrors.displayname }}
 				<label class="error" for="displayname">{{ . }}</label>
 			{{ end }}
@@ -37,7 +37,7 @@
 			/>
 		</div>
 		<div class="stack2">
-			<label for="email">Email:</label>
+			<label for="email">Email (optional, for password recovery):</label>
 			{{ with .Form.FieldErrors.email }}
 				<label class="error" for="email">{{ . }}</label>
 			{{ end }}
