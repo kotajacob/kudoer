@@ -524,6 +524,7 @@ func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.R
 			return
 		}
 
+		// Update the user's pic.
 		old, err := app.users.SetPic(
 			r.Context(),
 			username,

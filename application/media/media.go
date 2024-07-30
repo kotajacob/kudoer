@@ -15,8 +15,7 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 
-	"github.com/nfnt/resize"
-	orientation "github.com/takumakei/exif-orientation"
+	"github.com/disintegration/imaging"
 )
 
 const MaxPixels = 512
@@ -38,55 +37,49 @@ func (m *MediaStore) Dir() string {
 }
 
 // StorePic stores a picture.
-// The named file (sha1sum.imgformat) or an error will be returned.
-func (m *MediaStore) StorePic(src io.ReadSeeker) (string, error) {
-	img, _, err := image.Decode(src)
+// The named file (sha1sum.jpeg) or an error will be returned.
+func (m *MediaStore) StorePic(src io.Reader) (string, error) {
+	img, err := imaging.Decode(src, imaging.AutoOrientation(true))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed decoding image: %v", err)
 	}
-
-	// Rotate the image using its EXIF data if needed.
-	_, err = src.Seek(0, 0)
-	if err != nil {
-		return "", err
-	}
-	o, err := orientation.Read(src)
-	if err != nil {
-		return "", err
-	}
-	img = orientation.Normalize(img, o)
 
 	// Resize the image.
-	img = resize.Resize(
-		MaxPixels,
-		MaxPixels,
+	img = imaging.Fill(
 		img,
-		resize.NearestNeighbor,
+		MaxPixels,
+		MaxPixels,
+		imaging.Center,
+		imaging.Lanczos,
 	)
 
-	// Encode the image as jpeg.
-	var b bytes.Buffer
-	err = jpeg.Encode(&b, img, &jpeg.Options{Quality: 90})
+	return m.store(img)
+}
+
+// store an image as a jpeg with a name containing a sha1sum of itself.
+func (m *MediaStore) store(img image.Image) (string, error) {
+	var buf bytes.Buffer
+	err := jpeg.Encode(&buf, img, &jpeg.Options{Quality: 90})
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed encoding image as jpeg: %v", err)
 	}
 
-	// Calculate its hash for the filename.
+	// Calculate hash for the filename.
 	h := sha1.New()
-	r := bytes.NewReader(b.Bytes())
+	r := bytes.NewReader(buf.Bytes())
 	if _, err := io.Copy(h, r); err != nil {
-		return "", err
+		return "", fmt.Errorf("failed calculating hash for image: %v", err)
 	}
 	r.Seek(0, 0)
 
 	name := fmt.Sprintf("%x.jpeg", h.Sum(nil))
 	f, err := os.Create(filepath.Join(m.msn, name))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed creating file to store image: %v", err)
 	}
 
 	if _, err := io.Copy(f, r); err != nil {
-		return "", err
+		return "", fmt.Errorf("failed writing image: %v", err)
 	}
 	return name, f.Close()
 }
