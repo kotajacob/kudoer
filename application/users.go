@@ -513,8 +513,8 @@ func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.R
 	if err == nil {
 		defer file.Close()
 
-		if fileHeader.Size > (1024 * 1024 * 10) {
-			v.AddFieldError("pic", "Profile picture must be less than 10MB")
+		if fileHeader.Size > (1024 * 1024 * 50) {
+			v.AddFieldError("pic", "Profile picture must be less than 50MB")
 		}
 
 		// Store the profile picture.
