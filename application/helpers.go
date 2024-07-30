@@ -39,6 +39,7 @@ func (app *application) login(r *http.Request, username string) error {
 		return err
 	}
 	app.sessionManager.Put(r.Context(), "authenticatedUsername", username)
+	app.sessionManager.RememberMe(r.Context(), true)
 	return nil
 }
 
