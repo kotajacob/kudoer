@@ -1,14 +1,14 @@
 {{ define "kudo" }}
 	<div class="stack2 kudo frame-parent">
-		{{ if .CreatorPic }}
-			<img class="portrait" src="/media/{{ .CreatorPic }}" />
-		{{ else }}
-			<img
-				class="portrait"
+		<img
+			class="portrait"
+			{{ if .CreatorPic }}
+				src="/media/{{ .CreatorPic }}"
+			{{ else }}
 				src="{{ ToHash "/static/default-profile.png" }}"
-				alt="Profile picture for {{ .CreatorDisplayName }}"
-			/>
-		{{ end }}
+			{{ end }}
+			alt="Profile picture for {{ .CreatorDisplayName }}"
+		/>
 		<svg class="frame" width="600" height="200" alt="">
 			<use href="#frame{{ .Frame }}" />
 		</svg>
