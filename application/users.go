@@ -525,7 +525,7 @@ func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.R
 		}
 
 		// Update the user's pic.
-		old, err := app.users.SetPic(
+		err = app.users.SetPic(
 			r.Context(),
 			username,
 			pic,
@@ -533,14 +533,6 @@ func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.R
 		if err != nil {
 			app.serverError(w, err)
 			return
-		}
-
-		// Remove the old profile picture if it exists.
-		if old != "" {
-			err = app.mediaStore.DeletePic(old)
-			if err != nil {
-				app.errLog.Println(err)
-			}
 		}
 	} else if !errors.Is(err, http.ErrMissingFile) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
