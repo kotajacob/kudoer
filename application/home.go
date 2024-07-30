@@ -40,3 +40,18 @@ func (app *application) homeHandler(w http.ResponseWriter, r *http.Request) {
 		Kudos: kudos,
 	})
 }
+
+// allHandler presents a page displaying kudos from all users.
+// This is what the homepage displays when not logged in.
+func (app *application) allHandler(w http.ResponseWriter, r *http.Request) {
+	kudos, err := app.kudos.All(r.Context())
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.render(w, http.StatusOK, "home.tmpl", homePage{
+		Page:  app.newPage(r, "Kudoer", "Give kudos to your favorite things!"),
+		Kudos: kudos,
+	})
+}

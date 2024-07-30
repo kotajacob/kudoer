@@ -32,6 +32,7 @@ func (app *application) Routes() http.Handler {
 	dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf)
 
 	mux.Handle("GET /{$}", dynamic.ThenFunc(app.homeHandler))
+	mux.Handle("GET /all", dynamic.ThenFunc(app.allHandler))
 	mux.Handle("GET /search", dynamic.ThenFunc(app.searchHandler))
 	mux.Handle("GET /user/view/{username}", dynamic.ThenFunc(app.userViewHandler))
 	mux.Handle("GET /user/followers/{username}", dynamic.ThenFunc(app.userFollowersHandler))
