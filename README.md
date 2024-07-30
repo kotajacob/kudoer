@@ -22,3 +22,5 @@ application does not serve https by itself.
 GNU AGPL version 3 or later, see LICENSE.
 
 Emoji are provided by [Noto Color Emoji](https://github.com/googlefonts/noto-emoji) and used via the [SIL Open Font License, version 1.1](https://github.com/googlefonts/noto-emoji/blob/main/fonts/LICENSE).
+
+## [tickets](https://todo.sr.ht/~kota/kudoer)
