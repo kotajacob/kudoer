@@ -13,10 +13,10 @@ import (
 
 	"image/jpeg"
 	_ "image/jpeg"
-	"image/png"
 	_ "image/png"
 
 	"github.com/nfnt/resize"
+	orientation "github.com/takumakei/exif-orientation"
 )
 
 const MaxPixels = 512
@@ -40,10 +40,23 @@ func (m *MediaStore) Dir() string {
 // StorePic stores a picture.
 // The named file (sha1sum.imgformat) or an error will be returned.
 func (m *MediaStore) StorePic(src io.ReadSeeker) (string, error) {
-	img, format, err := image.Decode(src)
+	img, _, err := image.Decode(src)
 	if err != nil {
 		return "", err
 	}
+
+	// Rotate the image using its EXIF data if needed.
+	_, err = src.Seek(0, 0)
+	if err != nil {
+		return "", err
+	}
+	o, err := orientation.Read(src)
+	if err != nil {
+		return "", err
+	}
+	img = orientation.Normalize(img, o)
+
+	// Resize the image.
 	img = resize.Resize(
 		MaxPixels,
 		MaxPixels,
@@ -51,22 +64,14 @@ func (m *MediaStore) StorePic(src io.ReadSeeker) (string, error) {
 		resize.NearestNeighbor,
 	)
 
+	// Encode the image as jpeg.
 	var b bytes.Buffer
-	switch format {
-	case "jpeg":
-		err := jpeg.Encode(&b, img, &jpeg.Options{Quality: 95})
-		if err != nil {
-			return "", err
-		}
-	case "png":
-		err := png.Encode(&b, img)
-		if err != nil {
-			return "", err
-		}
-	default:
-		return "", image.ErrFormat
+	err = jpeg.Encode(&b, img, &jpeg.Options{Quality: 90})
+	if err != nil {
+		return "", err
 	}
 
+	// Calculate its hash for the filename.
 	h := sha1.New()
 	r := bytes.NewReader(b.Bytes())
 	if _, err := io.Copy(h, r); err != nil {
@@ -74,7 +79,7 @@ func (m *MediaStore) StorePic(src io.ReadSeeker) (string, error) {
 	}
 	r.Seek(0, 0)
 
-	name := fmt.Sprintf("%x.%v", h.Sum(nil), format)
+	name := fmt.Sprintf("%x.jpeg", h.Sum(nil))
 	f, err := os.Create(filepath.Join(m.msn, name))
 	if err != nil {
 		return "", err
