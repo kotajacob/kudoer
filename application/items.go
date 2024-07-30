@@ -65,8 +65,8 @@ func (app *application) itemViewHandler(w http.ResponseWriter, r *http.Request) 
 			kudoed = true
 		}
 
-		if pic, err := app.users.GetPic(r.Context(), username); err == nil {
-			creatorPic = pic
+		if pics, err := app.profilepics.Get(r.Context(), username); err == nil {
+			creatorPic = pics[models.ProfileJPEG128]
 		}
 	}
 

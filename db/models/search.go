@@ -20,6 +20,7 @@ type SearchUser struct {
 	DisplayName string
 }
 
+// SearchModel handles search index storage.
 type SearchModel struct {
 	DB *sqlitex.Pool
 }

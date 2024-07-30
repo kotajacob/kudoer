@@ -517,18 +517,18 @@ func (app *application) userSettingsPostHandler(w http.ResponseWriter, r *http.R
 			v.AddFieldError("pic", "Profile picture must be less than 50MB")
 		}
 
-		// Store the profile picture.
-		pic, err := app.mediaStore.StorePic(file)
+		// Store the profile picture variants.
+		filename512, filename128, err := app.mediaStore.StorePic(file)
 		if err != nil {
 			app.serverError(w, err)
 			return
 		}
 
 		// Update the user's pic.
-		err = app.users.SetPic(
+		err = app.profilepics.Set(
 			r.Context(),
 			username,
-			pic,
+			filename512, filename128,
 		)
 		if err != nil {
 			app.serverError(w, err)

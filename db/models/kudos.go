@@ -24,6 +24,7 @@ type Kudo struct {
 	Body               string
 }
 
+// KudoModel handles kudo storage.
 type KudoModel struct {
 	DB *sqlitex.Pool
 }
@@ -39,13 +40,22 @@ func (m *KudoModel) Following(ctx context.Context, username string) ([]Kudo, err
 
 	var kudos []Kudo
 	err = sqlitex.Execute(conn,
-		`SELECT kudos.id, kudos.item_id, items.name, kudos.creator_username,
-		users.displayname, users.pic, kudos.frame, kudos.emoji, kudos.body FROM users_following
-		JOIN kudos ON users_following.following_username = kudos.creator_username
-		JOIN users ON users_following.following_username = users.username
-		JOIN items ON kudos.item_id = items.id
-		WHERE users_following.username = ?
-		ORDER BY kudos.id DESC`,
+		`
+SELECT kudos.id, kudos.item_id, items.name, kudos.creator_username,
+	users.displayname, profile_pictures.filename, kudos.frame,
+	kudos.emoji, kudos.body
+FROM users_following
+JOIN kudos
+	ON users_following.following_username = kudos.creator_username
+JOIN users
+	ON users_following.following_username = users.username
+LEFT JOIN profile_pictures
+	ON users_following.following_username = profile_pictures.username
+	AND profile_pictures.kind = 1
+JOIN items
+	ON kudos.item_id = items.id
+WHERE users_following.username = ?
+ORDER BY kudos.id DESC`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				var k Kudo
@@ -90,11 +100,19 @@ func (m *KudoModel) All(ctx context.Context) ([]Kudo, error) {
 
 	var kudos []Kudo
 	err = sqlitex.Execute(conn,
-		`SELECT kudos.id, kudos.item_id, items.name, kudos.creator_username,
-		users.displayname, users.pic, kudos.frame, kudos.emoji, kudos.body FROM kudos
-		JOIN users ON kudos.creator_username = users.username
-		JOIN items on kudos.item_id = items.id
-		ORDER BY kudos.id DESC`,
+		`
+SELECT kudos.id, kudos.item_id, items.name, kudos.creator_username,
+	users.displayname, profile_pictures.filename, kudos.frame,
+	kudos.emoji, kudos.body
+FROM kudos
+JOIN users
+	ON kudos.creator_username = users.username
+LEFT JOIN profile_pictures
+	ON kudos.creator_username = profile_pictures.username
+	AND profile_pictures.kind = 1
+JOIN items
+ON kudos.item_id = items.id
+ORDER BY kudos.id DESC`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				var k Kudo
@@ -139,11 +157,19 @@ func (m *KudoModel) Item(ctx context.Context, itemID ulid.ULID) ([]Kudo, error) 
 
 	var kudos []Kudo
 	err = sqlitex.Execute(conn,
-		`SELECT kudos.id, items.name, kudos.creator_username,
-		users.displayname, users.pic, kudos.frame, kudos.emoji, kudos.body FROM kudos
-		JOIN users ON kudos.creator_username = users.username
-		JOIN items on kudos.item_id = items.id WHERE kudos.item_id = ?
-		ORDER BY kudos.id DESC`,
+		`
+SELECT kudos.id, items.name, kudos.creator_username,
+	users.displayname, profile_pictures.filename, kudos.frame,
+	kudos.emoji, kudos.body
+FROM kudos
+JOIN users
+	ON kudos.creator_username = users.username
+LEFT JOIN profile_pictures
+	ON kudos.creator_username = profile_pictures.username
+	AND profile_pictures.kind = 1
+JOIN items
+	ON kudos.item_id = items.id WHERE kudos.item_id = ?
+ORDER BY kudos.id DESC`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				var k Kudo
@@ -189,11 +215,17 @@ func (m *KudoModel) ItemUser(
 
 	var k Kudo
 	err = sqlitex.Execute(conn,
-		`SELECT kudos.id, items.name, users.displayname, users.pic,
-		kudos.frame, kudos.emoji, kudos.body FROM kudos
-		JOIN users ON kudos.creator_username = users.username
-		JOIN items on kudos.item_id = items.id
-		WHERE kudos.item_id = ? AND kudos.creator_username = ?`,
+		`
+SELECT kudos.id, items.name, users.displayname, profile_pictures.filename,
+	kudos.frame, kudos.emoji, kudos.body FROM kudos
+JOIN users
+	ON kudos.creator_username = users.username
+LEFT JOIN profile_pictures
+	ON kudos.creator_username = profile_pictures.username
+	AND profile_pictures.kind = 1
+JOIN items
+	ON kudos.item_id = items.id
+WHERE kudos.item_id = ? AND kudos.creator_username = ?`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				id := stmt.ColumnText(0)
@@ -237,11 +269,18 @@ func (m *KudoModel) User(
 
 	var kudos []Kudo
 	err = sqlitex.Execute(conn,
-		`SELECT kudos.id, kudos.item_id, items.name, users.displayname,
-		users.pic, kudos.frame, kudos.emoji, kudos.body FROM kudos
-		JOIN users ON kudos.creator_username = users.username
-		JOIN items on kudos.item_id = items.id
-		WHERE kudos.creator_username = ? ORDER BY kudos.id DESC`,
+		`
+SELECT kudos.id, kudos.item_id, items.name, users.displayname,
+	profile_pictures.filename, kudos.frame, kudos.emoji, kudos.body
+FROM kudos
+JOIN users
+	ON kudos.creator_username = users.username
+LEFT JOIN profile_pictures
+	ON kudos.creator_username = profile_pictures.username
+	AND profile_pictures.kind = 1
+JOIN items
+	ON kudos.item_id = items.id
+WHERE kudos.creator_username = ? ORDER BY kudos.id DESC`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				var k Kudo

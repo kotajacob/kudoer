@@ -22,6 +22,7 @@ type token struct {
 	Expiry    time.Time
 }
 
+// PWResetModel handles password reset request storage.
 type PWResetModel struct {
 	DB *sqlitex.Pool
 }

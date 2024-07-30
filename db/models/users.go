@@ -19,6 +19,7 @@ type User struct {
 	Bio         string
 }
 
+// UserModel handles user storage.
 type UserModel struct {
 	DB *sqlitex.Pool
 }
@@ -314,51 +315,6 @@ func (m *UserModel) Following(
 		},
 	)
 	return users, err
-}
-
-// SetPic sets a user's profile picture.
-func (m *UserModel) SetPic(
-	ctx context.Context,
-	username string,
-	pic string,
-) error {
-	conn, err := m.DB.Take(ctx)
-	if err != nil {
-		return err
-	}
-	defer m.DB.Put(conn)
-
-	err = sqlitex.Execute(
-		conn,
-		`UPDATE users SET pic = ? WHERE username = ?`,
-		&sqlitex.ExecOptions{Args: []any{pic, username}},
-	)
-	return err
-}
-
-// GetPic gets a user's profile picture.
-// A blank string indicates that they have not set a profile picture.
-func (m *UserModel) GetPic(
-	ctx context.Context,
-	username string,
-) (string, error) {
-	conn, err := m.DB.Take(ctx)
-	if err != nil {
-		return "", err
-	}
-	defer m.DB.Put(conn)
-
-	var pic string
-	err = sqlitex.Execute(conn, `SELECT pic from users WHERE username = ?`,
-		&sqlitex.ExecOptions{
-			ResultFunc: func(stmt *sqlite.Stmt) error {
-				pic = stmt.ColumnText(0)
-				return nil
-			},
-			Args: []any{username},
-		})
-
-	return pic, err
 }
 
 // GetEmail gets a user's email.

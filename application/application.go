@@ -30,11 +30,12 @@ type application struct {
 	mediaStore     *media.MediaStore
 	mailer         *mail.Mailer
 
-	users    *models.UserModel
-	items    *models.ItemModel
-	kudos    *models.KudoModel
-	search   *models.SearchModel
-	pwresets *models.PWResetModel
+	users       *models.UserModel
+	items       *models.ItemModel
+	kudos       *models.KudoModel
+	search      *models.SearchModel
+	pwresets    *models.PWResetModel
+	profilepics *models.ProfilePictureModel
 }
 
 func New(
@@ -50,6 +51,7 @@ func New(
 	kudos *models.KudoModel,
 	search *models.SearchModel,
 	pwresets *models.PWResetModel,
+	profilepics *models.ProfilePictureModel,
 ) *application {
 	return &application{
 		infoLog:        infoLog,
@@ -64,6 +66,7 @@ func New(
 		kudos:          kudos,
 		search:         search,
 		pwresets:       pwresets,
+		profilepics:    profilepics,
 	}
 }
 

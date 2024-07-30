@@ -22,6 +22,7 @@ type Item struct {
 	Source          string
 }
 
+// ItemModel handles item storage.
 type ItemModel struct {
 	DB *sqlitex.Pool
 }

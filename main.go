@@ -120,6 +120,7 @@ func main() {
 		&models.KudoModel{DB: db},
 		&models.SearchModel{DB: db},
 		&models.PWResetModel{DB: db},
+		&models.ProfilePictureModel{DB: db},
 	)
 
 	err = app.Serve(*addr)
