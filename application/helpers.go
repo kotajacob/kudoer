@@ -3,6 +3,7 @@
 package application
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"runtime/debug"
@@ -30,6 +31,21 @@ func (app *application) clientError(w http.ResponseWriter, status int) {
 // if the user is not authenticated.
 func (app *application) authenticated(r *http.Request) string {
 	return app.sessionManager.GetString(r.Context(), "authenticatedUsername")
+}
+
+// destroySessions will remove every session for a given username.
+// This logs the user out on all of their computers.
+func (app *application) destroySessions(username string) error {
+	ctx := context.WithValue(context.Background(), "username", username)
+	fn := func(ctx context.Context) error {
+		want := ctx.Value("username")
+		got := app.sessionManager.Get(ctx, "authenticatedUsername")
+		if want == got {
+			return app.sessionManager.Destroy(ctx)
+		}
+		return nil
+	}
+	return app.sessionManager.Iterate(ctx, fn)
 }
 
 // login will authenticate the current session as the provided user.

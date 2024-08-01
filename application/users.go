@@ -430,6 +430,11 @@ func (app *application) userResetPostHandler(w http.ResponseWriter, r *http.Requ
 		app.errLog.Println(err)
 	}
 
+	err = app.destroySessions(username)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
 	err = app.login(r, username)
 	if err != nil {
 		app.serverError(w, err)
