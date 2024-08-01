@@ -162,13 +162,7 @@ func (app *application) userRegisterPostHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = app.login(r, form.Username)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-
-	http.Redirect(w, r, fmt.Sprintf("/user/view/%v", form.Username), http.StatusSeeOther)
+	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 }
 
 type userLoginPage struct {
@@ -188,7 +182,8 @@ func (app *application) userLoginHandler(w http.ResponseWriter, r *http.Request)
 }
 
 type userLoginForm struct {
-	Username string
+	Username   string
+	RememberMe bool
 
 	// NonFieldErrors stores errors which do not relate to a form field.
 	NonFieldErrors []string
@@ -206,6 +201,7 @@ func (app *application) userLoginPostHandler(w http.ResponseWriter, r *http.Requ
 
 	form := userLoginForm{
 		Username:       r.PostForm.Get("username"),
+		RememberMe:     r.PostForm.Has("remember"),
 		NonFieldErrors: []string{},
 		FieldErrors:    map[string]string{},
 	}
@@ -243,7 +239,7 @@ func (app *application) userLoginPostHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	err = app.login(r, form.Username)
+	err = app.login(r, form.Username, form.RememberMe)
 	if err != nil {
 		app.serverError(w, err)
 		return
@@ -435,13 +431,7 @@ func (app *application) userResetPostHandler(w http.ResponseWriter, r *http.Requ
 		app.serverError(w, err)
 	}
 
-	err = app.login(r, username)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 }
 
 func (app *application) userLogoutPostHandler(w http.ResponseWriter, r *http.Request) {

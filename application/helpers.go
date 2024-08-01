@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"runtime/debug"
 	"strings"
+	"time"
 )
 
 // serverError writes a log entry and then sends a generic Internal Server Error
@@ -49,13 +50,23 @@ func (app *application) destroySessions(username string) error {
 }
 
 // login will authenticate the current session as the provided user.
-func (app *application) login(r *http.Request, username string) error {
+func (app *application) login(
+	r *http.Request,
+	username string,
+	rememberMe bool,
+) error {
 	err := app.sessionManager.RenewToken(r.Context())
 	if err != nil {
 		return err
 	}
 	app.sessionManager.Put(r.Context(), "authenticatedUsername", username)
-	app.sessionManager.RememberMe(r.Context(), true)
+	if rememberMe {
+		app.sessionManager.SetDeadline(
+			r.Context(),
+			time.Now().Add(time.Hour*24*365*10),
+		)
+	}
+	app.sessionManager.RememberMe(r.Context(), rememberMe)
 	return nil
 }
 

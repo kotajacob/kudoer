@@ -36,6 +36,10 @@
 				required
 			/>
 		</div>
+		<span>
+			<label for="remember">Remember me?</label>
+			<input type="checkbox" name="remember" />
+		</span>
 		<input type="submit" value="Login" />
 		<input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
 		<a href="forgot">Forgot your password?</a>
