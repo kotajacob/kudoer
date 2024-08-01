@@ -230,7 +230,7 @@ func (app *application) userLoginPostHandler(w http.ResponseWriter, r *http.Requ
 	err = app.users.Authenticate(r.Context(), form.Username, password)
 	if err != nil {
 		if errors.Is(err, models.ErrInvalidCredentials) {
-			v.AddNonFieldError("Email or password is incorrect")
+			v.AddNonFieldError("Username or password is incorrect")
 			form.NonFieldErrors = v.NonFieldErrors
 			validationError()
 		} else {
