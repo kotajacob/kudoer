@@ -3,13 +3,21 @@
 package application
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha1"
 	"errors"
+	"fmt"
 	"html/template"
+	"image/jpeg"
+	_ "image/jpeg"
+	_ "image/png"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -17,8 +25,11 @@ import (
 	"git.sr.ht/~kota/kudoer/application/media"
 	"git.sr.ht/~kota/kudoer/db/models"
 	"github.com/alexedwards/scs/v2"
+	"github.com/disintegration/imaging"
 	"github.com/justinas/nosurf"
 	"github.com/throttled/throttled/v2"
+	"zombiezen.com/go/sqlite"
+	"zombiezen.com/go/sqlite/sqlitex"
 )
 
 type application struct {
@@ -53,7 +64,7 @@ func New(
 	pwresets *models.PWResetModel,
 	profilepics *models.ProfilePictureModel,
 ) *application {
-	return &application{
+	app := &application{
 		infoLog:        infoLog,
 		errLog:         errLog,
 		templates:      templates,
@@ -68,6 +79,123 @@ func New(
 		pwresets:       pwresets,
 		profilepics:    profilepics,
 	}
+
+	// TODO: Remove after migration is completed!
+	app.MigrateProfilePics()
+
+	return app
+}
+
+// TODO: Remove after migration is completed!
+func (app *application) MigrateProfilePics() {
+	app.infoLog.Println("running profile picture migration")
+
+	conn, err := app.users.DB.Take(context.Background())
+	if err != nil {
+		app.errLog.Fatalln(err)
+	}
+	defer app.users.DB.Put(conn)
+
+	type user struct {
+		username string
+		pic      string
+	}
+	var users []user
+	err = sqlitex.Execute(
+		conn,
+		`SELECT username, pic FROM users`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				var u user
+				u.username = stmt.ColumnText(0)
+				u.pic = stmt.ColumnText(1)
+
+				users = append(users, u)
+				return nil
+			},
+		},
+	)
+	if err != nil {
+		app.errLog.Fatalln(err)
+	}
+
+	for _, u := range users {
+		// See if there's a matching file.
+		if u.pic == "" {
+			app.infoLog.Println(u.username, "skipping: has no pic")
+			continue
+		}
+		_, err := os.Stat(filepath.Join(app.mediaStore.Dir(), u.pic))
+		if err != nil {
+			app.infoLog.Println(u.username, "skipping: file does not exist")
+			continue
+		}
+		app.infoLog.Println(u.username, "migrating")
+
+		// Set 512 variant.
+		err = sqlitex.Execute(
+			conn,
+			`INSERT INTO profile_pictures
+			(filename, username, kind) VALUES (?, ?, ?)`,
+			&sqlitex.ExecOptions{Args: []any{u.pic, u.username, models.ProfileJPEG512}},
+		)
+		if err != nil {
+			app.errLog.Fatalln(err)
+		}
+
+		// Create 128 variant.
+		app.infoLog.Println("opening", filepath.Join(app.mediaStore.Dir(), u.pic))
+		img, err := imaging.Open(filepath.Join(app.mediaStore.Dir(), u.pic))
+		if err != nil {
+			app.errLog.Fatalln(err)
+		}
+		// Scale / shrink to the correct final size.
+		img = imaging.Fill(
+			img,
+			128,
+			128,
+			imaging.Center,
+			imaging.Lanczos,
+		)
+
+		var buf bytes.Buffer
+		err = jpeg.Encode(&buf, img, &jpeg.Options{Quality: 90})
+		if err != nil {
+			app.errLog.Fatalln(err)
+		}
+
+		// Calculate hash for the filename.
+		h := sha1.New()
+		r := bytes.NewReader(buf.Bytes())
+		if _, err := io.Copy(h, r); err != nil {
+			app.errLog.Fatalln(err)
+		}
+		r.Seek(0, 0)
+
+		name := fmt.Sprintf("%x.jpeg", h.Sum(nil))
+		f, err := os.Create(filepath.Join(app.mediaStore.Dir(), name))
+		if err != nil {
+			app.errLog.Fatalln(err)
+		}
+
+		if _, err := io.Copy(f, r); err != nil {
+			app.errLog.Fatalln(err)
+		}
+		err = f.Close()
+		if err != nil {
+			app.errLog.Fatalln(err)
+		}
+		err = sqlitex.Execute(
+			conn,
+			`INSERT INTO profile_pictures
+			(filename, username, kind) VALUES (?, ?, ?)`,
+			&sqlitex.ExecOptions{Args: []any{name, u.username, models.ProfileJPEG128}},
+		)
+		if err != nil {
+			app.errLog.Fatalln(err)
+		}
+	}
+	app.infoLog.Println("finished migrations")
 }
 
 // Page represents basic information needed on every page.
