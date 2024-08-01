@@ -20,12 +20,296 @@
 				href="{{ ToHash "/static/favicon.ico" }}"
 				type="image/x-icon"
 			/>
-			<link
-				rel="stylesheet"
-				href="{{ ToHash "/static/main.css" }}"
-				nonce="{{ .CSPNonce }}"
-			/>
 			<title>{{ .Title }}</title>
+			<style nonce="{{ .CSPNonce }}">
+				:root {
+					--ratio: 1.5;
+					--s-5: calc(var(--s-4) / var(--ratio));
+					--s-4: calc(var(--s-3) / var(--ratio));
+					--s-3: calc(var(--s-2) / var(--ratio));
+					--s-2: calc(var(--s-1) / var(--ratio));
+					--s-1: calc(var(--s0) / var(--ratio));
+					--s0: 1rem;
+					--s1: calc(var(--s0) * var(--ratio));
+					--s2: calc(var(--s1) * var(--ratio));
+					--s3: calc(var(--s2) * var(--ratio));
+					--s4: calc(var(--s3) * var(--ratio));
+					--s5: calc(var(--s4) * var(--ratio));
+					--color-fg: #000;
+					--color-fg-light: #505050;
+					--color-bg: #f8f5f2;
+					--color-bg-light: #ccc;
+					--color-red: #aa2200;
+					font-size: calc(0.333vw + 1em);
+				}
+				*,
+				:after,
+				:before {
+					box-sizing: border-box;
+					font-family: inherit;
+					color: inherit;
+					background: none;
+					overflow-wrap: break-word;
+					margin: 0;
+					padding: 0;
+					border: 0 solid;
+				}
+				body {
+					display: flex;
+					flex-direction: column;
+					row-gap: var(--s3);
+					color: var(--color-fg);
+					background-color: var(--color-bg);
+					box-sizing: content-box;
+					max-inline-size: 60ch;
+					margin-inline: auto;
+					padding: var(--s0) 5vw;
+					font-family: system-ui, sans-serif;
+				}
+				body > * {
+					inline-size: 100%;
+					max-inline-size: 48ch;
+					margin-inline: auto;
+				}
+				h1,
+				h2,
+				h3,
+				h4 {
+					text-align: center;
+				}
+				h1 {
+					font-size: var(--s3);
+				}
+				h2 {
+					font-size: var(--s2);
+				}
+				h3 {
+					font-size: var(--s1);
+				}
+				h4 {
+					font-size: var(--s0);
+				}
+				small {
+					font-size: var(--s-1);
+					color: var(--color-fg-light);
+				}
+				label {
+					display: block;
+				}
+				label.error {
+					font-size: var(--s-1);
+					font-weight: bold;
+					color: var(--color-red);
+				}
+				div.error {
+					text-align: center;
+					font-weight: bold;
+					color: var(--color-red);
+				}
+				input.error,
+				textarea.error {
+					border-color: var(--color-red);
+				}
+				div.flash {
+					text-align: center;
+					font-weight: bold;
+				}
+				input,
+				.button,
+				button,
+				textarea {
+					width: 100%;
+					display: block;
+					padding: var(--s-4);
+					border-width: 1px;
+					border-color: var(--color-fg-light);
+					font-size: var(--s0);
+				}
+				textarea {
+					resize: vertical;
+				}
+				.link {
+					text-decoration: none;
+					transition: 0.2s ease;
+				}
+				.link:hover {
+					text-decoration: underline;
+				}
+				button,
+				.button,
+				input[type="submit"] {
+					font-weight: bold;
+					text-decoration: none;
+					text-align: center;
+					color: var(--color-bg);
+					background-color: var(--color-fg);
+					cursor: pointer;
+				}
+				button:hover,
+				.button:hover,
+				input[type="submit"]:hover {
+					background-color: var(--color-fg-light);
+				}
+				input[type="checkbox"] {
+					width: auto;
+					display: inline;
+				}
+				.username {
+					text-align: center;
+					color: var(--color-fg-light);
+				}
+				.box {
+					border: var(--s-4) solid var(--color-bg-light);
+					padding: var(--s0);
+				}
+				.box > * {
+					text-align: start;
+				}
+				.undisplay {
+					display: none;
+				}
+				.stack0,
+				.stack1,
+				.stack2 {
+					display: flex;
+					flex-direction: column;
+					justify-content: flex-start;
+				}
+				.stack0 > *,
+				.stack1 > *,
+				.stack2 > * {
+					margin-block: 0;
+				}
+				.stack0 {
+					row-gap: var(--s0);
+				}
+				.stack1 {
+					row-gap: var(--s-1);
+				}
+				.stack2 {
+					row-gap: var(--s-2);
+				}
+				.row0,
+				.row1,
+				.row2 {
+					display: flex;
+					flex-direction: row;
+					justify-content: space-between;
+				}
+				.row0 > *,
+				.row1 > *,
+				.row2 > * {
+					margin-block: 0;
+				}
+				.row0 {
+					column-gap: var(--s0);
+				}
+				.row1 {
+					column-gap: var(--s-1);
+				}
+				.row2 {
+					column-gap: var(--s-2);
+				}
+				nav.row0 {
+					justify-content: center;
+				}
+				nav * {
+					font-size: var(--s0);
+					cursor: pointer;
+				}
+				nav .nav-option {
+					text-decoration: underline;
+					font-weight: normal;
+					width: auto;
+					display: inline-block;
+					padding: var(--s-3);
+					border-radius: var(--s-3);
+					border: none;
+					color: var(--color-fg);
+					background-color: var(--color-bg);
+				}
+				nav .nav-option:hover {
+					background-color: var(--color-bg-light);
+				}
+				h1 img {
+					height: var(--s5);
+					max-width: 95%;
+				}
+				.emoji {
+					height: var(--s2);
+				}
+				.emoji-options {
+					display: grid;
+					grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+				}
+				.emoji-options > input {
+					appearance: none;
+					display: none;
+				}
+				.emoji-options > label {
+					cursor: pointer;
+					margin: var(--s-1) auto;
+				}
+				.emoji-options input[type="radio"]:checked + label {
+					text-decoration: underline;
+					text-underline-position: under;
+					border-bottom: 4px solid;
+					margin-bottom: calc(var(--s-1) - 4px);
+				}
+				.portrait {
+					margin: 0 auto min(3ch, 4.5vw) auto;
+					width: min(7ch, 10.5vw);
+					height: min(7ch, 10.5vw);
+					z-index: -2;
+				}
+				#clip-path-svg {
+					margin-bottom: calc(var(--s3) * -1);
+				}
+				.frame-parent {
+					position: relative;
+					max-inline-size: 60ch;
+					padding: min(6ch, 9vw);
+					padding-top: min(0.66ch, 1vw);
+					min-height: 20ch;
+				}
+				.frame {
+					position: absolute;
+					top: 0;
+					bottom: 0;
+					right: 0;
+					left: 0;
+					z-index: -1;
+					width: 100%;
+					height: 100%;
+				}
+				symbol > svg {
+					overflow: visible;
+				}
+				.kudo > * {
+					text-align: start;
+				}
+				.kudo > h2 {
+					justify-content: center;
+					font-size: var(--s0);
+					font-weight: normal;
+				}
+				.kudo > h2 a {
+					font-weight: bold;
+					text-decoration: none;
+				}
+				.kudo > h2 > :first-child {
+					flex-grow: 1;
+					flex-basis: 0px;
+					text-align: end;
+					align-content: center;
+				}
+				.kudo > h2 > :last-child {
+					flex-grow: 1;
+					flex-basis: 0px;
+					text-align: start;
+					align-content: center;
+				}
+			</style>
 		</head>
 		<body>
 			<nav class="row0">
