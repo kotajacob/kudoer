@@ -6,16 +6,16 @@
 		{{ if .Bio }}<p>{{ .Bio }}</p>{{ end }}
 		<div class="row1">
 			<a class="button" href="/user/followers/{{ .Username }}"
-				>Followers</a
+				>Followers ({{ .Followers }})</a
 			>
 			<a class="button" href="/user/following/{{ .Username }}"
-				>Following</a
+				>Following ({{ .Following }})</a
 			>
 		</div>
 		{{ if eq .Username .Authenticated }}
 			<a class="button" href="/user/settings">Edit Profile</a>
 		{{ else }}
-			{{ if .Following }}
+			{{ if .IsFollowing }}
 				<form action="/user/unfollow" method="POST">
 					<button>Unfollow</button>
 					<input

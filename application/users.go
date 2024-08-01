@@ -18,7 +18,7 @@ type userViewPage struct {
 	models.User
 
 	// Is the logged in user following the user being viewed?
-	Following bool
+	IsFollowing bool
 
 	// All kudos this user has given.
 	Kudos []models.Kudo
@@ -56,10 +56,10 @@ func (app *application) userViewHandler(w http.ResponseWriter, r *http.Request) 
 	title := user.DisplayName + " - Kudoer"
 	desc := "Viewing " + user.DisplayName + " on Kudoer"
 	app.render(w, http.StatusOK, "userView.tmpl", userViewPage{
-		Page:      app.newPage(r, title, desc),
-		User:      user,
-		Following: following,
-		Kudos:     kudos,
+		Page:        app.newPage(r, title, desc),
+		User:        user,
+		IsFollowing: following,
+		Kudos:       kudos,
 	})
 }
 

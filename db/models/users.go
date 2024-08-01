@@ -17,6 +17,8 @@ type User struct {
 	DisplayName string
 	Email       string
 	Bio         string
+	Followers   int
+	Following   int
 }
 
 // UserModel handles user storage.
@@ -33,7 +35,13 @@ func (m *UserModel) Info(ctx context.Context, username string) (User, error) {
 	defer m.DB.Put(conn)
 
 	var u User
-	err = sqlitex.Execute(conn, `SELECT displayname, email, bio FROM users WHERE username = ?`,
+	err = sqlitex.Execute(conn, `
+SELECT users.displayname, users.email, users.bio,
+sum(case when users_following.username = ?1 then 1 else 0 end),
+sum(case when users_following.following_username = ?1 then 1 else 0 end)
+FROM users
+JOIN users_following
+WHERE users.username = ?1`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				u.Username = username
@@ -41,6 +49,9 @@ func (m *UserModel) Info(ctx context.Context, username string) (User, error) {
 				u.DisplayName = stmt.ColumnText(0)
 				u.Email = stmt.ColumnText(1)
 				u.Bio = stmt.ColumnText(2)
+
+				u.Following = stmt.ColumnInt(3)
+				u.Followers = stmt.ColumnInt(4)
 				return nil
 			},
 			Args: []any{username},
