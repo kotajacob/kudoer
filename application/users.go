@@ -218,7 +218,6 @@ func (app *application) userLoginPostHandler(w http.ResponseWriter, r *http.Requ
 			),
 			Form: form,
 		})
-		return
 	}
 	var valid bool
 	if form.NonFieldErrors, form.FieldErrors, valid = v.Valid(); !valid {

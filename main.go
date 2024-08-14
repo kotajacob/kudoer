@@ -82,7 +82,6 @@ func main() {
 			http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError,
 		)
-		return
 	}
 
 	// Set up HTTP request throttling.
