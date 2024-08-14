@@ -83,8 +83,13 @@ func (app *application) render(
 	err := ts.ExecuteTemplate(buf, "base", data)
 	if err != nil {
 		app.serverError(w, err)
+		return
 	}
 
 	w.WriteHeader(status)
-	buf.WriteTo(w)
+	_, err = buf.WriteTo(w)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
 }
