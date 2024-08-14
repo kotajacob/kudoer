@@ -418,7 +418,11 @@ func (app *application) userResetPostHandler(w http.ResponseWriter, r *http.Requ
 		app.serverError(w, err)
 		return
 	}
-	app.users.ChangePassword(r.Context(), username, string(hashedPassword))
+	err = app.users.ChangePassword(r.Context(), username, string(hashedPassword))
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
 
 	err = app.pwresets.DeleteAllUser(r.Context(), username)
 	if err != nil {
