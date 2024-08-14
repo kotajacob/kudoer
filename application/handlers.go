@@ -7,14 +7,10 @@ import (
 	"fmt"
 	"io/fs"
 	"net/http"
-	"regexp"
 
 	"git.sr.ht/~kota/kudoer/ui"
 	"github.com/justinas/alice"
 )
-
-var rxUsername = regexp.MustCompile("^[a-z0-9_-]+$")
-var rxEmail = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 func (app *application) Routes() http.Handler {
 	mux := http.NewServeMux()
