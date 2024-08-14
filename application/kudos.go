@@ -49,14 +49,17 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 	)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
-			_, err = app.kudos.Insert(
+			if _, err := app.kudos.Insert(
 				r.Context(),
 				itemID,
 				username,
 				f,
 				e,
 				body,
-			)
+			); err != nil {
+				app.serverError(w, err)
+				return
+			}
 			app.flash(r, "Kudos given")
 		} else {
 			app.serverError(w, err)
@@ -64,7 +67,7 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	err = app.kudos.Update(
+	if err := app.kudos.Update(
 		r.Context(),
 		k.ID,
 		itemID,
@@ -72,7 +75,10 @@ func (app *application) kudoPostHandler(w http.ResponseWriter, r *http.Request) 
 		f,
 		e,
 		body,
-	)
+	); err != nil {
+		app.serverError(w, err)
+		return
+	}
 	app.flash(r, "Kudos updated")
 	http.Redirect(w, r, fmt.Sprintf("/item/view/%v", itemID), http.StatusSeeOther)
 }
