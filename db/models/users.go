@@ -401,6 +401,9 @@ func (m *UserModel) Authenticate(
 			},
 			Args: []any{username},
 		})
+	if err != nil {
+		return err
+	}
 
 	if !found {
 		return ErrInvalidCredentials

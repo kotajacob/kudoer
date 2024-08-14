@@ -123,6 +123,9 @@ func (m *PWResetModel) Validate(
 			},
 		},
 	)
+	if err != nil {
+		return "", err
+	}
 
 	if !valid {
 		return "", ErrPWResetTokenInvalid
