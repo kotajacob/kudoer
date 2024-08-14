@@ -6,7 +6,9 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"runtime/debug"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -32,6 +34,17 @@ func (app *application) clientError(w http.ResponseWriter, status int) {
 // if the user is not authenticated.
 func (app *application) authenticated(r *http.Request) string {
 	return app.sessionManager.GetString(r.Context(), "authenticatedUsername")
+}
+
+// page checks for the page URL parameter and returns a valid page number.
+func page(params url.Values) int {
+	if ok := params.Has("page"); ok {
+		page, err := strconv.Atoi(params.Get("page"))
+		if err == nil && page > 1 {
+			return page
+		}
+	}
+	return 1
 }
 
 // destroySessions will remove every session for a given username.

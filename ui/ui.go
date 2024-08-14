@@ -9,8 +9,10 @@ import (
 	"html/template"
 	"io"
 	"io/fs"
+	"net/url"
 	"path"
 	"path/filepath"
+	"strconv"
 
 	"git.sr.ht/~kota/kudoer/application/emoji"
 	"github.com/oklog/ulid"
@@ -91,6 +93,8 @@ func Templates() (map[string]*template.Template, error) {
 
 		ts, err := template.New(baseTMPL).
 			Funcs(template.FuncMap{
+				"PrevPage": PrevPage,
+				"NextPage": NextPage,
 				"Date":     Date,
 				"ToHash":   ToHash,
 				"FromHash": FromHash,
@@ -106,6 +110,27 @@ func Templates() (map[string]*template.Template, error) {
 	return cache, nil
 }
 
+// PrevPage takes the current page number and returns a url for the previous page.
+func PrevPage(page int) string {
+	var u url.URL
+	q := u.Query()
+
+	if page > 1 {
+		q.Add("page", strconv.Itoa(page-1))
+	}
+	return "?" + q.Encode()
+}
+
+// PrevPage takes the current page number and returns a url for the next page.
+func NextPage(page int) string {
+	var u url.URL
+	q := u.Query()
+
+	q.Add("page", strconv.Itoa(page+1))
+	return "?" + q.Encode()
+}
+
+// Date takes and ID and returns a creation date in a display format.
 func Date(id ulid.ULID) string {
 	return ulid.Time(id.Time()).Format("January 2, 2006")
 }

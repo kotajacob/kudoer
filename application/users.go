@@ -15,6 +15,9 @@ import (
 
 type userViewPage struct {
 	Page
+	PageNumber int
+	PageSize   int
+
 	models.User
 
 	// Is the logged in user following the user being viewed?
@@ -37,6 +40,9 @@ func (app *application) userViewHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	params := r.URL.Query()
+	page := page(params)
+
 	following, err := app.users.IsFollowing(
 		r.Context(),
 		app.authenticated(r),
@@ -47,7 +53,7 @@ func (app *application) userViewHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	kudos, err := app.kudos.User(r.Context(), username)
+	kudos, err := app.kudos.User(r.Context(), username, page)
 	if err != nil {
 		app.serverError(w, err)
 		return
@@ -57,6 +63,8 @@ func (app *application) userViewHandler(w http.ResponseWriter, r *http.Request) 
 	desc := "Viewing " + user.DisplayName + " on Kudoer"
 	app.render(w, http.StatusOK, "userView.tmpl", userViewPage{
 		Page:        app.newPage(r, title, desc),
+		PageNumber:  page,
+		PageSize:    models.PageSize,
 		User:        user,
 		IsFollowing: following,
 		Kudos:       kudos,

@@ -3,8 +3,20 @@
 	{{ range .Kudos }}
 		{{ template "kudo" . }}
 	{{ end }}
-	<span class="stack2"
-		><a class="button" href="/search">Find users to follow</a>
+	<span class="stack2">
+		<span class="row2">
+			{{ if gt .PageNumber 1 }}
+				<a class="button" href="{{ PrevPage .PageNumber }}"
+					>Previous Page</a
+				>
+			{{ end }}
+			{{ if ge (len .Kudos) .PageSize }}
+				<a class="button" href="{{ NextPage .PageNumber }}"
+					>Next Page</a
+				>
+			{{ end }}
+		</span>
+		<a class="button" href="/search">Find users to follow</a>
 		<span class="row2">
 			<a class="button" href="https://git.sr.ht/~kota/kudoer">Source</a>
 			<a class="button" href="https://lists.sr.ht/~kota/kudoer"

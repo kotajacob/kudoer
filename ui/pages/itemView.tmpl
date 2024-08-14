@@ -117,4 +117,18 @@
 	{{ range .Kudos }}
 		{{ template "kudo" . }}
 	{{ end }}
+	<span class="stack2">
+		<span class="row2">
+			{{ if gt .PageNumber 1 }}
+				<a class="button" href="{{ PrevPage .PageNumber }}"
+					>Previous Page</a
+				>
+			{{ end }}
+			{{ if ge (len .Kudos) .PageSize }}
+				<a class="button" href="{{ NextPage .PageNumber }}"
+					>Next Page</a
+				>
+			{{ end }}
+		</span>
+	</span>
 {{ end }}

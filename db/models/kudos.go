@@ -29,14 +29,29 @@ type KudoModel struct {
 	DB *sqlitex.Pool
 }
 
+// Page size for paginated pages.
+const PageSize = 30
+
+// offset calculates the page offset using the page number and the PageSize
+// constant.
+func offset(page int) int {
+	return (page - 1) * PageSize
+}
+
 // Following returns a list of all kudos from everyone a user is following.
-// TODO: Pagination
-func (m *KudoModel) Following(ctx context.Context, username string) ([]Kudo, error) {
+func (m *KudoModel) Following(
+	ctx context.Context,
+	username string,
+	page int,
+) ([]Kudo, error) {
 	conn, err := m.DB.Take(ctx)
 	if err != nil {
 		return []Kudo{}, err
 	}
 	defer m.DB.Put(conn)
+
+	limit := PageSize
+	offset := offset(page)
 
 	var kudos []Kudo
 	err = sqlitex.Execute(conn,
@@ -55,7 +70,7 @@ LEFT JOIN profile_pictures
 JOIN items
 	ON kudos.item_id = items.id
 WHERE users_following.username = ?
-ORDER BY kudos.id DESC`,
+ORDER BY kudos.id DESC LIMIT ? OFFSET ?`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				var k Kudo
@@ -84,19 +99,24 @@ ORDER BY kudos.id DESC`,
 
 				return nil
 			},
-			Args: []any{username},
+			Args: []any{username, limit, offset},
 		})
 	return kudos, err
 }
 
 // All returns a list of all kudos by recency.
-// TODO: Pagination
-func (m *KudoModel) All(ctx context.Context) ([]Kudo, error) {
+func (m *KudoModel) All(
+	ctx context.Context,
+	page int,
+) ([]Kudo, error) {
 	conn, err := m.DB.Take(ctx)
 	if err != nil {
 		return []Kudo{}, err
 	}
 	defer m.DB.Put(conn)
+
+	limit := PageSize
+	offset := offset(page)
 
 	var kudos []Kudo
 	err = sqlitex.Execute(conn,
@@ -112,7 +132,7 @@ LEFT JOIN profile_pictures
 	AND profile_pictures.kind = 1
 JOIN items
 ON kudos.item_id = items.id
-ORDER BY kudos.id DESC`,
+ORDER BY kudos.id DESC LIMIT ? OFFSET ?`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				var k Kudo
@@ -141,19 +161,26 @@ ORDER BY kudos.id DESC`,
 
 				return nil
 			},
+			Args: []any{limit, offset},
 		})
 	return kudos, err
 }
 
 // Item returns all kudos for a given item.
 // The list is from newest to oldest.
-// TODO: Add pagination
-func (m *KudoModel) Item(ctx context.Context, itemID ulid.ULID) ([]Kudo, error) {
+func (m *KudoModel) Item(
+	ctx context.Context,
+	itemID ulid.ULID,
+	page int,
+) ([]Kudo, error) {
 	conn, err := m.DB.Take(ctx)
 	if err != nil {
 		return []Kudo{}, err
 	}
 	defer m.DB.Put(conn)
+
+	limit := PageSize
+	offset := offset(page)
 
 	var kudos []Kudo
 	err = sqlitex.Execute(conn,
@@ -169,7 +196,7 @@ LEFT JOIN profile_pictures
 	AND profile_pictures.kind = 1
 JOIN items
 	ON kudos.item_id = items.id WHERE kudos.item_id = ?
-ORDER BY kudos.id DESC`,
+ORDER BY kudos.id DESC LIMIT ? OFFSET ?`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				var k Kudo
@@ -194,14 +221,13 @@ ORDER BY kudos.id DESC`,
 
 				return nil
 			},
-			Args: []any{itemID},
+			Args: []any{itemID, limit, offset},
 		})
 	return kudos, err
 }
 
 // ItemUser returns the kudo for a given combination of item and user if it
 // exists.
-// TODO: Add pagination
 func (m *KudoModel) ItemUser(
 	ctx context.Context,
 	itemID ulid.ULID,
@@ -256,16 +282,19 @@ WHERE kudos.item_id = ? AND kudos.creator_username = ?`,
 
 // User returns all kudos for a given user.
 // The list is from newest to oldest.
-// TODO: Add pagination
 func (m *KudoModel) User(
 	ctx context.Context,
 	creator_username string,
+	page int,
 ) ([]Kudo, error) {
 	conn, err := m.DB.Take(ctx)
 	if err != nil {
 		return []Kudo{}, err
 	}
 	defer m.DB.Put(conn)
+
+	limit := PageSize
+	offset := offset(page)
 
 	var kudos []Kudo
 	err = sqlitex.Execute(conn,
@@ -280,7 +309,7 @@ LEFT JOIN profile_pictures
 	AND profile_pictures.kind = 1
 JOIN items
 	ON kudos.item_id = items.id
-WHERE kudos.creator_username = ? ORDER BY kudos.id DESC`,
+WHERE kudos.creator_username = ? ORDER BY kudos.id DESC LIMIT ? OFFSET ?`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				var k Kudo
@@ -308,7 +337,7 @@ WHERE kudos.creator_username = ? ORDER BY kudos.id DESC`,
 				kudos = append(kudos, k)
 				return nil
 			},
-			Args: []any{creator_username},
+			Args: []any{creator_username, limit, offset},
 		})
 	return kudos, err
 }

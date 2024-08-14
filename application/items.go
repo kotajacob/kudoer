@@ -17,6 +17,9 @@ import (
 
 type itemViewPage struct {
 	Page
+	PageNumber int
+	PageSize   int
+
 	models.Item
 
 	Emojis []emoji.Emoji
@@ -42,6 +45,9 @@ func (app *application) itemViewHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	params := r.URL.Query()
+	page := page(params)
+
 	item, err := app.items.Info(r.Context(), uuid)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
@@ -52,7 +58,7 @@ func (app *application) itemViewHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	kudos, err := app.kudos.Item(r.Context(), uuid)
+	kudos, err := app.kudos.Item(r.Context(), uuid, page)
 	if err != nil {
 		app.serverError(w, err)
 		return
@@ -73,6 +79,8 @@ func (app *application) itemViewHandler(w http.ResponseWriter, r *http.Request) 
 	title := item.Name + " - " + "Kudoer"
 	app.render(w, http.StatusOK, "itemView.tmpl", itemViewPage{
 		Page:       app.newPage(r, title, item.Description),
+		PageNumber: page,
+		PageSize:   models.PageSize,
 		Item:       item,
 		Emojis:     emoji.Shuffle(),
 		CreatorPic: creatorPic,
