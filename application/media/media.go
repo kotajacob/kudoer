@@ -101,7 +101,10 @@ func (m *MediaStore) store(img image.Image) (string, error) {
 	if _, err := io.Copy(h, r); err != nil {
 		return "", fmt.Errorf("failed calculating hash for image: %v", err)
 	}
-	r.Seek(0, 0)
+	_, err = r.Seek(0, 0)
+	if err != nil {
+		return "", fmt.Errorf("failed seeking on profile picture: %v", err)
+	}
 
 	name := fmt.Sprintf("%x.jpeg", h.Sum(nil))
 	f, err := os.Create(filepath.Join(m.msn, name))
