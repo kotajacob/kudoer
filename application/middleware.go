@@ -80,7 +80,7 @@ func (app *application) secureHeaders(next http.Handler) http.Handler {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("X-Frame-Options", "deny")
 		w.Header().Set("X-XSS-Protection", "0")
-		r = r.WithContext(context.WithValue(r.Context(), "nonce", nonce))
+		r = r.WithContext(context.WithValue(r.Context(), ContextKeyNonce, nonce))
 
 		next.ServeHTTP(w, r)
 	})
@@ -88,7 +88,7 @@ func (app *application) secureHeaders(next http.Handler) http.Handler {
 
 // nonce retrieves a stored nonce string from a request's context.
 func nonce(c context.Context) string {
-	if val, ok := c.Value("nonce").(string); ok {
+	if val, ok := c.Value(ContextKeyNonce).(string); ok {
 		return val
 	}
 	return ""

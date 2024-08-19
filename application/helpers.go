@@ -50,9 +50,9 @@ func page(params url.Values) int {
 // destroySessions will remove every session for a given username.
 // This logs the user out on all of their computers.
 func (app *application) destroySessions(username string) error {
-	ctx := context.WithValue(context.Background(), "username", username)
+	ctx := context.WithValue(context.Background(), ContextKeyUsername, username)
 	fn := func(ctx context.Context) error {
-		want := ctx.Value("username")
+		want := ctx.Value(ContextKeyUsername)
 		got := app.sessionManager.Get(ctx, "authenticatedUsername")
 		if want == got {
 			return app.sessionManager.Destroy(ctx)
