@@ -40,11 +40,11 @@ func main() {
 	infoLog.Println("opening database:", *dsn)
 	db, err := db.Open(*dsn)
 	if err != nil {
-		log.Fatal(err)
+		errLog.Fatal(err)
 	}
 	defer func() {
 		if err := db.Close(); err != nil {
-			log.Fatal(err)
+			errLog.Fatal(err)
 		}
 	}()
 
@@ -58,7 +58,7 @@ func main() {
 
 	mediaStore, err := media.Open(*msn)
 	if err != nil {
-		log.Fatal(err)
+		errLog.Fatal(err)
 	}
 
 	templates, err := ui.Templates()
@@ -76,7 +76,7 @@ func main() {
 		err error,
 	) {
 		trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
-		errLog.Output(2, trace)
+		_ = errLog.Output(2, trace) // Ignore failed error logging.
 		http.Error(
 			w,
 			http.StatusText(http.StatusInternalServerError),

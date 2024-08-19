@@ -17,7 +17,7 @@ import (
 // response to the client.
 func (app *application) serverError(w http.ResponseWriter, err error) {
 	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
-	app.errLog.Output(2, trace)
+	_ = app.errLog.Output(2, trace) // Ignore failed error logging.
 	http.Error(
 		w,
 		http.StatusText(http.StatusInternalServerError),
