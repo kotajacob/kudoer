@@ -166,3 +166,23 @@ func (m *ItemModel) Insert(
 	)
 	return uuid, err
 }
+
+// CustomCount returns the number of custom items.
+// This does not count "wikipedia" items.
+func (m *ItemModel) CustomCount(ctx context.Context) (int, error) {
+	conn, err := m.DB.Take(ctx)
+	if err != nil {
+		return 0, err
+	}
+	defer m.DB.Put(conn)
+
+	var count int
+	err = sqlitex.Execute(conn, `SELECT count(1) FROM items WHERE creator_username != 'wikipedia'`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				count = stmt.ColumnInt(0)
+				return nil
+			},
+		})
+	return count, err
+}

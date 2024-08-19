@@ -44,7 +44,6 @@ func Open(dsn string) (*sqlitex.Pool, error) {
 	}
 
 	db, err := sqlitex.NewPool(dsn, sqlitex.PoolOptions{
-		PoolSize: 10,
 		PrepareConn: func(conn *sqlite.Conn) error {
 			// Create users table.
 			err := sqlitex.Execute(

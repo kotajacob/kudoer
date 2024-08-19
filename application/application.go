@@ -76,6 +76,7 @@ type Page struct {
 	CSRFToken       string
 	Flash           string
 	Authenticated   string
+	Admin           bool
 	Title           string
 	PageDescription string
 }
@@ -85,11 +86,13 @@ func (app *application) newPage(r *http.Request, title, description string) Page
 	csrfToken := nosurf.Token(r)
 	flash := app.sessionManager.PopString(r.Context(), "flash")
 	authenticated := app.authenticated(r)
+	admin := app.admin(r)
 	return Page{
 		CSPNonce:        cspNonce,
 		CSRFToken:       csrfToken,
 		Flash:           flash,
 		Authenticated:   authenticated,
+		Admin:           admin,
 		Title:           title,
 		PageDescription: description,
 	}

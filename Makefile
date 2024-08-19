@@ -23,11 +23,11 @@ uninstall:
 clean:
 	$(RM) kudoer
 
-run:
-	go run -race .
-
 watch:
 	fd -e go -e tmpl | entr -rcs "go run -race ."
+
+fastwatch:
+	fd -e go -e tmpl | entr -rcs "go run ."
 
 lint:
 	fd -e go | entr -c golangci-lint run

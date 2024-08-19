@@ -33,7 +33,13 @@ func (app *application) clientError(w http.ResponseWriter, status int) {
 // authenticated returns the session's authenticated username or a blank string
 // if the user is not authenticated.
 func (app *application) authenticated(r *http.Request) string {
-	return app.sessionManager.GetString(r.Context(), "authenticatedUsername")
+	return app.sessionManager.GetString(r.Context(), SessionKeyUsername)
+}
+
+// admin returns if the session's user is an admin.
+// if the user is not authenticated.
+func (app *application) admin(r *http.Request) bool {
+	return app.sessionManager.GetBool(r.Context(), SessionKeyAdmin)
 }
 
 // page checks for the page URL parameter and returns a valid page number.
@@ -53,7 +59,7 @@ func (app *application) destroySessions(username string) error {
 	ctx := context.WithValue(context.Background(), ContextKeyUsername, username)
 	fn := func(ctx context.Context) error {
 		want := ctx.Value(ContextKeyUsername)
-		got := app.sessionManager.Get(ctx, "authenticatedUsername")
+		got := app.sessionManager.Get(ctx, SessionKeyUsername)
 		if want == got {
 			return app.sessionManager.Destroy(ctx)
 		}
@@ -66,13 +72,19 @@ func (app *application) destroySessions(username string) error {
 func (app *application) login(
 	r *http.Request,
 	username string,
+	admin bool,
 	rememberMe bool,
 ) error {
 	err := app.sessionManager.RenewToken(r.Context())
 	if err != nil {
 		return err
 	}
-	app.sessionManager.Put(r.Context(), "authenticatedUsername", username)
+	app.sessionManager.Put(r.Context(), SessionKeyUsername, username)
+
+	if admin {
+		app.sessionManager.Put(r.Context(), SessionKeyAdmin, true)
+	}
+
 	if rememberMe {
 		app.sessionManager.SetDeadline(
 			r.Context(),
@@ -89,7 +101,8 @@ func (app *application) logout(r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	app.sessionManager.Remove(r.Context(), "authenticatedUsername")
+	app.sessionManager.Remove(r.Context(), SessionKeyUsername)
+	app.sessionManager.Remove(r.Context(), SessionKeyAdmin)
 	return nil
 }
 

@@ -54,6 +54,10 @@ func (app *application) Routes() http.Handler {
 	mux.Handle("POST /item/create", protected.ThenFunc(app.itemCreatePostHandler))
 	mux.Handle("POST /kudo/{id}", protected.ThenFunc(app.kudoPostHandler))
 
+	admin := dynamic.Append(app.requireAdmin)
+
+	mux.Handle("GET /admin", admin.ThenFunc(app.adminDashboardHandler))
+
 	standard := alice.New(
 		app.recoverPanic,
 		app.rateLimiter.RateLimit,

@@ -408,3 +408,22 @@ func (m *KudoModel) Update(
 	)
 	return err
 }
+
+// Count returns the number of posted kudos.
+func (m *KudoModel) Count(ctx context.Context) (int, error) {
+	conn, err := m.DB.Take(ctx)
+	if err != nil {
+		return 0, err
+	}
+	defer m.DB.Put(conn)
+
+	var count int
+	err = sqlitex.Execute(conn, `SELECT count(1) FROM kudos`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				count = stmt.ColumnInt(0)
+				return nil
+			},
+		})
+	return count, err
+}

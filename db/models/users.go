@@ -375,7 +375,8 @@ func (m *UserModel) ChangePassword(
 }
 
 // Authenticate checks if a given username and password are correct for the
-// user.
+// user and if that user is an admin account.
+//
 // Success is indicated with a nil error.
 // Failure is indicated with ErrInvalidCredentials. All other errors are server
 // errors.
@@ -383,37 +384,58 @@ func (m *UserModel) Authenticate(
 	ctx context.Context,
 	username string,
 	password string,
-) error {
+) (bool, error) {
 	conn, err := m.DB.Take(ctx)
 	if err != nil {
-		return err
+		return false, err
 	}
 	defer m.DB.Put(conn)
 
 	var found bool
 	var hashedPassword string
-	err = sqlitex.Execute(conn, `SELECT password from users WHERE username = ?`,
+	var admin bool
+	err = sqlitex.Execute(conn, `SELECT password, admin from users WHERE username = ?`,
 		&sqlitex.ExecOptions{
 			ResultFunc: func(stmt *sqlite.Stmt) error {
 				found = true
 				hashedPassword = stmt.ColumnText(0)
+				admin = stmt.ColumnBool(1)
 				return nil
 			},
 			Args: []any{username},
 		})
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	if !found {
-		return ErrInvalidCredentials
+		return false, ErrInvalidCredentials
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			return ErrInvalidCredentials
+			return false, ErrInvalidCredentials
 		}
 	}
-	return err
+	return admin, err
+}
+
+// Count returns the number of registered users.
+func (m *UserModel) Count(ctx context.Context) (int, error) {
+	conn, err := m.DB.Take(ctx)
+	if err != nil {
+		return 0, err
+	}
+	defer m.DB.Put(conn)
+
+	var count int
+	err = sqlitex.Execute(conn, `SELECT count(1) FROM users`,
+		&sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				count = stmt.ColumnInt(0)
+				return nil
+			},
+		})
+	return count, err
 }

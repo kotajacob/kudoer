@@ -319,6 +319,9 @@
 					<a class="nav-option" href="/user/view/{{ .Authenticated }}"
 						>Profile</a
 					>
+					{{ if .Admin }}
+						<a class="nav-option" href="/admin">Admin</a>
+					{{ end }}
 					<form action="/user/logout" method="POST">
 						<button class="nav-option">Logout</button>
 						<input
