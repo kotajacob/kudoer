@@ -29,4 +29,7 @@ run:
 watch:
 	fd -e go -e tmpl | entr -rcs "go run -race ."
 
+lint:
+	fd -e go | entr -c golangci-lint run
+
 .PHONY: all kudoer install uninstall clean run watch
