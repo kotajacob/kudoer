@@ -76,7 +76,7 @@ func (app *application) secureHeaders(next http.Handler) http.Handler {
 				nonce+"'; style-src 'nonce-"+
 				nonce+"'; img-src 'self' https: data:",
 		)
-		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
+		w.Header().Set("Referrer-Policy", "no-referrer")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("X-Frame-Options", "deny")
 		w.Header().Set("X-XSS-Protection", "0")
