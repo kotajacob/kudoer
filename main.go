@@ -15,9 +15,9 @@ import (
 	"git.sr.ht/~kota/kudoer/application/mail"
 	"git.sr.ht/~kota/kudoer/application/media"
 	"git.sr.ht/~kota/kudoer/db"
-	"git.sr.ht/~kota/kudoer/db/litesession"
 	"git.sr.ht/~kota/kudoer/db/models"
 	"git.sr.ht/~kota/kudoer/ui"
+	"git.sr.ht/~kota/zqlsession"
 	"github.com/alexedwards/scs/v2"
 	"github.com/throttled/throttled/v2"
 	throttledstore "github.com/throttled/throttled/v2/store/memstore"
@@ -68,7 +68,7 @@ func main() {
 
 	// Setup session storage.
 	sessionManager := scs.New()
-	sessionManager.Store = litesession.New(db)
+	sessionManager.Store = zqlsession.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
 	sessionManager.ErrorFunc = func(
 		w http.ResponseWriter,
