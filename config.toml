@@ -1,0 +1,8 @@
+ADDR = ":2024"
+DSN = "kudoer.db"
+MSN = "media_store"
+MailHost = ""
+MailPort = 25
+MailUsername = ""
+MailPassword = ""
+MailSender = "Kudoer <no-reply@kudoer.com>"

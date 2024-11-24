@@ -14,6 +14,7 @@ import (
 	"git.sr.ht/~kota/kudoer/application"
 	"git.sr.ht/~kota/kudoer/application/mail"
 	"git.sr.ht/~kota/kudoer/application/media"
+	"git.sr.ht/~kota/kudoer/config"
 	"git.sr.ht/~kota/kudoer/db"
 	"git.sr.ht/~kota/kudoer/db/models"
 	"git.sr.ht/~kota/kudoer/ui"
@@ -24,21 +25,23 @@ import (
 )
 
 func main() {
-	addr := flag.String("addr", ":2024", "HTTP Network Address")
-	dsn := flag.String("dsn", "kudoer.db", "SQLite data source name")
-	msn := flag.String("media", "media_store", "Media source name")
-	mailHost := flag.String("mail-host", "", "Mail server host")
-	mailPort := flag.Int("mail-port", 25, "Mail server port")
-	mailUsername := flag.String("mail-username", "", "Mail server username")
-	mailPassword := flag.String("mail-password", "", "Mail server password")
-	mailSender := flag.String("mail-sender", "Kudoer <no-reply@kudoer.com>", "Mail server sender")
+	cfgPath := flag.String(
+		"config",
+		"/etc/kudoer/config.toml",
+		"Path to configuration file",
+	)
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO ", log.Ldate|log.Ltime)
 	errLog := log.New(os.Stdout, "ERROR ", log.Ldate|log.Ltime|log.Lshortfile)
 
-	infoLog.Println("opening database:", *dsn)
-	db, err := db.Open(*dsn)
+	cfg, err := config.Load(*cfgPath)
+	if err != nil {
+		errLog.Fatal(err)
+	}
+
+	infoLog.Println("opening database:", cfg.DSN)
+	db, err := db.Open(cfg.DSN)
 	if err != nil {
 		errLog.Fatal(err)
 	}
@@ -49,14 +52,14 @@ func main() {
 	}()
 
 	mailer := mail.New(
-		*mailHost,
-		*mailPort,
-		*mailUsername,
-		*mailPassword,
-		*mailSender,
+		cfg.MailHost,
+		cfg.MailPort,
+		cfg.MailUsername,
+		cfg.MailPassword,
+		cfg.MailSender,
 	)
 
-	mediaStore, err := media.Open(*msn)
+	mediaStore, err := media.Open(cfg.MSN)
 	if err != nil {
 		errLog.Fatal(err)
 	}
@@ -122,7 +125,7 @@ func main() {
 		&models.ProfilePictureModel{DB: db},
 	)
 
-	err = app.Serve(*addr)
+	err = app.Serve(cfg.Addr)
 	if err != nil {
 		errLog.Fatalln(err)
 	}

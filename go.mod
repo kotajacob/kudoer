@@ -3,6 +3,8 @@ module git.sr.ht/~kota/kudoer
 go 1.22.3
 
 require (
+	git.sr.ht/~kota/zqlsession v1.0.0
+	github.com/BurntSushi/toml v1.4.0
 	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/disintegration/imaging v1.6.2
 	github.com/go-mail/mail/v2 v2.3.0
@@ -16,7 +18,6 @@ require (
 )
 
 require (
-	git.sr.ht/~kota/zqlsession v1.0.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect

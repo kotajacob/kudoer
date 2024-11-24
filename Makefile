@@ -24,10 +24,10 @@ clean:
 	$(RM) kudoer
 
 run:
-	go run -race .
+	go run -race . -config config.toml
 
 watch:
-	fd -e go -e tmpl | entr -rcs "go run -race ."
+	fd -e go -e tmpl | entr -rcs "go run -race . -config config.toml"
 
 lint:
 	fd -e go | entr -c golangci-lint run
